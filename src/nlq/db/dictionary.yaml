@@ -1,0 +1,81 @@
+# Business meaning of the schema. Injected into the SQL-writing prompt, so it is
+# the one place where "revenue" and friends are defined.
+
+dataset: >-
+  Synthetic ticketing data for a sports and entertainment operator that runs three
+  venues and owns two clubs (Brooklyn Nets, New York Liberty). Every customer,
+  order and ticket in it is generated; no real sales data is used.
+
+business_rules:
+  - A ticket is one seat. "Tickets sold" is COUNT(*) over tickets with status = 'sold'.
+  - Revenue is SUM(price) over tickets with status = 'sold'. It excludes the fee
+    column, excludes refunded tickets, and excludes comps (which have price 0).
+  - Use fee only when the question asks about fees or "total paid" / "all-in" cost.
+  - Average ticket price means AVG(price) over tickets with status = 'sold'.
+  - "Home games" are events where home_team_id points at a club with is_home_club = 1.
+  - Date wording about when a game or show happened filters events.event_date.
+    Date wording about when a purchase happened filters orders.ordered_at.
+    If the question is ambiguous, prefer orders.ordered_at for "sold"/"bought"
+    wording and say so in the assumptions.
+  - Events dated in the future are on sale but not yet played, so they have
+    partial sales. Exclude them when a question is about past performance.
+  - Attendance is not recorded. Tickets sold is the closest available measure.
+
+tables:
+  venues:
+    description: The three venues the operator runs.
+    columns:
+      venue_id: Primary key.
+      name: "Barclays Center, Nassau Coliseum or Gowanus Pavilion."
+      city: City the venue is in.
+      state: Two-letter state code.
+      capacity: Maximum seats for a full-house configuration.
+  teams:
+    description: Clubs, both the operator's own and visiting opponents.
+    columns:
+      team_id: Primary key.
+      name: Club name, e.g. 'Brooklyn Nets'.
+      league: NBA or WNBA.
+      is_home_club: 1 for the two clubs the operator owns, 0 for opponents.
+  events:
+    description: One row per game, concert or show, past or on sale.
+    columns:
+      event_id: Primary key.
+      venue_id: Venue hosting the event.
+      name: Display name, e.g. 'Brooklyn Nets vs. Boston Celtics'.
+      category: NBA, WNBA, Concert, Comedy, Boxing or Family Show.
+      home_team_id: Home club for sport events, NULL otherwise.
+      away_team_id: Visiting club for sport events, NULL otherwise.
+      event_date: Date the event takes or took place (ISO date).
+      season: "NBA seasons read '2025-26'; WNBA seasons read '2026'; NULL for non-sport events."
+      is_playoff: 1 for postseason games.
+      announced_date: Date tickets went on sale.
+  customers:
+    description: Ticket buyers. Names and emails are generated.
+    columns:
+      customer_id: Primary key.
+      full_name: Buyer name.
+      email: Generated address, not a real inbox.
+      city: Buyer city.
+      state: Two-letter state code.
+      is_season_member: 1 if the buyer holds a season membership.
+      created_at: Date the account was opened (ISO date).
+  orders:
+    description: One purchase, covering one or more tickets to the same event.
+    columns:
+      order_id: Primary key.
+      customer_id: Buyer.
+      ordered_at: Timestamp of the purchase (ISO, to the second).
+      channel: web, mobile_app, box_office, resale or group_sales.
+      promo_code: Promotion applied, NULL when none.
+  tickets:
+    description: One row per seat. The fact table for counts and revenue.
+    columns:
+      ticket_id: Primary key.
+      order_id: Order the seat was bought on.
+      event_id: Event the seat is for.
+      section: Section label, e.g. '112' or 'FLOOR'.
+      seat_tier: Courtside, Suite, Club, Lower Bowl, Upper Bowl or General Admission.
+      price: Face value paid, excluding fee. 0 for comps.
+      fee: Service fee charged on top of price. 0 for comps.
+      status: sold (counts), refunded (does not count), comp (giveaway, price 0).

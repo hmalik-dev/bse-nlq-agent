@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.env
+data/*.db
+node_modules/
+dist/
+.DS_Store
+
+# Interview prep notes — not part of the submission.
+PRESENTATION_NOTES.md

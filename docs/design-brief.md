@@ -1,19 +1,52 @@
 # Design brief
 
-The source of truth for the UI: what screens exist, what state each one shows, and
-the tokens to build them with. The Claude Design prompt at the bottom of this file
-is what was pasted into Claude Design to produce the mockups; keep the two in sync.
+The source of truth for the UI: brand assets, screens, states and tokens. The
+Claude Design prompt at the bottom is what produced the mockups — keep the two in
+sync when either changes.
 
 ## Product
 
-**Marquee** — ask a ticketing database a question in plain English, get an answer
-and the SQL behind it. One screen, one question at a time.
+**BSE Insights** — an internal tool where anyone at Brooklyn Sports &
+Entertainment asks a question about ticket sales in plain English and gets an
+answer, the assumptions behind it, and the SQL that produced it.
 
-Byline used in the footer: *Prepared for the Brooklyn Sports & Entertainment AI
-Engineer exercise. All data is synthetic.*
+Header lockup: the BSE wordmark, a hairline divider, then the product word
+"Insights". A small `Demo · synthetic data` badge sits in the footer.
 
-No club or venue logos or wordmarks anywhere in the interface (see
-`docs/decisions.md`).
+## Brand assets
+
+Committed at `web/public/brand/`. Measured, not assumed:
+
+| File | Contents | Dimensions | Use |
+|---|---|---|---|
+| `bse.svg` | Single white fill `#fff` | 672 × 254 | Header lockup, ~28px tall. **Dark backgrounds only** — it is invisible on light. |
+| `nets.svg` | White paths `#fff` | 215 × 215 (square) | 24px badge on Nets rows, chips and team filters |
+| `liberty.svg` | Seafoam `#87D5B5` + near-black `#100F0D` detail | 200 × 170 | 24px badge for Liberty. Place on a panel (`#16161A`) or lighter, so the dark detail still reads. |
+| `barclays-center.svg` | White + cyan `#00AEEF` + three gradients | 567 × 222 | Footer venue line, ~20px tall |
+
+The white BSE and Nets marks are the reason the interface is dark. That is not a
+style preference; it is what the assets require.
+
+## Tokens
+
+Taken from the assets themselves, so the UI and the logos share one palette.
+
+- **Canvas** `#0B0B0D` · **panels** `#16161A` · **raised** `#1E1E23` · **hairline
+  borders** `#26262B`
+- **Text** `#FFFFFF` primary · `#A1A1AA` secondary · `#71717A` tertiary
+- **Primary accent** Barclays cyan `#00AEEF` — primary button (with black text),
+  active tab, focus ring, links
+- **Secondary accent** Liberty seafoam `#87D5B5` — chart bars, positive badges,
+  "sold" status
+- **Semantic** warning `#FBBF24` · error and blocked `#F87171`
+- **Type** tight grotesk for display and headings, Inter for body, a monospace
+  face for SQL and every number. Numbers are tabular and right-aligned.
+- **Shape** 12px radius on cards, 8px on chips, inputs and buttons; one soft
+  shadow level; no gradients in the UI itself (the Barclays logo owns the only
+  gradient on the page).
+- **Motion** 150–200ms fades. Pipeline steps tick in one after another. Nothing
+  bounces.
+- **Grid** 1200px max content width inside a 1440 viewport, 24px gutters.
 
 ## The response the UI renders
 
@@ -23,18 +56,18 @@ No club or venue logos or wordmarks anywhere in the interface (see
 {
   "status": "answered" | "empty" | "unanswerable" | "blocked" | "error",
   "question": "How many tickets were sold for Nets home games last month?",
-  "answer": "About 24,100 tickets…",       // plain English, empty unless answered
-  "assumptions": [                          // 0-3 short lines, shown as chips
+  "answer": "About 26,400 tickets…",       // plain English, empty unless answered
+  "assumptions": [                          // 0-3 short lines, rendered as chips
     "\"Last month\" means August 2026, by purchase date.",
     "Revenue excludes fees, refunds and comps."
   ],
   "sql": "SELECT …",                       // null when nothing was generated
   "columns": ["category", "revenue"],
-  "rows": [["Concert", 4821900.0]],
+  "rows": [["NBA", 201512122.83]],
   "row_count": 5,
-  "truncated": false,                       // true when more rows exist than shown
+  "truncated": false,                       // more rows exist than were returned
   "chart": { "type": "bar", "x": "category", "y": "revenue" } | null,
-  "trace": {                                // always present, powers the trace strip
+  "trace": {
     "steps": [{"name": "Writing SQL", "ms": 1240}, {"name": "Running query", "ms": 18}],
     "repairs": 1,
     "model": "claude-sonnet-5",
@@ -44,125 +77,178 @@ No club or venue logos or wordmarks anywhere in the interface (see
 }
 ```
 
-`GET /api/schema` returns the tables, columns and business rules for the schema
-drawer. `GET /api/examples` returns the starter questions.
+`GET /api/schema` feeds the schema drawer. `GET /api/examples` feeds the starter
+chips.
 
 ## Screens and states
 
-1. **Ask — empty.** Product mark, one-line explanation, large question input,
-   6 example question chips, a "What's in the data?" button, footer byline.
-2. **Ask — thinking.** The question locked in place; the pipeline steps reveal as
-   they complete: Reading schema → Writing SQL → Checking safety → Running query →
-   Writing answer. Honest progress, not a spinner.
-3. **Answer.** Answer card (largest type on the page), assumption chips beneath it,
-   then a panel with three tabs: Results (table), SQL (mono, copy button), Chart
-   (only when `chart` is present). Trace strip along the bottom: model, timings,
-   "repaired once" when `repairs > 0`.
-4. **Answer — empty result.** Same frame, answer card replaced by "No rows matched
-   this question", the assumptions, the SQL, and two suggested rewordings.
-5. **Unanswerable.** The agent explains what the data does not contain, lists what
-   it does cover, and offers example questions.
-6. **Blocked.** A write or destructive request was refused before execution. Shows
-   the reason and that the connection is read-only.
-7. **Error.** API key missing, rate limited or timed out. Plain wording, a retry
-   button, no stack traces.
-8. **Schema drawer.** Slide-over listing the seven tables, their columns and the
-   business rules (revenue, tickets sold, home games). Reachable from every state.
-9. **Session history.** A list of questions asked in this session; clicking one
-   restores its answer. Session only, nothing is persisted.
-
-## Tokens
-
-- **Surface:** near-black `#0B0B0D`, panels `#141417`, hairline borders `#26262B`.
-- **Text:** `#F5F5F4` primary, `#A1A1AA` secondary.
-- **Accent:** marquee gold `#F5C451` for the primary action and the active tab.
-- **Semantic:** positive `#4ADE80`, warning `#FBBF24`, blocked/error `#F87171`.
-- **Type:** display and headings in a tight grotesk; body in Inter; SQL and numbers
-  in a mono face. Numeric columns are tabular and right-aligned.
-- **Shape:** 12px radius on cards, 8px on chips and inputs, one soft shadow level.
-- **Motion:** 150-200ms fades; pipeline steps tick in one after another; nothing
-  bounces.
+1. **Ask — empty.** Header lockup, one-line explanation, large question input,
+   six example chips, "What's in the data?" button, footer.
+2. **Ask — thinking.** Question pinned; five pipeline steps complete one at a
+   time with their own elapsed times. Honest progress, not a spinner.
+3. **Answer — Results tab.** Answer card (largest type on the page), assumption
+   chips, tabbed panel, trace strip.
+4. **Answer — Chart tab.** Horizontal bars in seafoam, one emphasised.
+5. **Answer — SQL tab.** Monospace, syntax-highlighted, copy button.
+6. **Empty result.** "No rows matched", the assumptions, the SQL, two suggested
+   rewordings.
+7. **Unanswerable.** What the data does not hold, what it does, three examples.
+8. **Blocked.** A destructive request refused before execution, with the reason
+   and a note that the connection is read-only.
+9. **Error.** Rate limited or key missing. Plain wording, retry button.
+10. **Schema drawer.** Slide-over: six tables with columns, plus how revenue,
+    tickets sold and home games are defined.
+11. **Session history rail.** Questions asked this session; session only.
 
 ## Breakpoints
 
-1440 (design reference) · 1024 · 768 · 390 × 844 mobile. The answer card, the
-assumption chips and the SQL panel stack on 768 and below; the results table scrolls
-horizontally inside its own container rather than pushing the page wide; the schema
-drawer becomes full-screen on mobile.
+1440 reference · 1024 · 768 · 390 × 844 mobile. At 768 and below the answer card,
+chips and tabs stack; the results table scrolls inside its own container instead of
+widening the page; the drawer goes full-screen; the history rail collapses to a
+menu.
 
 ## Accessibility
 
-Every control has an accessible name; the question input has a real label; icon-only
-buttons carry `aria-label`. Text contrast at least 4.5:1 against its surface — check
-the gold accent on dark, and use dark text on gold buttons. Focus rings are visible
-on the accent colour.
+Real label on the question input; `aria-label` on icon-only buttons; 4.5:1 minimum
+text contrast (black text on the cyan button, never white); visible cyan focus
+rings; the table is a real `<table>` with scope'd headers.
 
 ---
 
 ## The Claude Design prompt
 
-> Paste into Claude Design. It produces the mockups this brief describes.
+> Pasted into Claude Design to produce the mockups.
 
 ```text
-Design a web app called Marquee — a natural language query tool for a sports and
-entertainment ticketing database. A non-technical user types a question in plain
-English ("How many tickets were sold for Brooklyn Nets home games last month?") and
+Design an internal web tool called BSE Insights for Brooklyn Sports & Entertainment
+(BSE Global) — the company that owns the Brooklyn Nets, the New York Liberty and
+Barclays Center. Someone in ticketing, finance or marketing types a question in
+plain English ("How many tickets did we sell for Nets home games last month?") and
 gets back a written answer, the assumptions the system made, the SQL it ran, a
-results table and, when the shape fits, a simple chart.
+results table and, where the shape fits, a simple chart. It should look like a real
+internal analytics product owned by the company, not a demo or a chatbot.
 
-Audience and tone: analysts and executives at an arena operator. The product should
-feel like a premium internal analytics tool — confident, quiet, arena-at-night. Not
-a chatbot, not a dashboard, not a developer toy. The written answer is the hero of
-the page; the SQL is supporting evidence.
+BRAND ASSETS — four real SVG logos exist in the repository at web/public/brand/.
+Use them exactly as described; do not redraw, recolour or invent marks.
+- brand/bse.svg — the BSE Global wordmark, solid white, aspect ratio 672 x 254.
+  Goes top-left in the header at about 28px tall. It is white artwork, so it only
+  works on a dark surface.
+- brand/nets.svg — the Brooklyn Nets mark, solid white, square (215 x 215). Use at
+  24px as a badge beside Nets events, in team filter chips, and in example
+  questions about the Nets.
+- brand/liberty.svg — the New York Liberty mark, seafoam green #87D5B5 with
+  near-black #100F0D interior detail, aspect ratio 200 x 170. Use at 24px the same
+  way for Liberty events. Because part of it is near-black, sit it on a panel of
+  #16161A or lighter so that detail does not disappear.
+- brand/barclays-center.svg — the Barclays Center wordmark, white with cyan #00AEEF
+  and subtle gradients, aspect ratio 567 x 222. Use once, in the footer, at about
+  20px tall, on the line that says the data covers events at Barclays Center.
+Show each logo in at least one frame at its real aspect ratio. Never stretch them,
+never place the white marks on a light background, and do not add glows or outlines.
 
-Do not use any real company, club or venue logos, wordmarks or brand colours.
-Marquee has its own identity: design a simple wordmark for it.
+The interface must be dark, because the BSE and Nets marks are white artwork.
 
-Visual direction:
-- Dark interface. Canvas #0B0B0D, panels #141417, hairline borders #26262B.
-- Text #F5F5F4 primary, #A1A1AA secondary.
-- One accent: marquee-bulb gold #F5C451, used for the primary action and the active
-  tab only. Semantic colours: #4ADE80 positive, #FBBF24 warning, #F87171 error.
-- Display and headings in a tight grotesk, body in Inter, SQL and all numbers in a
-  monospace face. Numbers are tabular and right-aligned.
-- 12px radius on cards, 8px on chips and inputs, one soft shadow level, generous
-  whitespace, no gradients, no glassmorphism.
+COLOUR — drawn from the logos themselves so the UI and the brand share one palette:
+- Canvas #0B0B0D, panels #16161A, raised surfaces #1E1E23, hairline borders #26262B.
+- Text #FFFFFF primary, #A1A1AA secondary, #71717A tertiary.
+- Primary accent Barclays cyan #00AEEF: the Ask button (black text on cyan), the
+  active tab, focus rings, links.
+- Secondary accent Liberty seafoam #87D5B5: chart bars, positive badges, "sold".
+- Warning #FBBF24. Error and blocked states #F87171.
+Use exactly one accent per surface. No gradients in the UI — the Barclays logo owns
+the only gradient on the page. No glassmorphism, no neon glow.
 
-Design these frames at 1440 wide:
-1. Ask, empty state: wordmark, one-line explanation, a large question input with a
-   gold "Ask" button, six example question chips, a "What's in the data?" link, and
-   a footer line reading "Prepared for the Brooklyn Sports & Entertainment AI
-   Engineer exercise. All data is synthetic."
-2. Ask, thinking state: the question pinned at the top and five pipeline steps that
-   complete one at a time — Reading schema, Writing SQL, Checking safety, Running
-   query, Writing answer — each with its own elapsed time.
-3. Answer state: an answer card with the written answer in the largest type on the
-   page, two assumption chips beneath it, then a panel with three tabs (Results,
-   SQL, Chart). Results shows a data table of about eight rows; SQL shows syntax-
-   highlighted SQL with a copy button; a trace strip runs along the bottom showing
-   the model name, the total time and "repaired once".
-4. Answer state, Chart tab active: a horizontal bar chart of five event categories
-   by revenue, using the accent colour with one bar emphasised.
-5. Empty result state: the same frame with "No rows matched this question" in place
-   of the answer, the assumptions, the SQL, and two suggested rewordings.
-6. Unanswerable state: the system explains that the data has no weather information,
-   lists what it does cover, and offers three example questions.
-7. Blocked state: a destructive request ("delete all ticket records") was refused
-   before it ran, with a short explanation and a note that the connection is
-   read-only.
-8. Error state: the service is rate limited; plain wording and a retry button.
-9. Schema drawer: a slide-over panel listing seven tables (venues, teams, events,
-   customers, orders, tickets) with their columns, plus a short "how we define
-   revenue, tickets sold and home games" section.
-10. Session history: a narrow left rail listing the questions asked this session,
-    with the current one highlighted.
+TYPE AND SHAPE — a tight grotesk for display and headings, Inter for body copy, and
+a monospace face for SQL and for every number. All numbers tabular and
+right-aligned. 12px radius on cards, 8px on chips, inputs and buttons. One soft
+shadow level. Generous whitespace: 1200px max content width inside 1440, 24px
+gutters. Transitions 150-200ms, no bouncing.
 
-Then design responsive versions of the ask-empty frame and the answer frame at
-1024, 768, and 390 x 844 mobile. On 768 and below the answer card, assumption chips
-and tabs stack vertically; the results table scrolls horizontally inside its own
-container instead of widening the page; the schema drawer becomes full-screen; the
-left rail collapses into a menu.
+Design these frames at 1440 wide.
 
-Accessibility: text contrast at least 4.5:1, dark text on the gold button, visible
-focus rings, and a real label on the question input.
+1. ASK, EMPTY STATE. Header: BSE wordmark, hairline divider, the product word
+   "Insights", and on the right a "What's in the data?" button. Centred below: a
+   headline like "Ask anything about ticket sales", a large question input with
+   placeholder "e.g. How many tickets did we sell for Nets home games last month?"
+   and a cyan Ask button. Under it, six example question chips, two of them
+   carrying the Nets and Liberty badges:
+   - How many tickets did we sell for Nets home games last month?
+   - Top 5 event categories by total revenue
+   - Which 2024 events had the highest average ticket price?
+   - Which opponent drives the biggest gate?
+   - How much revenue did refunds cost us last season?
+   - Compare web and box office sales for concerts
+   Footer: the Barclays Center wordmark with "Events at Barclays Center, 2024 to
+   today" and a small muted pill reading "Demo · synthetic data".
+
+2. ASK, THINKING STATE. The question pinned at the top in a card. Below it five
+   pipeline steps that complete one at a time, each with a tick and its own
+   elapsed time: Reading schema (0.0s), Writing SQL (1.2s), Checking safety
+   (0.01s), Running query (0.02s), Writing answer (in progress). Honest progress,
+   not a spinner.
+
+3. ANSWER, RESULTS TAB. The question small and muted at the top. An answer card
+   with the written answer in the largest type on the page: "We sold 26,412
+   tickets in August 2026 — all of them for upcoming games, since the Nets play no
+   home games in August." Beneath it two assumption chips: "'Last month' means
+   August 2026, by purchase date" and "Counts sold tickets only; refunds and comps
+   excluded". Then a panel with three tabs — Results, SQL, Chart — Results active,
+   showing an eight-row table (columns: Event, Date, Tickets sold, Avg price,
+   Gate revenue) with the Nets badge on Nets rows. A trace strip along the bottom:
+   "claude-sonnet-5 · 2.16s · repaired once" with a small clock icon.
+
+4. ANSWER, CHART TAB. Same frame, Chart tab active: a horizontal bar chart,
+   "Total revenue by event category", five bars in seafoam #87D5B5 with the top bar
+   emphasised, values labelled at the end of each bar in monospace.
+
+5. ANSWER, SQL TAB. Same frame, SQL tab active: syntax-highlighted SQL on a
+   #121215 block, about 12 lines with a JOIN and a GROUP BY, line numbers, and a
+   copy button top-right. Keywords in cyan, strings in seafoam, comments muted.
+
+6. EMPTY RESULT. Same frame shape, but the answer card reads "No rows matched this
+   question" with a muted explanation, the assumption chips, the SQL still shown,
+   and two suggested rewordings as clickable chips.
+
+7. UNANSWERABLE. The question was "What's the weather for the next home game?".
+   The card explains the data holds no weather information, lists what it does
+   cover (events, tickets, orders, customers, revenue), and offers three example
+   questions. Informational tone, warning colour only as a small icon.
+
+8. BLOCKED. The question was "Delete all ticket records". A refusal card in
+   #F87171 accent: the request was rejected before it ran, the connection is
+   read-only, and only single SELECT statements are permitted. Show the rejected
+   statement in monospace, struck through or dimmed.
+
+9. ERROR. The service is rate limited. Plain wording, a retry button, no stack
+   trace, the question preserved in the input so nothing is lost.
+
+10. SCHEMA DRAWER. A slide-over panel from the right, about 480px wide, over a
+    dimmed ask screen. Lists six tables — venues, teams, events, customers,
+    orders, tickets — as collapsible groups with column names and types in
+    monospace. At the top, a short "How we define things" block: revenue excludes
+    fees, refunds and comps; tickets sold counts sold status only; home games mean
+    Nets or Liberty home fixtures.
+
+11. SESSION HISTORY. The answer screen with a 240px left rail listing five
+    questions asked this session, the current one highlighted in cyan, each with
+    its elapsed time. A "New question" button at the top of the rail.
+
+Then design responsive versions of frame 1 (ask, empty) and frame 3 (answer,
+results) at three more widths:
+- 1024: rail collapses to icons, content keeps its two-column feel, chips wrap to
+  three rows.
+- 768: single column. The answer card, assumption chips and tab panel stack. The
+  results table scrolls horizontally inside its own bordered container rather than
+  widening the page. The header keeps the BSE wordmark but the "What's in the data?"
+  button becomes an icon.
+- 390 x 844 mobile: single column, 16px side gutters, the question input becomes
+  full-width with the Ask button beneath it, example chips scroll horizontally in
+  one row, the schema drawer is full-screen, and the history rail becomes a menu
+  behind an icon in the header. The BSE wordmark shrinks to 20px tall.
+
+ACCESSIBILITY. Minimum 4.5:1 text contrast. Black text on the cyan button, never
+white. Visible cyan focus rings on inputs, chips and tabs. The question input has a
+real visible label or a persistent floating label, not placeholder-only. Icon-only
+buttons show their accessible name in the design annotation. The results table is a
+real table with header cells, not a grid of divs.
 ```

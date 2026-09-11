@@ -36,7 +36,38 @@ off-by-one errors in generated SQL.
 **The window is whole calendar years** — the last two plus the year in progress,
 and events on sale up to 120 days out. A question about "2024" needs a full year
 behind it, not the tail of one season. A test enforces that every recent year has
-club home games and non-sport events in it.
+club home games and non-sport events in it. This means the NBA season before the
+window also contributes its January-to-April home games.
+
+**Scope: Barclays Center, the Brooklyn Nets and the New York Liberty**, matching
+BSE's actual portfolio. The invented second and third venues are gone. `venues`
+stays as a one-row table, because a real ticketing system has one and "at Barclays
+Center" should still resolve through a join.
+
+**Seating capacity moves onto the event**, not the venue. Barclays runs about
+17,732 seats for basketball, about 19,000 end-stage for concerts, and a curtained
+house near 8,000 for smaller shows. Per-event capacity is what a real ticketing
+manifest looks like, and it makes sell-through a question the agent can answer.
+
+**Realism is a measured target, not a vibe.** Generated figures have to land inside
+published real-world ranges, and a test asserts it per category: Nets around 16,500
+tickets a game at roughly 93% sell-through and a $140-190 average price; Liberty
+around 13,000 at a $55-90 average; arena concerts around 12,000 at $110-150; family
+shows near $45-70. The first pass got Nets attendance 30% low and priced Liberty
+like an NBA game, which is exactly the kind of error a reviewer would spot.
+
+**Season-ticket packages are modelled.** A third of Nets and Liberty seats sell as
+one pre-season order covering the whole season, which puts a real spike in the
+purchase-date distribution and makes "tickets sold last month" a more interesting
+question than a flat random spread would.
+
+**About 400,000 customers.** The first pass had 30,000 buyers holding 1.1M orders —
+36 purchases each, which no ticketing database looks like. Most buyers now appear
+once or twice; season members and resellers appear often.
+
+**Cost of that realism: about 4.6M ticket rows, roughly 600MB, a 35-second seed.**
+Accepted, because the file is generated locally and seeded at container start, so it
+costs disk rather than deploy weight, and aggregates still return in under a second.
 
 **The database is generated, not committed.** `seed.py` builds it relative to the
 current date, so "last month" always has data in it. The seed is deterministic
@@ -100,9 +131,16 @@ state handling gets messy at this level of polish).
 cap and a per-visitor rate limit, plus a `docker run` fallback in the README for
 anyone with their own key. Reviewers are not assumed to have an Anthropic account.
 
-**No BSE, Nets, Liberty or Barclays Center logos or wordmarks in the interface.**
-The app carries its own product identity and a line saying it was prepared for the
-Brooklyn Sports & Entertainment AI Engineer exercise on synthetic data. A public
-URL wearing a company's branding and serving invented ticket revenue would read as
-an official tool, which it is not. Real names inside the dataset are fine and
-necessary — the exercise's own example questions use them.
+**BSE branding, on the company's own instruction.** The exercise is meant to mimic
+the internal tools this role would build, so the app is branded as one: the product
+is **BSE Insights**, and the real BSE, Nets, Liberty and Barclays Center marks ship
+in `web/public/brand/`, supplied by the candidate rather than scraped. A small
+`Demo · synthetic data` pill in the footer keeps the demo honest without making it
+look like a mock-up.
+
+**The interface is dark because the assets require it.** The BSE and Nets marks are
+solid white artwork, so they are invisible on light surfaces. The accent palette is
+taken from the logos themselves — Barclays cyan `#00AEEF` for actions, Liberty
+seafoam `#87D5B5` for data — so the UI and the brand share one set of colours
+instead of an invented one. Measurements and per-logo usage rules are in
+`docs/design-brief.md`.

@@ -5,8 +5,14 @@ database. Built for a hiring exercise; it is judged on agent design, SQL accurac
 code quality, error handling, documentation and the ability to talk through it.
 
 **Read `docs/decisions.md` before changing anything.** It records what was chosen
-and why. Add a row there whenever you make a new call. UI work also reads
-`docs/design-brief.md`.
+and why; add to it whenever you make a new call. Then, for the work at hand:
+
+| Doc | Read it for |
+|---|---|
+| `docs/decisions.md` | every decision made so far, and why the rejected option lost |
+| `docs/data-spec.md` | what the generated data must look like, and the ranges tests assert |
+| `docs/design-brief.md` | brand assets, tokens, screens and states, the API response shape |
+| `docs/backlog.md` | the eight tickets, their acceptance criteria and their dependencies |
 
 ## Commands
 
@@ -46,3 +52,17 @@ goes through `Agent.ask(question) -> AskResult`.
 - Keep functions under ~30 lines and name things the way an interviewer would
   expect to hear them described out loud. This code gets presented, not just read.
 - Conventional Commits, one commit per milestone.
+
+## Project
+
+- **Tracker**: Linear, project `BSE NLQ`. Tickets are written in `docs/backlog.md`
+  first and created from it. Ready = Todo/Backlog.
+- **Lanes**: no lane tooling. There is no database server and no long-running
+  service, so a ticket runs in a plain git worktree: `uv sync`, then the commands
+  above.
+- **Stack**: Python 3.12 managed by uv, FastAPI, SQLite. `web/` is Vite + React +
+  TypeScript + Tailwind, built into the package's static directory.
+- **Verification surface**: the ask flow end to end in a browser — question to
+  answer, the SQL tab, the schema drawer, and the blocked and unanswerable states.
+- **Brand assets**: `web/public/brand/`. The BSE and Nets marks are solid white, so
+  they only work on dark surfaces. Usage rules are in `docs/design-brief.md`.

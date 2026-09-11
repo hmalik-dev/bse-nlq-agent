@@ -65,9 +65,22 @@ question than a flat random spread would.
 36 purchases each, which no ticketing database looks like. Most buyers now appear
 once or twice; season members and resellers appear often.
 
-**Cost of that realism: about 4.6M ticket rows, roughly 600MB, a 35-second seed.**
+**Cost of that realism: about 5M ticket rows, roughly 650MB, a 40-second seed.**
 Accepted, because the file is generated locally and seeded at container start, so it
 costs disk rather than deploy weight, and aggregates still return in under a second.
+The full specification, including what is deliberately not modelled, is in
+`docs/data-spec.md`.
+
+## Process
+
+**Tickets live in Linear**, project `BSE NLQ`, written first in `docs/backlog.md`
+so the reasoning behind each one survives outside the tracker. Eight tickets, one
+per concern, sized so each can be implemented unattended and reviewed on its own.
+
+**Work order.** The data pass, SQL generation and the SQL guard are independent and
+can run in parallel; orchestration joins them; the API, the interface, the
+evaluation and shipping follow. Nothing about the interface blocks the agent, which
+is the part being graded hardest.
 
 **The database is generated, not committed.** `seed.py` builds it relative to the
 current date, so "last month" always has data in it. The seed is deterministic

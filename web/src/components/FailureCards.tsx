@@ -2,13 +2,17 @@ import type { JSX, ReactNode } from "react";
 import type { AskResult } from "../types";
 import { errorCopy } from "../error-copy";
 import { AssumptionChips } from "./AnswerCard";
+import { formatSeconds } from "../format";
 
 const COVERED = ["events", "tickets", "orders", "customers", "revenue"];
 const EMPTY_EXPLANATION = "The query ran and returned no rows. Try one of these rewordings.";
 export const REFUSED_LINE = "Refused: INSERT, UPDATE, DELETE, DROP, ALTER, GRANT, multiple statements";
+const ALLOWED_LINE = "Allowed: a single SELECT statement";
 const CARD = "card flex flex-col gap-5 px-5 py-5 lg:px-8 lg:py-7";
 const HEADING = "font-display text-[22px] font-medium leading-[1.35] tracking-[-0.02em] text-pretty lg:text-[28px]";
 const BODY = "max-w-[760px] text-[15px] leading-[1.55] text-ink-2";
+const LABEL = "font-mono text-xs font-medium tracking-[0.08em] text-ink-3";
+const NOTE = "font-mono text-xs text-ink-3";
 const PRIMARY = "h-10 self-start rounded-control bg-accent px-[18px] text-[13px] font-semibold text-black transition-colors duration-150 hover:bg-accent-hover";
 
 interface Props {
@@ -38,7 +42,7 @@ export function UnanswerableCard({ result, onPick }: Props): JSX.Element {
       </div>
       <p className={BODY}>{result.answer}</p>
       <div className="flex flex-col gap-3 rounded-control border border-hairline bg-raised px-5 py-[18px]">
-        <h3 className="font-mono text-xs font-medium tracking-[0.08em] text-ink-3">WHAT IT DOES COVER</h3>
+        <h3 className={LABEL}>WHAT IT DOES COVER</h3>
         <ul className="flex flex-wrap gap-2">
           {COVERED.map((topic) => (
             <li key={topic} className="inline-flex h-7 items-center rounded-control bg-panel px-[11px] font-mono text-xs">
@@ -47,7 +51,9 @@ export function UnanswerableCard({ result, onPick }: Props): JSX.Element {
           ))}
         </ul>
       </div>
+      <h3 className={LABEL}>QUESTIONS THIS DATA CAN ANSWER</h3>
       <SuggestionChips suggestions={result.suggestions} onPick={onPick} />
+      <p className={NOTE}>No SQL was generated · {formatSeconds(result.trace.total_ms)}</p>
     </Card>
   );
 }
@@ -56,19 +62,30 @@ export function UnanswerableCard({ result, onPick }: Props): JSX.Element {
 export function BlockedCard({ result, onReset }: { result: AskResult; onReset: () => void }): JSX.Element {
   return (
     <Card tone="error">
-      <span className="self-start rounded-control bg-error/15 px-2 py-1 font-mono text-[11px] font-semibold tracking-[0.08em] text-error">
-        BLOCKED
-      </span>
+      <div className="flex items-center gap-3">
+        <span className="rounded-control bg-error/15 px-2 py-1 font-mono text-[11px] font-semibold tracking-[0.08em] text-error">
+          BLOCKED
+        </span>
+        <span className={NOTE}>rejected before execution · {formatSeconds(result.trace.total_ms)}</span>
+      </div>
       <h2 className={HEADING}>That request was refused before it ran</h2>
-      <p className={BODY}>
-        {result.answer} {REFUSED_LINE}.
-      </p>
+      <p className={BODY}>{result.answer}</p>
       {result.sql !== null && (
         <div className="flex flex-col gap-2 rounded-control border border-hairline bg-sql px-5 py-4">
           <span className="font-mono text-[11px] font-medium tracking-[0.08em] text-ink-3">REJECTED STATEMENT</span>
           <code className="font-mono text-sm text-ink-3 line-through">{result.sql}</code>
         </div>
       )}
+      <ul className="flex flex-col gap-1.5 text-[13px] text-ink-2">
+        <li>
+          <span aria-hidden="true" className="mr-2 text-seafoam">✓</span>
+          {ALLOWED_LINE}
+        </li>
+        <li>
+          <span aria-hidden="true" className="mr-2 text-error">✕</span>
+          {REFUSED_LINE}
+        </li>
+      </ul>
       <button type="button" onClick={onReset} className={PRIMARY}>
         Ask a different question
       </button>

@@ -862,6 +862,18 @@ Rejected: patching the one stale figure (the drift was document-wide), and
 keeping the agent design above the run steps (a reviewer's first job is to get
 it running, and the summary already names the design's headline points).
 
+**The README shows three PNG screenshots from the real agent, under the summary**
+(BSE-22). An answer on the Chart tab, its SQL, and a refused delete, captured at
+1440 CSS px and 2× scale against a `--scale 0.2` seed with Claude Sonnet 5 on
+2026-09-12, `NLQ_TODAY` unset. The real agent rather than the fake one, because
+the README promises that every figure in it is something the app produced, and
+the fake agent's canned answers would put invented numbers in the first thing a
+reviewer sees. They live in `docs/images/` beside the other documentation,
+referenced by relative path so they render on GitHub and in a clone, and are
+retaken by hand when the interface changes. Rejected: a GIF of the whole flow
+(blurs the SQL, runs to megabytes, and must be re-recorded for any copy change),
+and a capture script (a Playwright dependency for a one-off).
+
 ## Interface toolchain
 
 **Vite + React 19 + TypeScript, Tailwind v4 through `@tailwindcss/vite`.** One

@@ -18,6 +18,17 @@ answer from the rows that come back.
   override followed by a delete, a `DROP TABLE` smuggled after a real question,
   and a request for the system prompt and API key), and all three are refused.
 
+![BSE Insights answering the top five event categories by revenue as a bar chart, with the answer sentence, two assumptions and the per-step trace](docs/images/answer-chart.png)
+
+*"Show me the top 5 event categories by total revenue." answered on the Chart tab.*
+
+| ![The same answer on the SQL tab, showing the eight-line syntax-highlighted SELECT the agent wrote](docs/images/answer-sql.png) | ![A request to delete all ticket records shown in the blocked state, refused before anything ran](docs/images/blocked-write.png) |
+| --- | --- |
+| *The SQL behind that answer, as the agent wrote it.* | *"Delete all ticket records." is refused before it runs.* |
+
+Captured from the real agent (Claude Sonnet 5, `--scale 0.2` seed) on 2026-09-12;
+retake them if the interface changes.
+
 It was built for a hiring exercise and runs on your own machine; there is no
 hosted version.
 

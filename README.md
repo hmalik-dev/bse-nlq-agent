@@ -90,8 +90,11 @@ with a `status` field, so the interface renders one shape:
 **Error codes.** The interface has its own sentence for `missing_api_key`
 (the key is unset or rejected), `rate_limited`, `model_timeout` (no reply
 within 60 seconds, or unreachable), `query_timeout` (past the 5 second limit),
-`repairs_exhausted` (the SQL failed three times) and `database_missing` (run
-the seed). `model_refused` (the model produced no usable plan), `model_error`
+`repairs_exhausted` (the SQL failed three times), `database_missing` (run
+the seed) and `usage_exhausted` (the key's credit or spend cap is used up,
+which says the allowance is spent rather than that the app broke). Error
+messages never carry a server path or the SDK's own text; that detail goes to
+the server log. `model_refused` (the model produced no usable plan), `model_error`
 and `internal` (anything unexpected, logged with its traceback on the server)
 all show "Something went wrong." A blank or over-long question is the one
 request that gets an HTTP error, a standard 422.

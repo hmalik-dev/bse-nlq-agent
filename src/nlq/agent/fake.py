@@ -13,7 +13,9 @@ import time
 from collections.abc import Callable
 
 from nlq.agent.agent import BLOCKED_ANSWER, EMPTY_SUGGESTIONS
+from nlq.agent.llm import USAGE_EXHAUSTED_MESSAGE
 from nlq.agent.models import AskResult, ChartSpec, ErrorInfo, Step, Trace
+from nlq.db.connection import MISSING_MESSAGE
 from nlq.examples import EXAMPLE_QUESTIONS
 from nlq.pricing import cost_usd
 
@@ -111,7 +113,8 @@ UNANSWERABLE_ANSWER = (
 ERROR_MESSAGES = {
     "rate_limited": "The model is rate limited right now. Try again shortly.",
     "missing_api_key": "ANTHROPIC_API_KEY is not set. Add it to .env.",
-    "database_missing": "No database found. Create it with: uv run python -m nlq.db.seed",
+    "database_missing": MISSING_MESSAGE,
+    "usage_exhausted": USAGE_EXHAUSTED_MESSAGE,
 }
 
 
@@ -211,6 +214,7 @@ _CANNED: tuple[tuple[tuple[str, ...], Callable[[str], AskResult]], ...] = (
     (("rate limit",), _error("rate_limited")),
     (("no key",), _error("missing_api_key")),
     (("no database",), _error("database_missing")),
+    (("out of credit",), _error("usage_exhausted")),
     (("slow",), _slow),
     (("nets",), _nets_table),
 )

@@ -493,6 +493,25 @@ is another empty result), and a third model call to propose rewrites (it breaks
 "suggestions come from code" and spends tokens on a state that already has its
 SQL on screen to adjust).
 
+**Error messages are fixed sentences; the detail goes to the `nlq` log.** A
+missing database says how to seed it without naming the absolute path (logged
+at WARNING), and a generic model failure says "The model call failed. Try again
+shortly." with the SDK's text logged once through `logger.exception`. Rejected:
+a response-scrubbing middleware (it would have to guess what a path looks like,
+and the message is already built in one place). `ApiKeyError` keeps naming
+`ANTHROPIC_API_KEY`: a variable name is neither a secret nor a path, and it is
+the instruction the reader needs.
+
+**A spent key is `usage_exhausted`, not `model_error`.** Once the credit balance
+or the console spend cap runs out, the API answers 400 "Your credit balance is
+too low…" or "You have reached your specified API usage limits…", or a 402
+billing error. `map_api_error` recognises those by status and by those two
+phrases, ahead of the generic branch, so the interface can say the allowance is
+spent instead of "Something went wrong." Rejected: every 400 as usage (a
+malformed request is a real fault), and matching on the body's error type alone
+(the credit message arrives as a plain `invalid_request_error`). The fake agent
+shows it for a question containing "out of credit".
+
 ## Interface
 
 **React + Vite + TypeScript + Tailwind on a FastAPI backend**, served as one app

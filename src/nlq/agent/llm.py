@@ -6,8 +6,10 @@ structured output, and every way the API can fail becomes a named `NlqError`.
 
 from __future__ import annotations
 
+import logging
 import time
 from collections.abc import Sequence
+from http import HTTPStatus
 from typing import Any
 
 import anthropic
@@ -21,11 +23,19 @@ from nlq.agent.errors import (
     ModelRateLimited,
     ModelRefused,
     ModelTimeout,
+    ModelUsageExhausted,
     NlqError,
 )
 from nlq.agent.models import Attempt, LlmResult, SqlPlan
 
+logger = logging.getLogger("nlq")
+
 MAX_TOKENS = 2048
+# Fixed sentences: the SDK's own text goes to the log, never into an API response.
+MODEL_ERROR_MESSAGE = "The model call failed. Try again shortly."
+USAGE_EXHAUSTED_MESSAGE = "The API key has used up its credit or its spend cap."
+# What the API says in a 400 when the balance or a console spend limit runs out.
+USAGE_EXHAUSTED_PHRASES = ("credit balance is too low", "api usage limits")
 OUTPUT_CONFIG = {"format": {"type": "json_schema", "schema": anthropic.transform_schema(SqlPlan)}}
 REPAIR_INSTRUCTION = (
     "Earlier queries for this question failed. Write a corrected query that avoids these errors:"
@@ -139,4 +149,20 @@ def map_api_error(error: anthropic.AnthropicError) -> NlqError:
         return ModelRateLimited("The model is rate limited right now. Try again shortly.")
     if isinstance(error, anthropic.APIConnectionError):  # APITimeoutError is a subclass
         return ModelTimeout("The model did not respond in time.")
-    return ModelError(f"The model call failed: {error}")
+    if is_usage_exhausted(error):
+        logger.warning("The API key is out of credit or over its spend cap: %s", error)
+        return ModelUsageExhausted(USAGE_EXHAUSTED_MESSAGE)
+    logger.exception("The model call failed")
+    return ModelError(MODEL_ERROR_MESSAGE)
+
+
+def is_usage_exhausted(error: anthropic.AnthropicError) -> bool:
+    """A 402 billing error, or the 400 the API sends once the credit or the spend cap runs out."""
+    if not isinstance(error, anthropic.APIStatusError):
+        return False
+    if error.status_code == HTTPStatus.PAYMENT_REQUIRED:
+        return True
+    text = str(error).lower()
+    return isinstance(error, anthropic.BadRequestError) and any(
+        phrase in text for phrase in USAGE_EXHAUSTED_PHRASES
+    )

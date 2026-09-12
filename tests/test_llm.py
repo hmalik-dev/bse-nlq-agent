@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import json
+import logging
 
 import anthropic
+import httpx2
 import pytest
 
 from nlq.agent.context import GOLDEN_TODAY, PromptContext, build_context
@@ -14,6 +16,7 @@ from nlq.agent.errors import (
     ModelRateLimited,
     ModelRefused,
     ModelTimeout,
+    ModelUsageExhausted,
 )
 from nlq.agent.llm import MAX_TOKENS, SqlWriter
 from nlq.agent.models import Attempt, SqlPlan
@@ -125,6 +128,62 @@ def test_each_api_failure_becomes_a_named_error(
     with pytest.raises(expected) as raised:
         SqlWriter(FakeAnthropic([scripted])).write(QUESTION, context=context)
     assert raised.value.code == code
+
+
+def test_a_model_error_hides_the_sdk_text_and_logs_it_once(
+    context: PromptContext, caplog: pytest.LogCaptureFixture
+) -> None:
+    with caplog.at_level(logging.ERROR, logger="nlq"), pytest.raises(ModelError) as raised:
+        SqlWriter(FakeAnthropic([api_status_error(500)])).write(QUESTION, context=context)
+
+    assert raised.value.message == "The model call failed. Try again shortly."
+    logged = [record for record in caplog.records if record.name == "nlq"]
+    assert len(logged) == 1
+    assert logged[0].levelno == logging.ERROR
+    assert "upstream failure" in logged[0].exc_text
+
+
+def _usage_error(error_class: type, status: int, message: str) -> anthropic.APIStatusError:
+    """Shaped the way the SDK builds it: the body's text folded into the message."""
+    body = {"type": "error", "error": {"type": "invalid_request_error", "message": message}}
+    request = httpx2.Request("POST", "https://api.anthropic.com/v1/messages")
+    response = httpx2.Response(status, request=request)
+    return error_class(f"Error code: {status} - {body}", response=response, body=body)
+
+
+@pytest.mark.parametrize(
+    "scripted",
+    [
+        _usage_error(
+            anthropic.BadRequestError,
+            400,
+            "Your credit balance is too low to access the Anthropic API. "
+            "Please go to Plans & Billing to upgrade or purchase credits.",
+        ),
+        _usage_error(
+            anthropic.BadRequestError,
+            400,
+            "You have reached your specified API usage limits. "
+            "You will regain access on 2026-10-01 at 00:00 UTC.",
+        ),
+        _usage_error(anthropic.APIStatusError, 402, "Billing error."),
+    ],
+    ids=["credit-balance", "spend-cap", "billing-402"],
+)
+def test_a_spent_allowance_gets_its_own_code_not_model_error(
+    context: PromptContext, scripted: anthropic.APIStatusError
+) -> None:
+    with pytest.raises(ModelUsageExhausted) as raised:
+        SqlWriter(FakeAnthropic([scripted])).write(QUESTION, context=context)
+
+    assert raised.value.code == "usage_exhausted"
+    assert raised.value.message == "The API key has used up its credit or its spend cap."
+
+
+def test_an_unrelated_bad_request_is_still_a_model_error(context: PromptContext) -> None:
+    scripted = _usage_error(anthropic.BadRequestError, 400, "max_tokens: must be positive")
+    with pytest.raises(ModelError):
+        SqlWriter(FakeAnthropic([scripted])).write(QUESTION, context=context)
 
 
 @pytest.mark.parametrize(

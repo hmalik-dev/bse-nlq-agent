@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  body { margin:0; background:#08080A; }
+  a { color:#00AEEF; text-decoration:none; }
+  a:hover { color:#5CCBF5; }
+  table { border-collapse:collapse; }
+  button { font-family:Inter,sans-serif; }
+</style>
+</helmet>
+
+<section style="display:flex;flex-direction:column;gap:72px;padding:64px;background:#08080A;font-family:Inter,sans-serif">
+
+  <div id="1a" style="display:flex;flex-direction:column;gap:56px">
+    <div style="display:flex;align-items:center;gap:12px">
+      <div style="display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:6px;background:#00AEEF;color:#0B0B0D;font:700 12px/1 'JetBrains Mono',monospace">1a</div>
+      <div style="font:600 15px/1 Archivo,sans-serif;color:#A1A1AA">BSE Insights — 17 frames</div>
+    </div>
+
+    <!-- ============ 01 ASK, EMPTY ============ -->
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="font:500 12px/1 'JetBrains Mono',monospace;color:#71717A;letter-spacing:.1em">01 · ASK, EMPTY STATE · 1440</div>
+      <div data-screen-label="01 Ask empty" style="width:1440px;background:#0B0B0D;border:1px solid #26262B;border-radius:12px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.55)">
+        <div style="display:flex;align-items:center;gap:16px;height:64px;padding:0 24px;border-bottom:1px solid #26262B">
+          <img src="brand/bse.svg" alt="BSE Global" style="height:28px;width:auto;display:block">
+          <div style="width:1px;height:24px;background:#26262B"></div>
+          <div style="font:600 17px/1 Archivo,sans-serif;color:#FFFFFF;letter-spacing:-.01em">Insights</div>
+          <div style="flex:1"></div>
+          <button style="height:36px;padding:0 14px;border-radius:8px;border:1px solid #26262B;background:#16161A;color:#FFFFFF;font:500 13px/1 Inter,sans-serif;cursor:pointer;transition:background 160ms,border-color 160ms" style-hover="background:#1E1E23;border-color:#3A3A42">What's in the data?</button>
+        </div>
+        <div style="max-width:1200px;margin:0 auto;padding:88px 24px 40px;display:flex;flex-direction:column;align-items:center">
+          <h1 style="margin:0;font:600 44px/1.1 Archivo,sans-serif;color:#FFFFFF;letter-spacing:-.025em;text-align:center">Ask anything about ticket sales</h1>
+          <p style="margin:14px 0 0;font:400 16px/1.5 Inter,sans-serif;color:#A1A1AA;text-align:center">Plain English in, SQL and a written answer out. Events at Barclays Center, 2024 to today.</p>
+
+          <div style="width:100%;max-width:880px;margin-top:44px;display:flex;flex-direction:column;gap:8px">
+            <label for="q1" style="font:500 13px/1 Inter,sans-serif;color:#A1A1AA">Your question</label>
+            <div style="display:flex;gap:12px;align-items:stretch">
+              <div style="flex:1;display:flex;align-items:center;height:56px;padding:0 16px;background:#16161A;border:1px solid #00AEEF;border-radius:8px;box-shadow:0 0 0 3px rgba(0,174,239,.28)">
+                <span id="q1" style="font:400 15px/1 Inter,sans-serif;color:#71717A">e.g. How many tickets did we sell for Nets home games last month?</span>
+                <div style="width:1.5px;height:20px;margin-left:2px;background:#00AEEF"></div>
+              </div>
+              <button style="height:56px;padding:0 32px;border:none;border-radius:8px;background:#00AEEF;color:#0B0B0D;font:600 15px/1 Inter,sans-serif;cursor:pointer;transition:background 160ms" style-hover="background:#2CC0F5">Ask</button>
+            </div>
+            <div style="font:400 12px/1 Inter,sans-serif;color:#71717A;margin-top:2px">Read-only. Single SELECT statements only.</div>
+          </div>
+
+          <div style="width:100%;max-width:880px;margin-top:40px;display:flex;flex-direction:column;gap:12px">
+            <div style="font:500 12px/1 'JetBrains Mono',monospace;color:#71717A;letter-spacing:.1em">TRY ONE OF THESE</div>
+            <div style="display:flex;flex-wrap:wrap;gap:10px">
+              <button style="display:inline-flex;align-items:center;gap:10px;height:44px;padding:0 14px;border-radius:8px;border:1px solid #26262B;background:#16161A;color:#FFFFFF;font:400 13px/1 Inter,sans-serif;cursor:pointer;transition:background 160ms,border-color 160ms" style-hover="background:#1E1E23;border-color:#3A3A42"><img src="brand/nets.svg" alt="Brooklyn Nets" style="width:24px;height:24px;display:block">How many tickets did we sell for Nets home games last month?</button>
+              <button style="display:inline-flex;align-items:center;height:44px;padding:0 14px;border-radius:8px;border:1px solid #26262B;background:#16161A;color:#FFFFFF;font:400 13px/1 Inter,sans-serif;cursor:pointer;transition:background 160ms,border-color 160ms" style-hover="background:#1E1E23;border-color:#3A3A42">Top 5 event categories by total revenue</button>
+              <button style="display:inline-flex;align-items:center;gap:10px;height:44px;padding:0 14px;border-radius:8px;border:1px solid #26262B;background:#16161A;color:#FFFFFF;font:400 13px/1 Inter,sans-serif;cursor:pointer;transition:background 160ms,border-color 160ms" style-hover="background:#1E1E23;border-color:#3A3A42"><img src="brand/liberty.svg" alt="New York Liberty" style="height:24px;width:auto;display:block">Which 2024 events had the highest average ticket price?</button>
+              <button style="display:inline-flex;align-items:center;height:44px;padding:0 14px;border-radius:8px;border:1px solid #26262B;background:#16161A;color:#FFFFFF;font:400 13px/1 Inter,sans-serif;cursor:pointer;transition:background 160ms,border-color 160ms" style-hover="background:#1E1E23;border-color:#3A3A42">Which opponent drives the biggest gate?</button>
+              <button style="display:inline-flex;align-items:center;height:44px;padding:0 14px;border-radius:8px;border:1px solid #26262B;background:#16161A;color:#FFFFFF;font:400 13px/1 Inter,sans-serif;cursor:pointer;transition:background 160ms,border-color 160ms" style-hover="background:#1E1E23;border-color:#3A3A42">How much revenue did refunds cost us last season?</button>
+              <button style="display:inline-flex;align-items:center;height:44px;padding:0 14px;border-radius:8px;border:1px solid #26262B;background:#16161A;color:#FFFFFF;font:400 13px/1 Inter,sans-serif;cursor:pointer;transition:background 160ms,border-color 160ms" style-hover="background:#1E1E23;border-color:#3A3A42">Compare web and box office sales for concerts</button>
+            </div>
+          </div>
+        </div>
+        <div style="border-top:1px solid #26262B;padding:20px 24px;display:flex;align-items:center;gap:16px;max-width:1200px;margin:56px auto 0">
+          <img src="brand/barclays-center.svg" alt="Barclays Center" style="height:20px;width:auto;display:block">
+          <div style="font:400 13px/1 Inter,sans-serif;color:#A1A1AA">Events at Barclays Center, 2024 to today</div>
+          <div style="flex:1"></div>
+          <div style="display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:12px;background:#16161A;border:1px solid #26262B;color:#A1A1AA;font:400 11px/1 'JetBrains Mono',monospace">Demo · synthetic data</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ 02 THINKING ============ -->
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="font:500 12px/1 'JetBrains Mono',monospace;color:#71717A;letter-spacing:.1em">02 · ASK, THINKING · 1440</div>
+      <div data-screen-label="02 Thinking" style="width:1440px;background:#0B0B0D;border:1px solid #26262B;border-radius:12px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.55)">
+        <div style="display:flex;align-items:center;gap:16px;height:64px;padding:0 24px;border-bottom:1px solid #26262B">
+          <img src="brand/bse.svg" alt="BSE Global" style="height:28px;width:auto;display:block">
+          <div style="width:1px;height:24px;background:#26262B"></div>
+          <div style="font:600 17px/1 Archivo,sans-serif;color:#FFFFFF;letter-spacing:-.01em">Insights</div>
+          <div style="flex:1"></div>
+          <button style="height:36px;padding:0 14px;border-radius:8px;border:1px solid #26262B;background:#16161A;color:#FFFFFF;font:500 13px/1 Inter,sans-serif;cursor:pointer" style-hover="background:#1E1E23">What's in the data?</button>
+        </div>
+        <div style="max-width:1200px;margin:0 auto;padding:40px 24px 64px;display:flex;flex-direction:column;gap:24px">
+          <div style="background:#16161A;border:1px solid #26262B;border-radius:12px;padding:20px 24px;display:flex;align-items:center;gap:14px">
+            <img src="brand/nets.svg" alt="Brooklyn Nets" style="width:24px;height:24px;display:block">
+            <div style="font:500 18px/1.35 Inter,sans-serif;color:#FFFFFF">How many tickets did we sell for Nets home games last month?</div>
+            <div style="flex:1"></div>
+            <button style="height:32px;padding:0 12px;border-radius:8px;border:1px solid #26262B;background:#1E1E23;color:#A1A1AA;font:500 12px/1 Inter,sans-serif;cursor:pointer" style-hover="color:#FFFFFF">Cancel</button>
+          </div>
+          <div style="background:#16161A;border:1px solid #26262B;border-radius:12px;padding:8px 24px">
+            <div style="display:flex;align-items:center;gap:14px;padding:16px 0;border-bottom:1px solid #26262B">
+              <div style="width:22px;height:22px;border-radius:11px;background:rgba(135,213,181,.16);display:flex;align-items:center;justify-content:center;color:#87D5B5;font:700 12px/1 Inter,sans-serif">✓</div>
+              <div style="font:400 14px/1 Inter,sans-serif;color:#FFFFFF;flex:1">Reading schema</div>
+              <div style="font:400 13px/1 'JetBrains Mono',monospace;color:#A1A1AA;font-variant-numeric:tabular-nums">0.00s</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:14px;padding:16px 0;border-bottom:1px solid #26262B">
+              <div style="width:22px;height:22px;border-radius:11px;background:rgba(135,213,181,.16);display:flex;align-items:center;justify-content:center;color:#87D5B5;font:700 12px/1 Inter,sans-serif">✓</div>
+              <div style="font:400 14px/1 Inter,sans-serif;color:#FFFFFF;flex:1">Writing SQL</div>
+              <div style="font:400 13px/1 'JetBrains Mono',monospace;color:#A1A1AA;font-variant-numeric:tabular-nums">1.20s</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:14px;padding:16px 0;border-bottom:1px solid #26262B">
+              <div style="width:22px;height:22px;border-radius:11px;background:rgba(135,213,181,.16);display:flex;align-items:center;justify-content:center;color:#87D5B5;font:700 12px/1 Inter,sans-serif">✓</div>
+              <div style="font:400 14px/1 Inter,sans-serif;color:#FFFFFF;flex:1">Checking safety <span style="color:#71717A">— single SELECT, read-only connection</span></div>
+              <div style="font:400 13px/1 'JetBrains Mono',monospace;color:#A1A1AA;font-variant-numeric:tabular-nums">0.01s</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:14px;padding:16px 0;border-bottom:1px solid #26262B">
+              <div style="width:22px;height:22px;border-radius:11px;background:rgba(135,213,181,.16);display:flex;align-items:center;justify-content:center;color:#87D5B5;font:700 12px/1 Inter,sans-serif">✓</div>
+              <div style="font:400 14px/1 Inter,sans-serif;color:#FFFFFF;flex:1">Running query <span style="color:#71717A">— 8 rows</span></div>
+              <div style="font:400 13px/1 'JetBrains Mono',monospace;color:#A1A1AA;font-variant-numeric:tabular-nums">0.02s</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:14px;padding:16px 0">
+              <div style="width:22px;height:22px;border-radius:11px;border:2px solid #26262B;border-top-color:#00AEEF;box-sizing:border-box"></div>
+              <div style="font:500 14px/1 Inter,sans-serif;color:#FFFFFF;flex:1">Writing answer</div>
+              <div style="font:400 13px/1 'JetBrains Mono',monospace;color:#00AEEF;font-variant-numeric:tabular-nums">0.93s</div>
+            </div>
+            <div style="height:2px;background:#26262B;border-radius:1px;margin:0 0 16px"><div style="width:78%;height:2px;background:#00AEEF;border-radius:1px"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ 03 ANSWER, RESULTS ============ -->
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="font:500 12px/1 'JetBrains Mono',monospace;color:#71717A;letter-spacing:.1em">03 · ANSWER, RESULTS TAB · 1440</div>
+      <div data-screen-label="03 Answer results" style="width:1440px;background:#0B0B0D;border:1px solid #26262B;border-radius:12px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.55)">
+        <div style="display:flex;align-items:center;gap:16px;height:64px;padding:0 24px;border-bottom:1px solid #26262B">
+          <img src="brand/bse.svg" alt="BSE Global" style="height:28px;width:auto;display:block">
+          <div style="width:1px;height:24px;background:#26262B"></div>
+          <div style="font:600 17px/1 Archivo,sans-serif;color:#FFFFFF;letter-spacing:-.01em">Insights</div>
+          <div style="flex:1"></div>
+          <button style="height:36px;padding:0 14px;border-radius:8px;border:1px solid #26262B;background:#16161A;color:#FFFFFF;font:500 13px/1 Inter,sans-serif;cursor:pointer" style-hover="background:#1E1E23">What's in the data?</button>
+        </div>
+        <div style="max-width:1200px;margin:0 auto;padding:32px 24px 48px;display:flex;flex-direction:column;gap:20px">
+          <div style="display:flex;align-items:center;gap:10px">
+            <img src="brand/nets.svg" alt="Brooklyn Nets" style="width:24px;height:24px;display:block">
+            <div style="font:400 14px/1.4 Inter,sans-serif;color:#A1A1AA">How many tickets did we sell for Nets home games last month?</div>
+            <button style="height:26px;padding:0 10px;border-radius:8px;border:1px solid #26262B;background:transparent;color:#71717A;font:500 12px/1 Inter,sans-serif;cursor:pointer" style-hover="color:#FFFFFF;border-color:#3A3A42">Edit</button>
+          </div>
+
+          <div style="background:#16161A;border:1px solid #26262B;border-radius:12px;padding:28px 32px;display:flex;flex-direction:column;gap:18px">
+            <p style="margin:0;font:500 28px/1.35 Archivo,sans-serif;color:#FFFFFF;letter-spacing:-.02em;text-wrap:pretty">We sold <span style="font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums">26,412</span> tickets in August 2026 — all of them for upcoming games, since the Nets play no home games in August.</p>
+            <div style="display:flex;flex-wrap:wrap;gap:8px">
+              <div style="display:inline-flex;align-items:center;gap:8px;height:32px;padding:0 12px;border-radius:8px;background:#1E1E23;border:1px solid #26262B;color:#A1A1AA;font:400 12px/1 Inter,sans-serif"><span style="color:#71717A;font-family:'JetBrains Mono',monospace">ASSUMED</span>“Last month” means August 2026, by purchase date</div>
+              <div style="display:inline-flex;align-items:center;gap:8px;height:32px;padding:0 12px;border-radius:8px;background:#1E1E23;border:1px solid #26262B;color:#A1A1AA;font:400 12px/1 Inter,sans-serif"><span style="color:#71717A;font-family:'JetBrains Mono',monospace">ASSUMED</span>Counts sold tickets only; refunds and comps excluded</div>
+            </div>
+          </div>
+
+          <div style="background:#16161A;border:1px solid #26262B;border-radius:12px;overflow:hidden">
+            <div style="display:flex;align-items:center;gap:4px;padding:0 16px;border-bottom:1px solid #26262B">
+              <button style="height:48px;padding:0 6px;margin-right:14px;border:none;background:transparent;color:#FFFFFF;font:600 13px/1 Inter,sans-serif;cursor:pointer;box-shadow:inset 0 -2px 0 #00AEEF">Results</button>
+              <button style="height:48px;padding:0 6px;margin-right:14px;border:none;background:transparent;color:#A1A1AA;font:500 13px/1 Inter,sans-serif;cursor:pointer;transition:color 160ms" style-hover="color:#FFFFFF">SQL</button>
+              <button style="height:48px;padding:0 6px;border:none;background:transparent;color:#A1A1AA;font:500 13px/1 Inter,sans-serif;cursor:pointer;transition:color 160ms" style-hover="color:#FFFFFF">Chart</button>
+              <div style="flex:1"></div>
+              <div style="font:400 12px/1 'JetBrains Mono',monospace;color:#71717A;font-variant-numeric:tabular-nums">8 rows</div>
+              <button style="height:30px;margin-left:14px;padding:0 12px;border-radius:8px;border:1px solid #26262B;background:#1E1E23;color:#FFFFFF;font:500 12px/1 Inter,sans-serif;cursor:pointer" style-hover="border-color:#3A3A42">Export CSV</button>
+            </div>
+            <table style="width:100%;border-collapse:collapse">
+              <thead>
+                <tr style="background:#121215">
+                  <th scope="col" style="text-align:left;padding:12px 20px;font:500 11px/1 'JetBrains Mono',monospace;color:#71717A;letter-spacing:.08em;border-bottom:1px solid #26262B">EVENT</th>
+                  <th scope="col" style="text-align:left;padding:12px 20px;font:500 11px/1 'JetBrains Mono',monospace;color:#71717A;letter-spacing:.08em;border-bottom:1px solid #26262B">DATE</th>
+                  <th scope="col" style="text-align:right;padding:12px 20px;font:500 11px/1 'JetBrains Mono',monospace;color:#71717A;letter-spacing:.08em;border-bottom:1px solid #26262B">TICKETS SOLD</th>
+                  <th scope="col" style="text-align:right;padding:12px 20px;font:500 11px/1 'JetBrains Mono',monospace;color:#71717A;letter-spacing:.08em;border-bottom:1px solid #26262B">AVG PRICE</th>
+                  <th scope="col" style="text-align:right;padding:12px 20px;font:500 11px/1 'JetBrains Mono',monospace;color:#71717A;letter-spacing:.08em;border-bottom:1px solid #26262B">GATE REVENUE</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="padding:14px 20px;border-bottom:1px solid #26262B"><span style="display:inline-flex;align-items:center;gap:10px;font:400 14px/1 Inter,sans-serif;color:#FFFFFF"><img src="brand/nets.svg" alt="Brooklyn Nets" style="width:24px;height:24px;display:block">Nets vs. Knicks</span></td>
+                  <td style="padding:14px 20px;border-bottom:1px solid #26262B;font:400 13px/1 'JetBrains Mono',monospace;color:#A1A1AA">2026-10-22</td>
+                  <td style="padding:14px 20px;border-bottom:1px solid #26262B;text-align:right;font:400 14px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">4,812</td>
+                  <td style="padding:14px 20px;border-bottom:1px solid #26262B;text-align:right;font:400 14px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">$184.20</td>
+                  <td style="padding:14px 20px;border-bottom:1px solid #26262B;text-align:right;font:400 14px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">$886,370</td>
+                </tr>
+                <tr>
+                  <td style="padding:14px 20px;border-bottom:1px solid #26262B"><span style="display:inline-flex;align-items:center;gap:10px;font:400 14px/1 Inter,sans-serif;color:#FFFFFF"><img src="brand/nets.svg" alt="Brooklyn Nets" style="width:24px;height:24px;display:block">Nets vs. Celtics</span></td>
+                  <td style="padding:14px 20px;border-bottom:1px solid #26262B;font:400 13px/1 'JetBrains Mono',monospace;color:#A1A1AA">2026-10-28</td>
+                  <td style="padding:14px 20px;border-bottom:1px solid #26262B;text-align:right;font:400 14px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">4,166</td>
+                  <td style="padding:14px 20px;border-bottom:1px solid #26262B;text-align:right;font:400 14px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">$171.55</td>
+                  <td style="padding:14px 20px;border-bottom:1px solid #26262B;text-align:right;font:400 14px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">$714,678</td>
+                </tr>
+                <tr>
+                  <td style="padding:14px 20px;border-bottom:1px solid #26262B"><span style="display:inline-flex;align-items:center;gap:10px;font:400 14px/1 Inter,sans-serif;color:#FFFFFF"><img src="brand/nets.svg" alt="Brooklyn Nets" style="width:24px;height:24px;display:block">Nets vs. 76ers</span></td>
+                  <td style="padding:14px 20px;border-bottom:1px solid #26262B;font:400 13px/1 'JetBrains Mono',monospace;color:#A1A1AA">2026-11-03</td>
+                  <td style="padding:14px 20px;border-bottom:1px solid #26262B;text-align:right;font:400 14px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">3,704</td>
+                  <td style="padding:14px 20px;border-bottom:1px solid #26262B;text-align:right;font:400 14px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">$158.90</td>
+                  <td style="padding:14px 20px;border-bottom:1px solid #26262B;text-align:right;font:400 14px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">$588,566</td>
+                </tr>
+                <tr>
+                  <td style="padding:14px 20px;border-bottom:1px solid #26262B"><span style="display:inline-flex;align-items:center;gap:10px;font:400 14px/1 Inter,sans-serif;color:#FFFFFF"><img src="brand/nets.svg" alt="Brooklyn Nets" style="width:24px;height:24px;display:block">Nets vs. Bucks</span></td>
+                  <td style="padding:14px 20px;border-bottom:1px solid #26262B;font:400 13px/1 'JetBrains Mono',monospace;color:#A1A1AA">2026-11-07</td>
+                  <td style="padding:14px 20px;border-bottom:1px solid #26262B;text-align:right;font:400 14px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">3,388</td>
+                  <td style="padding:14px 20px;border-bottom:1px solid #26262B;text-align:right;font:400 14px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">$152.40</td>
+                  <td style="padding:14px 20px;border-bottom:1px solid #26262B;text-align:right;font:400 14px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">$516,331</td>
+                </tr>
+                <tr>
+                  <td style="padding:14px 20px;border-bottom:1px solid #26262B"><span style="display:inline-flex;align-items:center;gap:10px;font:400 14px/1 Inter,sans-serif;color:#FFFFFF"><img src="brand/nets.svg" alt="Brooklyn Nets" style="width:24px;height:24px;display:block">Nets vs. Heat</span></td>
+                  <td style="padding:14px 20px;border-bottom:1px solid #26262B;font:400 13px/1 'JetBrains Mono',monospace;color:#A1A1AA">2026-11-12</td>
+                  <td style="padding:14px 20px;border-bottom:1px solid #26262B;text-align:right;font:400 14px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">3,102</td>
+                  <td style="padding:14px 20px;border-bottom:1px solid #26262B;text-align:right;font:400 14px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">$146.75</td>
+                  <td style="padding:14px 20px;border-bottom:1px solid #26262B;text-align:right;font:400 14px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">$455,222</td>
+                </tr>
+                <tr>
+                  <td style="padding:14px 20px;border-bottom:1px solid #26262B"><span style="display:inline-flex;align-items:center;gap:10px;font:400 14px/1 Inter,sans-serif;color:#FFFFFF"><img src="brand/nets.svg" alt="Brooklyn Nets" style="width:24px;height:24px;display:block">Nets vs. Raptors</span></td>
+                  <td style="padding:14px 20px;border-bottom:1px solid #26262B;font:400 13px/1 'JetBrains Mono',monospace;color:#A1A1AA">2026-11-18</td>
+                  <td style="padding:14px 20px;border-bottom:1px solid #26262B;text-align:right;font:400 14px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">2,845</td>
+                  <td style="padding:14px 20px;border-bottom:1px solid #26262B;text-align:right;font:400 14px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">$139.10</td>
+                  <td style="padding:14px 20px;border-bottom:1px solid #26262B;text-align:right;font:400 14px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">$395,740</td>
+                </tr>
+                <tr>
+                  <td style="padding:14px 20px;border-bottom:1px solid #26262B"><span style="display:inline-flex;align-items:center;gap:10px;font:400 14px/1 Inter,sans-serif;color:#FFFFFF"><img src="brand/nets.svg" alt="Brooklyn Nets" style="width:24px;height:24px;display:block">Nets vs. Bulls</span></td>
+                  <td style="padding:14px 20px;border-bottom:1px solid #26262B;font:400 13px/1 'JetBrains Mono',monospace;color:#A1A1AA">2026-11-21</td>
+                  <td style="padding:14px 20px;border-bottom:1px solid #26262B;text-align:right;font:400 14px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">2,414</td>
+                  <td style="padding:14px 20px;border-bottom:1px solid #26262B;text-align:right;font:400 14px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">$133.65</td>
+                  <td style="padding:14px 20px;border-bottom:1px solid #26262B;text-align:right;font:400 14px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">$322,632</td>
+                </tr>
+                <tr>
+                  <td style="padding:14px 20px"><span style="display:inline-flex;align-items:center;gap:10px;font:400 14px/1 Inter,sans-serif;color:#FFFFFF"><img src="brand/nets.svg" alt="Brooklyn Nets" style="width:24px;height:24px;display:block">Nets vs. Pistons</span></td>
+                  <td style="padding:14px 20px;font:400 13px/1 'JetBrains Mono',monospace;color:#A1A1AA">2026-11-25</td>
+                  <td style="padding:14px 20px;text-align:right;font:400 14px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">1,981</td>
+                  <td style="padding:14px 20px;text-align:right;font:400 14px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">$128.40</td>
+                  <td style="padding:14px 20px;text-align:right;font:400 14px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">$254,360</td>
+                </tr>
+              </tbody>
+            </table>
+            <div style="display:flex;align-items:center;gap:10px;padding:12px 20px;border-top:1px solid #26262B;background:#121215">
+              <div style="width:14px;height:14px;border-radius:7px;border:1.5px solid #71717A;position:relative;box-sizing:border-box"><div style="position:absolute;left:5.5px;top:2.5px;width:1.5px;height:5px;background:#71717A"></div></div>
+              <div style="font:400 12px/1 'JetBrains Mono',monospace;color:#71717A;font-variant-numeric:tabular-nums">claude-sonnet-5 · 2.16s · repaired once</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ 04 ANSWER, CHART ============ -->
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="font:500 12px/1 'JetBrains Mono',monospace;color:#71717A;letter-spacing:.1em">04 · ANSWER, CHART TAB · 1440</div>
+      <div data-screen-label="04 Answer chart" style="width:1440px;background:#0B0B0D;border:1px solid #26262B;border-radius:12px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.55)">
+        <div style="display:flex;align-items:center;gap:16px;height:64px;padding:0 24px;border-bottom:1px solid #26262B">
+          <img src="brand/bse.svg" alt="BSE Global" style="height:28px;width:auto;display:block">
+          <div style="width:1px;height:24px;background:#26262B"></div>
+          <div style="font:600 17px/1 Archivo,sans-serif;color:#FFFFFF;letter-spacing:-.01em">Insights</div>
+          <div style="flex:1"></div>
+          <button style="height:36px;padding:0 14px;border-radius:8px;border:1px solid #26262B;background:#16161A;color:#FFFFFF;font:500 13px/1 Inter,sans-serif;cursor:pointer" style-hover="background:#1E1E23">What's in the data?</button>
+        </div>
+        <div style="max-width:1200px;margin:0 auto;padding:32px 24px 48px;display:flex;flex-direction:column;gap:20px">
+          <div style="font:400 14px/1.4 Inter,sans-serif;color:#A1A1AA">Top 5 event categories by total revenue</div>
+          <div style="background:#16161A;border:1px solid #26262B;border-radius:12px;padding:28px 32px;display:flex;flex-direction:column;gap:18px">
+            <p style="margin:0;font:500 28px/1.35 Archivo,sans-serif;color:#FFFFFF;letter-spacing:-.02em;text-wrap:pretty">Nets home games brought in <span style="font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums">$18.4M</span> — more than concerts and Liberty games combined.</p>
+            <div style="display:flex;flex-wrap:wrap;gap:8px">
+              <div style="display:inline-flex;align-items:center;gap:8px;height:32px;padding:0 12px;border-radius:8px;background:#1E1E23;border:1px solid #26262B;color:#A1A1AA;font:400 12px/1 Inter,sans-serif"><span style="color:#71717A;font-family:'JetBrains Mono',monospace">ASSUMED</span>Revenue is gate only — fees, refunds and comps excluded</div>
+              <div style="display:inline-flex;align-items:center;gap:8px;height:32px;padding:0 12px;border-radius:8px;background:#1E1E23;border:1px solid #26262B;color:#A1A1AA;font:400 12px/1 Inter,sans-serif"><span style="color:#71717A;font-family:'JetBrains Mono',monospace">ASSUMED</span>All events at Barclays Center, 2024 to today</div>
+            </div>
+          </div>
+          <div style="background:#16161A;border:1px solid #26262B;border-radius:12px;overflow:hidden">
+            <div style="display:flex;align-items:center;gap:4px;padding:0 16px;border-bottom:1px solid #26262B">
+              <button style="height:48px;padding:0 6px;margin-right:14px;border:none;background:transparent;color:#A1A1AA;font:500 13px/1 Inter,sans-serif;cursor:pointer" style-hover="color:#FFFFFF">Results</button>
+              <button style="height:48px;padding:0 6px;margin-right:14px;border:none;background:transparent;color:#A1A1AA;font:500 13px/1 Inter,sans-serif;cursor:pointer" style-hover="color:#FFFFFF">SQL</button>
+              <button style="height:48px;padding:0 6px;border:none;background:transparent;color:#FFFFFF;font:600 13px/1 Inter,sans-serif;cursor:pointer;box-shadow:inset 0 -2px 0 #00AEEF">Chart</button>
+              <div style="flex:1"></div>
+              <select style="height:30px;padding:0 10px;border-radius:8px;border:1px solid #26262B;background:#1E1E23;color:#FFFFFF;font:500 12px/1 Inter,sans-serif;cursor:pointer">
+                <option>Horizontal bars</option>
+                <option>Column</option>
+                <option>Line</option>
+              </select>
+              <button style="height:30px;margin-left:8px;padding:0 12px;border-radius:8px;border:1px solid #26262B;background:#1E1E23;color:#FFFFFF;font:500 12px/1 Inter,sans-serif;cursor:pointer" style-hover="border-color:#3A3A42">Download PNG</button>
+            </div>
+            <div style="padding:28px 32px 32px;display:flex;flex-direction:column;gap:22px">
+              <div style="font:600 15px/1 Archivo,sans-serif;color:#FFFFFF">Total revenue by event category</div>
+              <div style="display:flex;flex-direction:column;gap:18px">
+                <div style="display:grid;grid-template-columns:180px 1fr;align-items:center;gap:20px">
+                  <div style="font:400 13px/1.3 Inter,sans-serif;color:#FFFFFF;text-align:right">Nets home games</div>
+                  <div style="display:flex;align-items:center;gap:12px"><div style="height:28px;width:78%;background:#87D5B5;border-radius:4px"></div><div style="font:500 13px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">$18,412,900</div></div>
+                </div>
+                <div style="display:grid;grid-template-columns:180px 1fr;align-items:center;gap:20px">
+                  <div style="font:400 13px/1.3 Inter,sans-serif;color:#A1A1AA;text-align:right">Concerts</div>
+                  <div style="display:flex;align-items:center;gap:12px"><div style="height:28px;width:51%;background:rgba(135,213,181,.55);border-radius:4px"></div><div style="font:500 13px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">$12,106,480</div></div>
+                </div>
+                <div style="display:grid;grid-template-columns:180px 1fr;align-items:center;gap:20px">
+                  <div style="font:400 13px/1.3 Inter,sans-serif;color:#A1A1AA;text-align:right">Liberty home games</div>
+                  <div style="display:flex;align-items:center;gap:12px"><div style="height:28px;width:29%;background:rgba(135,213,181,.55);border-radius:4px"></div><div style="font:500 13px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">$6,841,220</div></div>
+                </div>
+                <div style="display:grid;grid-template-columns:180px 1fr;align-items:center;gap:20px">
+                  <div style="font:400 13px/1.3 Inter,sans-serif;color:#A1A1AA;text-align:right">Family shows</div>
+                  <div style="display:flex;align-items:center;gap:12px"><div style="height:28px;width:13.5%;background:rgba(135,213,181,.55);border-radius:4px"></div><div style="font:500 13px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">$3,204,915</div></div>
+                </div>
+                <div style="display:grid;grid-template-columns:180px 1fr;align-items:center;gap:20px">
+                  <div style="font:400 13px/1.3 Inter,sans-serif;color:#A1A1AA;text-align:right">College basketball</div>
+                  <div style="display:flex;align-items:center;gap:12px"><div style="height:28px;width:6%;background:rgba(135,213,181,.55);border-radius:4px"></div><div style="font:500 13px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">$1,438,060</div></div>
+                </div>
+              </div>
+              <div style="display:grid;grid-template-columns:180px 1fr;gap:20px;border-top:1px solid #26262B;padding-top:12px">
+                <div></div>
+                <div style="display:flex;justify-content:space-between;font:400 11px/1 'JetBrains Mono',monospace;color:#71717A;font-variant-numeric:tabular-nums"><span>$0</span><span>$6M</span><span>$12M</span><span>$18M</span><span></span></div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;padding:12px 20px;border-top:1px solid #26262B;background:#121215">
+              <div style="width:14px;height:14px;border-radius:7px;border:1.5px solid #71717A;position:relative;box-sizing:border-box"><div style="position:absolute;left:5.5px;top:2.5px;width:1.5px;height:5px;background:#71717A"></div></div>
+              <div style="font:400 12px/1 'JetBrains Mono',monospace;color:#71717A;font-variant-numeric:tabular-nums">claude-sonnet-5 · 1.84s · first try</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ 05 ANSWER, SQL ============ -->
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="font:500 12px/1 'JetBrains Mono',monospace;color:#71717A;letter-spacing:.1em">05 · ANSWER, SQL TAB · 1440</div>
+      <div data-screen-label="05 Answer SQL" style="width:1440px;background:#0B0B0D;border:1px solid #26262B;border-radius:12px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.55)">
+        <div style="display:flex;align-items:center;gap:16px;height:64px;padding:0 24px;border-bottom:1px solid #26262B">
+          <img src="brand/bse.svg" alt="BSE Global" style="height:28px;width:auto;display:block">
+          <div style="width:1px;height:24px;background:#26262B"></div>
+          <div style="font:600 17px/1 Archivo,sans-serif;color:#FFFFFF;letter-spacing:-.01em">Insights</div>
+          <div style="flex:1"></div>
+          <button style="height:36px;padding:0 14px;border-radius:8px;border:1px solid #26262B;background:#16161A;color:#FFFFFF;font:500 13px/1 Inter,sans-serif;cursor:pointer" style-hover="background:#1E1E23">What's in the data?</button>
+        </div>
+        <div style="max-width:1200px;margin:0 auto;padding:32px 24px 48px;display:flex;flex-direction:column;gap:20px">
+          <div style="display:flex;align-items:center;gap:10px">
+            <img src="brand/nets.svg" alt="Brooklyn Nets" style="width:24px;height:24px;display:block">
+            <div style="font:400 14px/1.4 Inter,sans-serif;color:#A1A1AA">How many tickets did we sell for Nets home games last month?</div>
+          </div>
+          <div style="background:#16161A;border:1px solid #26262B;border-radius:12px;padding:28px 32px">
+            <p style="margin:0;font:500 28px/1.35 Archivo,sans-serif;color:#FFFFFF;letter-spacing:-.02em;text-wrap:pretty">We sold <span style="font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums">26,412</span> tickets in August 2026 — all of them for upcoming games, since the Nets play no home games in August.</p>
+          </div>
+          <div style="background:#16161A;border:1px solid #26262B;border-radius:12px;overflow:hidden">
+            <div style="display:flex;align-items:center;gap:4px;padding:0 16px;border-bottom:1px solid #26262B">
+              <button style="height:48px;padding:0 6px;margin-right:14px;border:none;background:transparent;color:#A1A1AA;font:500 13px/1 Inter,sans-serif;cursor:pointer" style-hover="color:#FFFFFF">Results</button>
+              <button style="height:48px;padding:0 6px;margin-right:14px;border:none;background:transparent;color:#FFFFFF;font:600 13px/1 Inter,sans-serif;cursor:pointer;box-shadow:inset 0 -2px 0 #00AEEF">SQL</button>
+              <button style="height:48px;padding:0 6px;border:none;background:transparent;color:#A1A1AA;font:500 13px/1 Inter,sans-serif;cursor:pointer" style-hover="color:#FFFFFF">Chart</button>
+              <div style="flex:1"></div>
+              <div style="display:inline-flex;align-items:center;gap:7px;height:24px;padding:0 10px;border-radius:12px;background:rgba(135,213,181,.12);color:#87D5B5;font:500 11px/1 'JetBrains Mono',monospace">READ-ONLY</div>
+            </div>
+            <div style="position:relative;padding:20px 0;background:#121215">
+              <button style="position:absolute;top:14px;right:16px;height:30px;padding:0 12px;border-radius:8px;border:1px solid #26262B;background:#1E1E23;color:#FFFFFF;font:500 12px/1 Inter,sans-serif;cursor:pointer;z-index:1" style-hover="border-color:#3A3A42">Copy</button>
+              <div style="padding:0 24px;font:400 13.5px/2 'JetBrains Mono',monospace;color:#FFFFFF;overflow-x:auto"><div style="display:block;white-space:pre"><span style="display:inline-block;width:34px;color:#3F3F46;user-select:none"> 1</span><span style="color:#71717A">-- Tickets sold in Aug 2026 for Nets home fixtures</span></div><div style="display:block;white-space:pre"><span style="display:inline-block;width:34px;color:#3F3F46;user-select:none"> 2</span><span style="color:#00AEEF">SELECT</span>   e.name    <span style="color:#00AEEF">AS</span> event,</div><div style="display:block;white-space:pre"><span style="display:inline-block;width:34px;color:#3F3F46;user-select:none"> 3</span>         e.starts_at <span style="color:#00AEEF">AS</span> date,</div><div style="display:block;white-space:pre"><span style="display:inline-block;width:34px;color:#3F3F46;user-select:none"> 4</span>         <span style="color:#00AEEF">COUNT</span>(t.id) <span style="color:#00AEEF">AS</span> tickets_sold,</div><div style="display:block;white-space:pre"><span style="display:inline-block;width:34px;color:#3F3F46;user-select:none"> 5</span>         <span style="color:#00AEEF">ROUND</span>(<span style="color:#00AEEF">AVG</span>(t.price), <span style="color:#87D5B5">2</span>) <span style="color:#00AEEF">AS</span> avg_price,</div><div style="display:block;white-space:pre"><span style="display:inline-block;width:34px;color:#3F3F46;user-select:none"> 6</span>         <span style="color:#00AEEF">SUM</span>(t.price) <span style="color:#00AEEF">AS</span> gate_revenue</div><div style="display:block;white-space:pre"><span style="display:inline-block;width:34px;color:#3F3F46;user-select:none"> 7</span><span style="color:#00AEEF">FROM</span>     tickets t</div><div style="display:block;white-space:pre"><span style="display:inline-block;width:34px;color:#3F3F46;user-select:none"> 8</span><span style="color:#00AEEF">JOIN</span>     orders o <span style="color:#00AEEF">ON</span> o.id = t.order_id</div><div style="display:block;white-space:pre"><span style="display:inline-block;width:34px;color:#3F3F46;user-select:none"> 9</span><span style="color:#00AEEF">JOIN</span>     events e <span style="color:#00AEEF">ON</span> e.id = t.event_id</div><div style="display:block;white-space:pre"><span style="display:inline-block;width:34px;color:#3F3F46;user-select:none">10</span><span style="color:#00AEEF">JOIN</span>     teams  h <span style="color:#00AEEF">ON</span> h.id = e.home_team_id</div><div style="display:block;white-space:pre"><span style="display:inline-block;width:34px;color:#3F3F46;user-select:none">11</span><span style="color:#00AEEF">WHERE</span>    h.slug = <span style="color:#87D5B5">'nets'</span></div><div style="display:block;white-space:pre"><span style="display:inline-block;width:34px;color:#3F3F46;user-select:none">12</span>  <span style="color:#00AEEF">AND</span>    o.purchased_at &gt;= <span style="color:#87D5B5">'2026-08-01'</span></div><div style="display:block;white-space:pre"><span style="display:inline-block;width:34px;color:#3F3F46;user-select:none">13</span>  <span style="color:#00AEEF">AND</span>    o.purchased_at &lt;  <span style="color:#87D5B5">'2026-09-01'</span></div><div style="display:block;white-space:pre"><span style="display:inline-block;width:34px;color:#3F3F46;user-select:none">14</span>  <span style="color:#00AEEF">AND</span>    t.status = <span style="color:#87D5B5">'sold'</span></div><div style="display:block;white-space:pre"><span style="display:inline-block;width:34px;color:#3F3F46;user-select:none">15</span><span style="color:#00AEEF">GROUP BY</span> e.id, e.name, e.starts_at</div><div style="display:block;white-space:pre"><span style="display:inline-block;width:34px;color:#3F3F46;user-select:none">16</span><span style="color:#00AEEF">ORDER BY</span> tickets_sold <span style="color:#00AEEF">DESC</span></div><div style="display:block;white-space:pre"><span style="display:inline-block;width:34px;color:#3F3F46;user-select:none">17</span><span style="color:#00AEEF">LIMIT</span>    <span style="color:#87D5B5">8</span>;</div></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;padding:12px 20px;border-top:1px solid #26262B;background:#121215">
+              <div style="width:14px;height:14px;border-radius:7px;border:1.5px solid #71717A;position:relative;box-sizing:border-box"><div style="position:absolute;left:5.5px;top:2.5px;width:1.5px;height:5px;background:#71717A"></div></div>
+              <div style="font:400 12px/1 'JetBrains Mono',monospace;color:#71717A;font-variant-numeric:tabular-nums">claude-sonnet-5 · 2.16s · repaired once</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ 06 EMPTY RESULT ============ -->
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="font:500 12px/1 'JetBrains Mono',monospace;color:#71717A;letter-spacing:.1em">06 · EMPTY RESULT · 1440</div>
+      <div data-screen-label="06 Empty result" style="width:1440px;background:#0B0B0D;border:1px solid #26262B;border-radius:12px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.55)">
+        <div style="display:flex;align-items:center;gap:16px;height:64px;padding:0 24px;border-bottom:1px solid #26262B">
+          <img src="brand/bse.svg" alt="BSE Global" style="height:28px;width:auto;display:block">
+          <div style="width:1px;height:24px;background:#26262B"></div>
+          <div style="font:600 17px/1 Archivo,sans-serif;color:#FFFFFF;letter-spacing:-.01em">Insights</div>
+          <div style="flex:1"></div>
+          <button style="height:36px;padding:0 14px;border-radius:8px;border:1px solid #26262B;background:#16161A;color:#FFFFFF;font:500 13px/1 Inter,sans-serif;cursor:pointer" style-hover="background:#1E1E23">What's in the data?</button>
+        </div>
+        <div style="max-width:1200px;margin:0 auto;padding:32px 24px 48px;display:flex;flex-direction:column;gap:20px">
+          <div style="font:400 14px/1.4 Inter,sans-serif;color:#A1A1AA">Which Liberty games in 2023 sold out in under an hour?</div>
+          <div style="background:#16161A;border:1px solid #26262B;border-radius:12px;padding:28px 32px;display:flex;flex-direction:column;gap:16px">
+            <p style="margin:0;font:500 28px/1.35 Archivo,sans-serif;color:#FFFFFF;letter-spacing:-.02em">No rows matched this question</p>
+            <p style="margin:0;max-width:760px;font:400 15px/1.6 Inter,sans-serif;color:#A1A1AA;text-wrap:pretty">The query ran cleanly and returned zero rows. The data starts in January 2024, so no 2023 events exist — and sell-out timing is not recorded, only order timestamps.</p>
+            <div style="display:flex;flex-wrap:wrap;gap:8px">
+              <div style="display:inline-flex;align-items:center;gap:8px;height:32px;padding:0 12px;border-radius:8px;background:#1E1E23;border:1px solid #26262B;color:#A1A1AA;font:400 12px/1 Inter,sans-serif"><span style="color:#71717A;font-family:'JetBrains Mono',monospace">ASSUMED</span>“Sold out” means tickets sold equals venue capacity</div>
+              <div style="display:inline-flex;align-items:center;gap:8px;height:32px;padding:0 12px;border-radius:8px;background:#1E1E23;border:1px solid #26262B;color:#A1A1AA;font:400 12px/1 Inter,sans-serif"><span style="color:#71717A;font-family:'JetBrains Mono',monospace">ASSUMED</span>Liberty home fixtures only</div>
+            </div>
+            <div style="height:1px;background:#26262B;margin:4px 0"></div>
+            <div style="font:500 13px/1 Inter,sans-serif;color:#FFFFFF">Try instead</div>
+            <div style="display:flex;flex-wrap:wrap;gap:10px">
+              <button style="display:inline-flex;align-items:center;gap:10px;height:40px;padding:0 14px;border-radius:8px;border:1px solid #26262B;background:#1E1E23;color:#FFFFFF;font:400 13px/1 Inter,sans-serif;cursor:pointer;transition:border-color 160ms" style-hover="border-color:#00AEEF"><img src="brand/liberty.svg" alt="New York Liberty" style="height:24px;width:auto;display:block">Which 2024 Liberty games came closest to capacity?</button>
+              <button style="display:inline-flex;align-items:center;height:40px;padding:0 14px;border-radius:8px;border:1px solid #26262B;background:#1E1E23;color:#FFFFFF;font:400 13px/1 Inter,sans-serif;cursor:pointer;transition:border-color 160ms" style-hover="border-color:#00AEEF">Which Liberty games sold the most tickets in their first 24 hours?</button>
+            </div>
+          </div>
+          <div style="background:#16161A;border:1px solid #26262B;border-radius:12px;overflow:hidden">
+            <div style="display:flex;align-items:center;gap:4px;padding:0 16px;border-bottom:1px solid #26262B">
+              <button style="height:48px;padding:0 6px;margin-right:14px;border:none;background:transparent;color:#71717A;font:500 13px/1 Inter,sans-serif;cursor:not-allowed">Results <span style="font-family:'JetBrains Mono',monospace;font-size:11px">(0)</span></button>
+              <button style="height:48px;padding:0 6px;margin-right:14px;border:none;background:transparent;color:#FFFFFF;font:600 13px/1 Inter,sans-serif;cursor:pointer;box-shadow:inset 0 -2px 0 #00AEEF">SQL</button>
+              <button style="height:48px;padding:0 6px;border:none;background:transparent;color:#71717A;font:500 13px/1 Inter,sans-serif;cursor:not-allowed">Chart</button>
+              <div style="flex:1"></div>
+              <div style="font:400 12px/1 'JetBrains Mono',monospace;color:#71717A">0 rows · 0.01s</div>
+            </div>
+            <div style="position:relative;padding:20px 0;background:#121215">
+              <button style="position:absolute;top:14px;right:16px;height:30px;padding:0 12px;border-radius:8px;border:1px solid #26262B;background:#1E1E23;color:#FFFFFF;font:500 12px/1 Inter,sans-serif;cursor:pointer">Copy</button>
+              <div style="padding:0 24px;font:400 13.5px/2 'JetBrains Mono',monospace;color:#FFFFFF;overflow-x:auto"><div style="display:block;white-space:pre"><span style="display:inline-block;width:34px;color:#3F3F46;user-select:none">1</span><span style="color:#71717A">-- Liberty home games at or above capacity, 2023</span></div><div style="display:block;white-space:pre"><span style="display:inline-block;width:34px;color:#3F3F46;user-select:none">2</span><span style="color:#00AEEF">SELECT</span> e.name, <span style="color:#00AEEF">COUNT</span>(t.id) <span style="color:#00AEEF">AS</span> tickets_sold, v.capacity</div><div style="display:block;white-space:pre"><span style="display:inline-block;width:34px;color:#3F3F46;user-select:none">3</span><span style="color:#00AEEF">FROM</span>   events e</div><div style="display:block;white-space:pre"><span style="display:inline-block;width:34px;color:#3F3F46;user-select:none">4</span><span style="color:#00AEEF">JOIN</span>   venues  v <span style="color:#00AEEF">ON</span> v.id = e.venue_id</div><div style="display:block;white-space:pre"><span style="display:inline-block;width:34px;color:#3F3F46;user-select:none">5</span><span style="color:#00AEEF">JOIN</span>   tickets t <span style="color:#00AEEF">ON</span> t.event_id = e.id <span style="color:#00AEEF">AND</span> t.status = <span style="color:#87D5B5">'sold'</span></div><div style="display:block;white-space:pre"><span style="display:inline-block;width:34px;color:#3F3F46;user-select:none">6</span><span style="color:#00AEEF">WHERE</span>  e.starts_at &lt; <span style="color:#87D5B5">'2024-01-01'</span></div><div style="display:block;white-space:pre"><span style="display:inline-block;width:34px;color:#3F3F46;user-select:none">7</span><span style="color:#00AEEF">GROUP BY</span> e.id, e.name, v.capacity;</div></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;padding:12px 20px;border-top:1px solid #26262B;background:#121215">
+              <div style="width:14px;height:14px;border-radius:7px;border:1.5px solid #71717A;position:relative;box-sizing:border-box"><div style="position:absolute;left:5.5px;top:2.5px;width:1.5px;height:5px;background:#71717A"></div></div>
+              <div style="font:400 12px/1 'JetBrains Mono',monospace;color:#71717A;font-variant-numeric:tabular-nums">claude-sonnet-5 · 1.42s · first try</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ 07 UNANSWERABLE ============ -->
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="font:500 12px/1 'JetBrains Mono',monospace;color:#71717A;letter-spacing:.1em">07 · UNANSWERABLE · 1440</div>
+      <div data-screen-label="07 Unanswerable" style="width:1440px;background:#0B0B0D;border:1px solid #26262B;border-radius:12px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.55)">
+        <div style="display:flex;align-items:center;gap:16px;height:64px;padding:0 24px;border-bottom:1px solid #26262B">
+          <img src="brand/bse.svg" alt="BSE Global" style="height:28px;width:auto;display:block">
+          <div style="width:1px;height:24px;background:#26262B"></div>
+          <div style="font:600 17px/1 Archivo,sans-serif;color:#FFFFFF;letter-spacing:-.01em">Insights</div>
+          <div style="flex:1"></div>
+          <button style="height:36px;padding:0 14px;border-radius:8px;border:1px solid #26262B;background:#16161A;color:#FFFFFF;font:500 13px/1 Inter,sans-serif;cursor:pointer" style-hover="background:#1E1E23">What's in the data?</button>
+        </div>
+        <div style="max-width:1200px;margin:0 auto;padding:32px 24px 56px;display:flex;flex-direction:column;gap:20px">
+          <div style="font:400 14px/1.4 Inter,sans-serif;color:#A1A1AA">What's the weather for the next home game?</div>
+          <div style="background:#16161A;border:1px solid #26262B;border-radius:12px;padding:28px 32px;display:flex;flex-direction:column;gap:20px">
+            <div style="display:flex;align-items:flex-start;gap:14px">
+              <div style="width:22px;height:22px;border-radius:11px;background:rgba(251,191,36,.16);color:#FBBF24;display:flex;align-items:center;justify-content:center;font:700 13px/1 Inter,sans-serif;flex:none;margin-top:5px">!</div>
+              <p style="margin:0;font:500 28px/1.35 Archivo,sans-serif;color:#FFFFFF;letter-spacing:-.02em;text-wrap:pretty">This dataset holds no weather information, so I can't answer that one.</p>
+            </div>
+            <p style="margin:0;max-width:760px;font:400 15px/1.6 Inter,sans-serif;color:#A1A1AA">Insights only reads the ticketing warehouse. It has no forecast feed, no attendance-day conditions and no external sources.</p>
+            <div style="background:#1E1E23;border:1px solid #26262B;border-radius:12px;padding:18px 20px;display:flex;flex-direction:column;gap:12px">
+              <div style="font:500 12px/1 'JetBrains Mono',monospace;color:#71717A;letter-spacing:.08em">WHAT IT DOES COVER</div>
+              <div style="display:flex;flex-wrap:wrap;gap:8px">
+                <div style="display:inline-flex;align-items:center;height:28px;padding:0 11px;border-radius:8px;background:#16161A;border:1px solid #26262B;color:#FFFFFF;font:400 12px/1 'JetBrains Mono',monospace">events</div>
+                <div style="display:inline-flex;align-items:center;height:28px;padding:0 11px;border-radius:8px;background:#16161A;border:1px solid #26262B;color:#FFFFFF;font:400 12px/1 'JetBrains Mono',monospace">tickets</div>
+                <div style="display:inline-flex;align-items:center;height:28px;padding:0 11px;border-radius:8px;background:#16161A;border:1px solid #26262B;color:#FFFFFF;font:400 12px/1 'JetBrains Mono',monospace">orders</div>
+                <div style="display:inline-flex;align-items:center;height:28px;padding:0 11px;border-radius:8px;background:#16161A;border:1px solid #26262B;color:#FFFFFF;font:400 12px/1 'JetBrains Mono',monospace">customers</div>
+                <div style="display:inline-flex;align-items:center;height:28px;padding:0 11px;border-radius:8px;background:#16161A;border:1px solid #26262B;color:#FFFFFF;font:400 12px/1 'JetBrains Mono',monospace">revenue</div>
+              </div>
+            </div>
+            <div style="height:1px;background:#26262B"></div>
+            <div style="font:500 13px/1 Inter,sans-serif;color:#FFFFFF">Questions this data can answer</div>
+            <div style="display:flex;flex-wrap:wrap;gap:10px">
+              <button style="display:inline-flex;align-items:center;gap:10px;height:40px;padding:0 14px;border-radius:8px;border:1px solid #26262B;background:#1E1E23;color:#FFFFFF;font:400 13px/1 Inter,sans-serif;cursor:pointer;transition:border-color 160ms" style-hover="border-color:#00AEEF"><img src="brand/nets.svg" alt="Brooklyn Nets" style="width:24px;height:24px;display:block">When is the next Nets home game and how much of it is sold?</button>
+              <button style="display:inline-flex;align-items:center;height:40px;padding:0 14px;border-radius:8px;border:1px solid #26262B;background:#1E1E23;color:#FFFFFF;font:400 13px/1 Inter,sans-serif;cursor:pointer;transition:border-color 160ms" style-hover="border-color:#00AEEF">How do weekday and weekend games compare on gate revenue?</button>
+              <button style="display:inline-flex;align-items:center;height:40px;padding:0 14px;border-radius:8px;border:1px solid #26262B;background:#1E1E23;color:#FFFFFF;font:400 13px/1 Inter,sans-serif;cursor:pointer;transition:border-color 160ms" style-hover="border-color:#00AEEF">Which upcoming events are pacing behind last season?</button>
+            </div>
+          </div>
+          <div style="font:400 12px/1 'JetBrains Mono',monospace;color:#71717A">No SQL was generated · 0.61s</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ 08 BLOCKED ============ -->
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="font:500 12px/1 'JetBrains Mono',monospace;color:#71717A;letter-spacing:.1em">08 · BLOCKED · 1440</div>
+      <div data-screen-label="08 Blocked" style="width:1440px;background:#0B0B0D;border:1px solid #26262B;border-radius:12px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.55)">
+        <div style="display:flex;align-items:center;gap:16px;height:64px;padding:0 24px;border-bottom:1px solid #26262B">
+          <img src="brand/bse.svg" alt="BSE Global" style="height:28px;width:auto;display:block">
+          <div style="width:1px;height:24px;background:#26262B"></div>
+          <div style="font:600 17px/1 Archivo,sans-serif;color:#FFFFFF;letter-spacing:-.01em">Insights</div>
+          <div style="flex:1"></div>
+          <button style="height:36px;padding:0 14px;border-radius:8px;border:1px solid #26262B;background:#16161A;color:#FFFFFF;font:500 13px/1 Inter,sans-serif;cursor:pointer" style-hover="background:#1E1E23">What's in the data?</button>
+        </div>
+        <div style="max-width:1200px;margin:0 auto;padding:32px 24px 56px;display:flex;flex-direction:column;gap:20px">
+          <div style="font:400 14px/1.4 Inter,sans-serif;color:#A1A1AA">Delete all ticket records</div>
+          <div style="background:#16161A;border:1px solid #F87171;border-radius:12px;padding:28px 32px;display:flex;flex-direction:column;gap:20px">
+            <div style="display:flex;align-items:center;gap:12px">
+              <div style="display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:8px;background:rgba(248,113,113,.14);color:#F87171;font:600 11px/1 'JetBrains Mono',monospace;letter-spacing:.08em">BLOCKED</div>
+              <div style="font:400 12px/1 'JetBrains Mono',monospace;color:#71717A">rejected before execution · 0.00s</div>
+            </div>
+            <p style="margin:0;font:500 28px/1.35 Archivo,sans-serif;color:#FFFFFF;letter-spacing:-.02em;text-wrap:pretty">This request was rejected before anything ran.</p>
+            <p style="margin:0;max-width:760px;font:400 15px/1.6 Inter,sans-serif;color:#A1A1AA">Insights connects to the warehouse with a read-only account and permits a single <span style="font-family:'JetBrains Mono',monospace;color:#FFFFFF">SELECT</span> statement per question. Statements that write, drop or alter data are refused at the safety check and never reach the database.</p>
+            <div style="background:#121215;border:1px solid #26262B;border-radius:12px;padding:16px 20px;display:flex;flex-direction:column;gap:8px">
+              <div style="font:500 11px/1 'JetBrains Mono',monospace;color:#71717A;letter-spacing:.08em">REJECTED STATEMENT</div>
+              <div style="font:400 14px/1.6 'JetBrains Mono',monospace;color:#71717A;text-decoration:line-through">DELETE FROM tickets;</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div style="display:flex;align-items:center;gap:10px;font:400 13px/1.4 Inter,sans-serif;color:#A1A1AA"><span style="color:#87D5B5;font-family:'JetBrains Mono',monospace">✓</span>Allowed: single SELECT, with JOIN, WHERE, GROUP BY, ORDER BY, LIMIT</div>
+              <div style="display:flex;align-items:center;gap:10px;font:400 13px/1.4 Inter,sans-serif;color:#A1A1AA"><span style="color:#F87171;font-family:'JetBrains Mono',monospace">✕</span>Refused: INSERT, UPDATE, DELETE, DROP, ALTER, GRANT, multiple statements</div>
+            </div>
+            <div style="height:1px;background:#26262B"></div>
+            <div style="display:flex;align-items:center;gap:12px">
+              <button style="height:40px;padding:0 18px;border:none;border-radius:8px;background:#00AEEF;color:#0B0B0D;font:600 13px/1 Inter,sans-serif;cursor:pointer" style-hover="background:#2CC0F5">Ask a different question</button>
+              <a href="#1a" style="font:500 13px/1 Inter,sans-serif;color:#00AEEF">Read the access policy</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ 09 ERROR ============ -->
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="font:500 12px/1 'JetBrains Mono',monospace;color:#71717A;letter-spacing:.1em">09 · ERROR, RATE LIMITED · 1440</div>
+      <div data-screen-label="09 Error" style="width:1440px;background:#0B0B0D;border:1px solid #26262B;border-radius:12px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.55)">
+        <div style="display:flex;align-items:center;gap:16px;height:64px;padding:0 24px;border-bottom:1px solid #26262B">
+          <img src="brand/bse.svg" alt="BSE Global" style="height:28px;width:auto;display:block">
+          <div style="width:1px;height:24px;background:#26262B"></div>
+          <div style="font:600 17px/1 Archivo,sans-serif;color:#FFFFFF;letter-spacing:-.01em">Insights</div>
+          <div style="flex:1"></div>
+          <button style="height:36px;padding:0 14px;border-radius:8px;border:1px solid #26262B;background:#16161A;color:#FFFFFF;font:500 13px/1 Inter,sans-serif;cursor:pointer" style-hover="background:#1E1E23">What's in the data?</button>
+        </div>
+        <div style="max-width:1200px;margin:0 auto;padding:48px 24px 64px;display:flex;flex-direction:column;gap:24px">
+          <div style="background:#16161A;border:1px solid #F87171;border-radius:12px;padding:28px 32px;display:flex;flex-direction:column;gap:18px">
+            <div style="display:flex;align-items:center;gap:12px">
+              <div style="width:22px;height:22px;border-radius:11px;background:rgba(248,113,113,.16);color:#F87171;display:flex;align-items:center;justify-content:center;font:700 13px/1 Inter,sans-serif">!</div>
+              <p style="margin:0;font:500 26px/1.3 Archivo,sans-serif;color:#FFFFFF;letter-spacing:-.02em">Too many questions at once — we're waiting for capacity</p>
+            </div>
+            <p style="margin:0;max-width:720px;font:400 15px/1.6 Inter,sans-serif;color:#A1A1AA">Nothing was lost. Your question is still in the box below. Try again in about 30 seconds, or come back to it later from session history.</p>
+            <div style="display:flex;align-items:center;gap:12px">
+              <button style="height:40px;padding:0 18px;border:none;border-radius:8px;background:#00AEEF;color:#0B0B0D;font:600 13px/1 Inter,sans-serif;cursor:pointer" style-hover="background:#2CC0F5">Retry now</button>
+              <div style="font:400 12px/1 'JetBrains Mono',monospace;color:#71717A;font-variant-numeric:tabular-nums">auto-retry in 00:28 · error 429</div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px;max-width:880px">
+            <label for="q9" style="font:500 13px/1 Inter,sans-serif;color:#A1A1AA">Your question</label>
+            <div style="display:flex;gap:12px">
+              <div style="flex:1;display:flex;align-items:center;height:56px;padding:0 16px;background:#16161A;border:1px solid #26262B;border-radius:8px">
+                <span id="q9" style="font:400 15px/1 Inter,sans-serif;color:#FFFFFF">Which opponent drives the biggest gate?</span>
+              </div>
+              <button style="height:56px;padding:0 32px;border:none;border-radius:8px;background:#1E1E23;color:#71717A;font:600 15px/1 Inter,sans-serif;cursor:not-allowed">Ask</button>
+            </div>
+            <div style="font:400 12px/1 Inter,sans-serif;color:#71717A">Asking is paused until the service responds.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ 10 SCHEMA DRAWER ============ -->
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="font:500 12px/1 'JetBrains Mono',monospace;color:#71717A;letter-spacing:.1em">10 · SCHEMA DRAWER · 1440</div>
+      <div data-screen-label="10 Schema drawer" style="position:relative;width:1440px;min-height:880px;background:#0B0B0D;border:1px solid #26262B;border-radius:12px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.55)">
+        <div style="filter:saturate(.9)">
+          <div style="display:flex;align-items:center;gap:16px;height:64px;padding:0 24px;border-bottom:1px solid #26262B">
+            <img src="brand/bse.svg" alt="BSE Global" style="height:28px;width:auto;display:block">
+            <div style="width:1px;height:24px;background:#26262B"></div>
+            <div style="font:600 17px/1 Archivo,sans-serif;color:#FFFFFF;letter-spacing:-.01em">Insights</div>
+            <div style="flex:1"></div>
+            <button style="height:36px;padding:0 14px;border-radius:8px;border:1px solid #00AEEF;background:#16161A;color:#FFFFFF;font:500 13px/1 Inter,sans-serif;cursor:pointer">What's in the data?</button>
+          </div>
+          <div style="max-width:1200px;margin:0 auto;padding:88px 24px 120px;display:flex;flex-direction:column;align-items:center">
+            <h2 style="margin:0;font:600 44px/1.1 Archivo,sans-serif;color:#FFFFFF;letter-spacing:-.025em">Ask anything about ticket sales</h2>
+            <div style="width:100%;max-width:880px;margin-top:44px;display:flex;gap:12px">
+              <div style="flex:1;display:flex;align-items:center;height:56px;padding:0 16px;background:#16161A;border:1px solid #26262B;border-radius:8px;font:400 15px/1 Inter,sans-serif;color:#71717A">e.g. How many tickets did we sell for Nets home games last month?</div>
+              <button style="height:56px;padding:0 32px;border:none;border-radius:8px;background:#00AEEF;color:#0B0B0D;font:600 15px/1 Inter,sans-serif">Ask</button>
+            </div>
+          </div>
+        </div>
+        <div style="position:absolute;inset:0;background:rgba(8,8,10,.66)"></div>
+        <div style="position:absolute;top:0;right:0;bottom:0;width:480px;background:#16161A;border-left:1px solid #26262B;box-shadow:-24px 0 48px rgba(0,0,0,.5);display:flex;flex-direction:column">
+          <div style="display:flex;align-items:center;gap:12px;padding:20px 24px;border-bottom:1px solid #26262B">
+            <div style="font:600 17px/1 Archivo,sans-serif;color:#FFFFFF">What's in the data?</div>
+            <div style="flex:1"></div>
+            <button aria-label="Close schema panel" style="width:32px;height:32px;border-radius:8px;border:1px solid #26262B;background:#1E1E23;color:#A1A1AA;font:400 15px/1 Inter,sans-serif;cursor:pointer" style-hover="color:#FFFFFF">✕</button>
+          </div>
+          <div style="padding:20px 24px;display:flex;flex-direction:column;gap:20px;overflow-y:auto">
+            <div style="background:#1E1E23;border:1px solid #26262B;border-radius:12px;padding:16px 18px;display:flex;flex-direction:column;gap:10px">
+              <div style="font:500 11px/1 'JetBrains Mono',monospace;color:#71717A;letter-spacing:.08em">HOW WE DEFINE THINGS</div>
+              <div style="font:400 13px/1.55 Inter,sans-serif;color:#A1A1AA"><span style="color:#FFFFFF">Revenue</span> excludes fees, refunds and comps.</div>
+              <div style="font:400 13px/1.55 Inter,sans-serif;color:#A1A1AA"><span style="color:#FFFFFF">Tickets sold</span> counts rows with status <span style="font-family:'JetBrains Mono',monospace;color:#87D5B5">'sold'</span> only.</div>
+              <div style="font:400 13px/1.55 Inter,sans-serif;color:#A1A1AA"><span style="color:#FFFFFF">Home games</span> mean Nets or Liberty home fixtures.</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;height:40px;padding:0 12px;background:#1E1E23;border:1px solid #26262B;border-radius:8px">
+              <span style="color:#71717A;font:400 13px/1 Inter,sans-serif">⌕</span>
+              <span style="font:400 13px/1 Inter,sans-serif;color:#71717A">Search tables and columns</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="font:500 11px/1 'JetBrains Mono',monospace;color:#71717A;letter-spacing:.08em">6 TABLES</div>
+              <div style="border:1px solid #26262B;border-radius:12px;overflow:hidden">
+                <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:#1E1E23">
+                  <span style="color:#00AEEF;font:400 11px/1 'JetBrains Mono',monospace">▼</span>
+                  <span style="font:500 13px/1 'JetBrains Mono',monospace;color:#FFFFFF">events</span>
+                  <span style="flex:1"></span>
+                  <span style="font:400 11px/1 'JetBrains Mono',monospace;color:#71717A;font-variant-numeric:tabular-nums">412 rows</span>
+                </div>
+                <div style="padding:10px 14px 12px 32px;display:flex;flex-direction:column;gap:7px;border-top:1px solid #26262B">
+                  <div style="display:flex;justify-content:space-between;font:400 12px/1 'JetBrains Mono',monospace"><span style="color:#FFFFFF">id</span><span style="color:#71717A">uuid</span></div>
+                  <div style="display:flex;justify-content:space-between;font:400 12px/1 'JetBrains Mono',monospace"><span style="color:#FFFFFF">name</span><span style="color:#71717A">text</span></div>
+                  <div style="display:flex;justify-content:space-between;font:400 12px/1 'JetBrains Mono',monospace"><span style="color:#FFFFFF">category</span><span style="color:#71717A">text</span></div>
+                  <div style="display:flex;justify-content:space-between;font:400 12px/1 'JetBrains Mono',monospace"><span style="color:#FFFFFF">starts_at</span><span style="color:#71717A">timestamptz</span></div>
+                  <div style="display:flex;justify-content:space-between;font:400 12px/1 'JetBrains Mono',monospace"><span style="color:#FFFFFF">venue_id</span><span style="color:#71717A">uuid → venues</span></div>
+                  <div style="display:flex;justify-content:space-between;font:400 12px/1 'JetBrains Mono',monospace"><span style="color:#FFFFFF">home_team_id</span><span style="color:#71717A">uuid → teams</span></div>
+                </div>
+              </div>
+              <div style="border:1px solid #26262B;border-radius:12px;overflow:hidden">
+                <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:#1E1E23">
+                  <span style="color:#00AEEF;font:400 11px/1 'JetBrains Mono',monospace">▼</span>
+                  <span style="font:500 13px/1 'JetBrains Mono',monospace;color:#FFFFFF">tickets</span>
+                  <span style="flex:1"></span>
+                  <span style="font:400 11px/1 'JetBrains Mono',monospace;color:#71717A;font-variant-numeric:tabular-nums">1,284,506 rows</span>
+                </div>
+                <div style="padding:10px 14px 12px 32px;display:flex;flex-direction:column;gap:7px;border-top:1px solid #26262B">
+                  <div style="display:flex;justify-content:space-between;font:400 12px/1 'JetBrains Mono',monospace"><span style="color:#FFFFFF">id</span><span style="color:#71717A">uuid</span></div>
+                  <div style="display:flex;justify-content:space-between;font:400 12px/1 'JetBrains Mono',monospace"><span style="color:#FFFFFF">order_id</span><span style="color:#71717A">uuid → orders</span></div>
+                  <div style="display:flex;justify-content:space-between;font:400 12px/1 'JetBrains Mono',monospace"><span style="color:#FFFFFF">event_id</span><span style="color:#71717A">uuid → events</span></div>
+                  <div style="display:flex;justify-content:space-between;font:400 12px/1 'JetBrains Mono',monospace"><span style="color:#FFFFFF">price</span><span style="color:#71717A">numeric(10,2)</span></div>
+                  <div style="display:flex;justify-content:space-between;font:400 12px/1 'JetBrains Mono',monospace"><span style="color:#FFFFFF">status</span><span style="color:#71717A">sold · refunded · comp</span></div>
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:#1E1E23;border:1px solid #26262B;border-radius:12px">
+                <span style="color:#71717A;font:400 11px/1 'JetBrains Mono',monospace">▶</span><span style="font:500 13px/1 'JetBrains Mono',monospace;color:#FFFFFF">orders</span><span style="flex:1"></span><span style="font:400 11px/1 'JetBrains Mono',monospace;color:#71717A">7 columns</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:#1E1E23;border:1px solid #26262B;border-radius:12px">
+                <span style="color:#71717A;font:400 11px/1 'JetBrains Mono',monospace">▶</span><span style="font:500 13px/1 'JetBrains Mono',monospace;color:#FFFFFF">customers</span><span style="flex:1"></span><span style="font:400 11px/1 'JetBrains Mono',monospace;color:#71717A">9 columns</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:#1E1E23;border:1px solid #26262B;border-radius:12px">
+                <span style="color:#71717A;font:400 11px/1 'JetBrains Mono',monospace">▶</span><span style="font:500 13px/1 'JetBrains Mono',monospace;color:#FFFFFF">teams</span><span style="flex:1"></span><span style="font:400 11px/1 'JetBrains Mono',monospace;color:#71717A">5 columns</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:#1E1E23;border:1px solid #26262B;border-radius:12px">
+                <span style="color:#71717A;font:400 11px/1 'JetBrains Mono',monospace">▶</span><span style="font:500 13px/1 'JetBrains Mono',monospace;color:#FFFFFF">venues</span><span style="flex:1"></span><span style="font:400 11px/1 'JetBrains Mono',monospace;color:#71717A">6 columns</span>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top:auto;padding:16px 24px;border-top:1px solid #26262B;display:flex;align-items:center;gap:12px">
+            <img src="brand/barclays-center.svg" alt="Barclays Center" style="height:20px;width:auto;display:block">
+            <div style="font:400 12px/1.4 Inter,sans-serif;color:#71717A">Events at Barclays Center, 2024 to today</div>
+          </div>
+        </div>
+      </div>
+      <sc-if value="{{ showAnnotations }}" hint-placeholder-val="{{ true }}">
+        <div style="font:400 12px/1.6 'JetBrains Mono',monospace;color:#71717A">Annotation · icon-only close button has accessible name “Close schema panel”. Esc closes the drawer; focus returns to the “What's in the data?” trigger.</div>
+      </sc-if>
+    </div>
+
+    <!-- ============ 11 SESSION HISTORY ============ -->
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="font:500 12px/1 'JetBrains Mono',monospace;color:#71717A;letter-spacing:.1em">11 · SESSION HISTORY · 1440</div>
+      <div data-screen-label="11 Session history" style="width:1440px;background:#0B0B0D;border:1px solid #26262B;border-radius:12px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.55)">
+        <div style="display:flex;align-items:center;gap:16px;height:64px;padding:0 24px;border-bottom:1px solid #26262B">
+          <img src="brand/bse.svg" alt="BSE Global" style="height:28px;width:auto;display:block">
+          <div style="width:1px;height:24px;background:#26262B"></div>
+          <div style="font:600 17px/1 Archivo,sans-serif;color:#FFFFFF;letter-spacing:-.01em">Insights</div>
+          <div style="flex:1"></div>
+          <button style="height:36px;padding:0 14px;border-radius:8px;border:1px solid #26262B;background:#16161A;color:#FFFFFF;font:500 13px/1 Inter,sans-serif;cursor:pointer" style-hover="background:#1E1E23">What's in the data?</button>
+        </div>
+        <div style="display:flex;align-items:stretch;min-height:720px">
+          <nav aria-label="Session history" style="width:240px;flex:none;border-right:1px solid #26262B;padding:20px 12px;display:flex;flex-direction:column;gap:14px">
+            <button style="height:40px;border-radius:8px;border:none;background:#00AEEF;color:#0B0B0D;font:600 13px/1 Inter,sans-serif;cursor:pointer" style-hover="background:#2CC0F5">+ New question</button>
+            <div style="font:500 11px/1 'JetBrains Mono',monospace;color:#71717A;letter-spacing:.08em;padding:0 8px">THIS SESSION</div>
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <button style="text-align:left;padding:10px 10px;border-radius:8px;border:1px solid #26262B;background:#1E1E23;cursor:pointer;display:flex;flex-direction:column;gap:6px">
+                <span style="font:500 12.5px/1.4 Inter,sans-serif;color:#00AEEF">How many tickets did we sell for Nets home games last month?</span>
+                <span style="font:400 11px/1 'JetBrains Mono',monospace;color:#71717A;font-variant-numeric:tabular-nums">2.16s · 8 rows</span>
+              </button>
+              <button style="text-align:left;padding:10px 10px;border-radius:8px;border:1px solid transparent;background:transparent;cursor:pointer;display:flex;flex-direction:column;gap:6px;transition:background 160ms" style-hover="background:#16161A">
+                <span style="font:400 12.5px/1.4 Inter,sans-serif;color:#A1A1AA">Top 5 event categories by total revenue</span>
+                <span style="font:400 11px/1 'JetBrains Mono',monospace;color:#71717A;font-variant-numeric:tabular-nums">1.84s · 5 rows</span>
+              </button>
+              <button style="text-align:left;padding:10px 10px;border-radius:8px;border:1px solid transparent;background:transparent;cursor:pointer;display:flex;flex-direction:column;gap:6px;transition:background 160ms" style-hover="background:#16161A">
+                <span style="font:400 12.5px/1.4 Inter,sans-serif;color:#A1A1AA">Which opponent drives the biggest gate?</span>
+                <span style="font:400 11px/1 'JetBrains Mono',monospace;color:#71717A;font-variant-numeric:tabular-nums">3.02s · 12 rows</span>
+              </button>
+              <button style="text-align:left;padding:10px 10px;border-radius:8px;border:1px solid transparent;background:transparent;cursor:pointer;display:flex;flex-direction:column;gap:6px;transition:background 160ms" style-hover="background:#16161A">
+                <span style="font:400 12.5px/1.4 Inter,sans-serif;color:#A1A1AA">Which Liberty games in 2023 sold out in under an hour?</span>
+                <span style="font:400 11px/1 'JetBrains Mono',monospace;color:#71717A;font-variant-numeric:tabular-nums">1.42s · 0 rows</span>
+              </button>
+              <button style="text-align:left;padding:10px 10px;border-radius:8px;border:1px solid transparent;background:transparent;cursor:pointer;display:flex;flex-direction:column;gap:6px;transition:background 160ms" style-hover="background:#16161A">
+                <span style="font:400 12.5px/1.4 Inter,sans-serif;color:#A1A1AA">Delete all ticket records</span>
+                <span style="font:400 11px/1 'JetBrains Mono',monospace;color:#F87171">blocked</span>
+              </button>
+            </div>
+          </nav>
+          <div style="flex:1;min-width:0;padding:32px 24px 48px">
+            <div style="max-width:1200px;margin:0 auto;display:flex;flex-direction:column;gap:20px">
+              <div style="display:flex;align-items:center;gap:10px">
+                <img src="brand/nets.svg" alt="Brooklyn Nets" style="width:24px;height:24px;display:block">
+                <div style="font:400 14px/1.4 Inter,sans-serif;color:#A1A1AA">How many tickets did we sell for Nets home games last month?</div>
+              </div>
+              <div style="background:#16161A;border:1px solid #26262B;border-radius:12px;padding:28px 32px;display:flex;flex-direction:column;gap:18px">
+                <p style="margin:0;font:500 28px/1.35 Archivo,sans-serif;color:#FFFFFF;letter-spacing:-.02em;text-wrap:pretty">We sold <span style="font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums">26,412</span> tickets in August 2026 — all of them for upcoming games, since the Nets play no home games in August.</p>
+                <div style="display:flex;flex-wrap:wrap;gap:8px">
+                  <div style="display:inline-flex;align-items:center;gap:8px;height:32px;padding:0 12px;border-radius:8px;background:#1E1E23;border:1px solid #26262B;color:#A1A1AA;font:400 12px/1 Inter,sans-serif"><span style="color:#71717A;font-family:'JetBrains Mono',monospace">ASSUMED</span>“Last month” means August 2026, by purchase date</div>
+                  <div style="display:inline-flex;align-items:center;gap:8px;height:32px;padding:0 12px;border-radius:8px;background:#1E1E23;border:1px solid #26262B;color:#A1A1AA;font:400 12px/1 Inter,sans-serif"><span style="color:#71717A;font-family:'JetBrains Mono',monospace">ASSUMED</span>Refunds and comps excluded</div>
+                </div>
+              </div>
+              <div style="background:#16161A;border:1px solid #26262B;border-radius:12px;overflow:hidden">
+                <div style="display:flex;align-items:center;gap:4px;padding:0 16px;border-bottom:1px solid #26262B">
+                  <button style="height:48px;padding:0 6px;margin-right:14px;border:none;background:transparent;color:#FFFFFF;font:600 13px/1 Inter,sans-serif;cursor:pointer;box-shadow:inset 0 -2px 0 #00AEEF">Results</button>
+                  <button style="height:48px;padding:0 6px;margin-right:14px;border:none;background:transparent;color:#A1A1AA;font:500 13px/1 Inter,sans-serif;cursor:pointer" style-hover="color:#FFFFFF">SQL</button>
+                  <button style="height:48px;padding:0 6px;border:none;background:transparent;color:#A1A1AA;font:500 13px/1 Inter,sans-serif;cursor:pointer" style-hover="color:#FFFFFF">Chart</button>
+                  <div style="flex:1"></div>
+                  <div style="font:400 12px/1 'JetBrains Mono',monospace;color:#71717A">8 rows</div>
+                </div>
+                <table style="width:100%;border-collapse:collapse">
+                  <thead>
+                    <tr style="background:#121215">
+                      <th scope="col" style="text-align:left;padding:12px 20px;font:500 11px/1 'JetBrains Mono',monospace;color:#71717A;letter-spacing:.08em;border-bottom:1px solid #26262B">EVENT</th>
+                      <th scope="col" style="text-align:left;padding:12px 20px;font:500 11px/1 'JetBrains Mono',monospace;color:#71717A;letter-spacing:.08em;border-bottom:1px solid #26262B">DATE</th>
+                      <th scope="col" style="text-align:right;padding:12px 20px;font:500 11px/1 'JetBrains Mono',monospace;color:#71717A;letter-spacing:.08em;border-bottom:1px solid #26262B">TICKETS SOLD</th>
+                      <th scope="col" style="text-align:right;padding:12px 20px;font:500 11px/1 'JetBrains Mono',monospace;color:#71717A;letter-spacing:.08em;border-bottom:1px solid #26262B">AVG PRICE</th>
+                      <th scope="col" style="text-align:right;padding:12px 20px;font:500 11px/1 'JetBrains Mono',monospace;color:#71717A;letter-spacing:.08em;border-bottom:1px solid #26262B">GATE REVENUE</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td style="padding:14px 20px;border-bottom:1px solid #26262B"><span style="display:inline-flex;align-items:center;gap:10px;font:400 14px/1 Inter,sans-serif;color:#FFFFFF"><img src="brand/nets.svg" alt="Brooklyn Nets" style="width:24px;height:24px;display:block">Nets vs. Knicks</span></td>
+                      <td style="padding:14px 20px;border-bottom:1px solid #26262B;font:400 13px/1 'JetBrains Mono',monospace;color:#A1A1AA">2026-10-22</td>
+                      <td style="padding:14px 20px;border-bottom:1px solid #26262B;text-align:right;font:400 14px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">4,812</td>
+                      <td style="padding:14px 20px;border-bottom:1px solid #26262B;text-align:right;font:400 14px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">$184.20</td>
+                      <td style="padding:14px 20px;border-bottom:1px solid #26262B;text-align:right;font:400 14px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">$886,370</td>
+                    </tr>
+                    <tr>
+                      <td style="padding:14px 20px;border-bottom:1px solid #26262B"><span style="display:inline-flex;align-items:center;gap:10px;font:400 14px/1 Inter,sans-serif;color:#FFFFFF"><img src="brand/nets.svg" alt="Brooklyn Nets" style="width:24px;height:24px;display:block">Nets vs. Celtics</span></td>
+                      <td style="padding:14px 20px;border-bottom:1px solid #26262B;font:400 13px/1 'JetBrains Mono',monospace;color:#A1A1AA">2026-10-28</td>
+                      <td style="padding:14px 20px;border-bottom:1px solid #26262B;text-align:right;font:400 14px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">4,166</td>
+                      <td style="padding:14px 20px;border-bottom:1px solid #26262B;text-align:right;font:400 14px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">$171.55</td>
+                      <td style="padding:14px 20px;border-bottom:1px solid #26262B;text-align:right;font:400 14px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">$714,678</td>
+                    </tr>
+                    <tr>
+                      <td style="padding:14px 20px;border-bottom:1px solid #26262B"><span style="display:inline-flex;align-items:center;gap:10px;font:400 14px/1 Inter,sans-serif;color:#FFFFFF"><img src="brand/nets.svg" alt="Brooklyn Nets" style="width:24px;height:24px;display:block">Nets vs. 76ers</span></td>
+                      <td style="padding:14px 20px;border-bottom:1px solid #26262B;font:400 13px/1 'JetBrains Mono',monospace;color:#A1A1AA">2026-11-03</td>
+                      <td style="padding:14px 20px;border-bottom:1px solid #26262B;text-align:right;font:400 14px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">3,704</td>
+                      <td style="padding:14px 20px;border-bottom:1px solid #26262B;text-align:right;font:400 14px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">$158.90</td>
+                      <td style="padding:14px 20px;border-bottom:1px solid #26262B;text-align:right;font:400 14px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">$588,566</td>
+                    </tr>
+                    <tr>
+                      <td style="padding:14px 20px;border-bottom:1px solid #26262B"><span style="display:inline-flex;align-items:center;gap:10px;font:400 14px/1 Inter,sans-serif;color:#FFFFFF"><img src="brand/nets.svg" alt="Brooklyn Nets" style="width:24px;height:24px;display:block">Nets vs. Bucks</span></td>
+                      <td style="padding:14px 20px;border-bottom:1px solid #26262B;font:400 13px/1 'JetBrains Mono',monospace;color:#A1A1AA">2026-11-07</td>
+                      <td style="padding:14px 20px;border-bottom:1px solid #26262B;text-align:right;font:400 14px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">3,388</td>
+                      <td style="padding:14px 20px;border-bottom:1px solid #26262B;text-align:right;font:400 14px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">$152.40</td>
+                      <td style="padding:14px 20px;border-bottom:1px solid #26262B;text-align:right;font:400 14px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">$516,331</td>
+                    </tr>
+                    <tr>
+                      <td style="padding:14px 20px"><span style="display:inline-flex;align-items:center;gap:10px;font:400 14px/1 Inter,sans-serif;color:#FFFFFF"><img src="brand/nets.svg" alt="Brooklyn Nets" style="width:24px;height:24px;display:block">Nets vs. Heat</span></td>
+                      <td style="padding:14px 20px;font:400 13px/1 'JetBrains Mono',monospace;color:#A1A1AA">2026-11-12</td>
+                      <td style="padding:14px 20px;text-align:right;font:400 14px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">3,102</td>
+                      <td style="padding:14px 20px;text-align:right;font:400 14px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">$146.75</td>
+                      <td style="padding:14px 20px;text-align:right;font:400 14px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">$455,222</td>
+                    </tr>
+                  </tbody>
+                </table>
+                <div style="display:flex;align-items:center;gap:10px;padding:12px 20px;border-top:1px solid #26262B;background:#121215">
+                  <div style="width:14px;height:14px;border-radius:7px;border:1.5px solid #71717A;position:relative;box-sizing:border-box"><div style="position:absolute;left:5.5px;top:2.5px;width:1.5px;height:5px;background:#71717A"></div></div>
+                  <div style="font:400 12px/1 'JetBrains Mono',monospace;color:#71717A;font-variant-numeric:tabular-nums">claude-sonnet-5 · 2.16s · repaired once</div>
+                  <div style="flex:1"></div>
+                  <div style="font:400 12px/1 'JetBrains Mono',monospace;color:#71717A">showing 5 of 8 · scroll for more</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <sc-if value="{{ showResponsive }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex;flex-direction:column;gap:56px">
+        <div style="font:600 15px/1 Archivo,sans-serif;color:#A1A1AA;border-top:1px solid #26262B;padding-top:32px">Responsive — ask (empty) and answer (results) at 1024, 768 and 390</div>
+
+        <!-- 1024 -->
+        <div style="display:flex;gap:32px;align-items:flex-start">
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <div style="font:500 12px/1 'JetBrains Mono',monospace;color:#71717A;letter-spacing:.1em">12 · ASK, EMPTY · 1024</div>
+            <div data-screen-label="12 Ask 1024" style="width:1024px;background:#0B0B0D;border:1px solid #26262B;border-radius:12px;overflow:hidden">
+              <div style="display:flex;align-items:center;gap:14px;height:60px;padding:0 20px;border-bottom:1px solid #26262B">
+                <img src="brand/bse.svg" alt="BSE Global" style="height:26px;width:auto;display:block">
+                <div style="width:1px;height:22px;background:#26262B"></div>
+                <div style="font:600 16px/1 Archivo,sans-serif;color:#FFFFFF">Insights</div>
+                <div style="flex:1"></div>
+                <button style="height:34px;padding:0 12px;border-radius:8px;border:1px solid #26262B;background:#16161A;color:#FFFFFF;font:500 12.5px/1 Inter,sans-serif;cursor:pointer">What's in the data?</button>
+              </div>
+              <div style="display:flex;align-items:stretch;min-height:560px">
+                <nav aria-label="Session history" style="width:56px;flex:none;border-right:1px solid #26262B;padding:16px 0;display:flex;flex-direction:column;align-items:center;gap:10px">
+                  <button aria-label="New question" style="width:36px;height:36px;border-radius:8px;border:none;background:#00AEEF;color:#0B0B0D;font:700 16px/1 Inter,sans-serif;cursor:pointer">+</button>
+                  <div style="width:24px;height:1px;background:#26262B;margin:4px 0"></div>
+                  <button aria-label="Question 1: Nets tickets last month" style="width:36px;height:36px;border-radius:8px;border:1px solid #26262B;background:#1E1E23;color:#00AEEF;font:500 12px/1 'JetBrains Mono',monospace;cursor:pointer">Q1</button>
+                  <button aria-label="Question 2: Top categories by revenue" style="width:36px;height:36px;border-radius:8px;border:1px solid transparent;background:transparent;color:#71717A;font:500 12px/1 'JetBrains Mono',monospace;cursor:pointer" style-hover="background:#16161A;color:#FFFFFF">Q2</button>
+                  <button aria-label="Question 3: Biggest gate by opponent" style="width:36px;height:36px;border-radius:8px;border:1px solid transparent;background:transparent;color:#71717A;font:500 12px/1 'JetBrains Mono',monospace;cursor:pointer" style-hover="background:#16161A;color:#FFFFFF">Q3</button>
+                </nav>
+                <div style="flex:1;min-width:0;padding:56px 24px 24px;display:flex;flex-direction:column;align-items:center">
+                  <h2 style="margin:0;font:600 36px/1.15 Archivo,sans-serif;color:#FFFFFF;letter-spacing:-.025em;text-align:center">Ask anything about ticket sales</h2>
+                  <div style="width:100%;max-width:720px;margin-top:28px;display:flex;flex-direction:column;gap:8px">
+                    <label for="q12" style="font:500 13px/1 Inter,sans-serif;color:#A1A1AA">Your question</label>
+                    <div style="display:flex;gap:10px">
+                      <div id="q12" style="flex:1;display:flex;align-items:center;height:52px;padding:0 14px;background:#16161A;border:1px solid #26262B;border-radius:8px;font:400 14px/1 Inter,sans-serif;color:#71717A">e.g. How many tickets did we sell for Nets home games last month?</div>
+                      <button style="height:52px;padding:0 26px;border:none;border-radius:8px;background:#00AEEF;color:#0B0B0D;font:600 14px/1 Inter,sans-serif;cursor:pointer">Ask</button>
+                    </div>
+                  </div>
+                  <div style="width:100%;max-width:720px;margin-top:28px;display:flex;flex-wrap:wrap;gap:8px">
+                    <button style="display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 12px;border-radius:8px;border:1px solid #26262B;background:#16161A;color:#FFFFFF;font:400 12.5px/1 Inter,sans-serif;cursor:pointer"><img src="brand/nets.svg" alt="Brooklyn Nets" style="width:24px;height:24px">Nets tickets sold last month</button>
+                    <button style="height:40px;padding:0 12px;border-radius:8px;border:1px solid #26262B;background:#16161A;color:#FFFFFF;font:400 12.5px/1 Inter,sans-serif;cursor:pointer">Top 5 event categories by total revenue</button>
+                    <button style="display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 12px;border-radius:8px;border:1px solid #26262B;background:#16161A;color:#FFFFFF;font:400 12.5px/1 Inter,sans-serif;cursor:pointer"><img src="brand/liberty.svg" alt="New York Liberty" style="height:24px;width:auto">Highest average ticket price in 2024</button>
+                    <button style="height:40px;padding:0 12px;border-radius:8px;border:1px solid #26262B;background:#16161A;color:#FFFFFF;font:400 12.5px/1 Inter,sans-serif;cursor:pointer">Which opponent drives the biggest gate?</button>
+                    <button style="height:40px;padding:0 12px;border-radius:8px;border:1px solid #26262B;background:#16161A;color:#FFFFFF;font:400 12.5px/1 Inter,sans-serif;cursor:pointer">Refund cost last season</button>
+                    <button style="height:40px;padding:0 12px;border-radius:8px;border:1px solid #26262B;background:#16161A;color:#FFFFFF;font:400 12.5px/1 Inter,sans-serif;cursor:pointer">Web vs box office for concerts</button>
+                  </div>
+                  <div style="flex:1"></div>
+                  <div style="width:100%;border-top:1px solid #26262B;margin-top:40px;padding-top:16px;display:flex;align-items:center;gap:12px">
+                    <img src="brand/barclays-center.svg" alt="Barclays Center" style="height:20px;width:auto;display:block">
+                    <div style="font:400 12.5px/1 Inter,sans-serif;color:#A1A1AA">Events at Barclays Center, 2024 to today</div>
+                    <div style="flex:1"></div>
+                    <div style="display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:12px;background:#16161A;border:1px solid #26262B;color:#A1A1AA;font:400 11px/1 'JetBrains Mono',monospace">Demo · synthetic data</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <sc-if value="{{ showAnnotations }}" hint-placeholder-val="{{ true }}">
+              <div style="font:400 12px/1.6 'JetBrains Mono',monospace;color:#71717A;max-width:1024px">Annotation · collapsed rail buttons keep accessible names (“New question”, “Question 1: …”) and show the full text on hover and focus.</div>
+            </sc-if>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <div style="font:500 12px/1 'JetBrains Mono',monospace;color:#71717A;letter-spacing:.1em">13 · ANSWER · 1024</div>
+            <div data-screen-label="13 Answer 1024" style="width:1024px;background:#0B0B0D;border:1px solid #26262B;border-radius:12px;overflow:hidden">
+              <div style="display:flex;align-items:center;gap:14px;height:60px;padding:0 20px;border-bottom:1px solid #26262B">
+                <img src="brand/bse.svg" alt="BSE Global" style="height:26px;width:auto;display:block">
+                <div style="width:1px;height:22px;background:#26262B"></div>
+                <div style="font:600 16px/1 Archivo,sans-serif;color:#FFFFFF">Insights</div>
+                <div style="flex:1"></div>
+                <button style="height:34px;padding:0 12px;border-radius:8px;border:1px solid #26262B;background:#16161A;color:#FFFFFF;font:500 12.5px/1 Inter,sans-serif;cursor:pointer">What's in the data?</button>
+              </div>
+              <div style="display:flex;align-items:stretch;min-height:560px">
+                <nav aria-label="Session history" style="width:56px;flex:none;border-right:1px solid #26262B;padding:16px 0;display:flex;flex-direction:column;align-items:center;gap:10px">
+                  <button aria-label="New question" style="width:36px;height:36px;border-radius:8px;border:none;background:#00AEEF;color:#0B0B0D;font:700 16px/1 Inter,sans-serif;cursor:pointer">+</button>
+                  <div style="width:24px;height:1px;background:#26262B;margin:4px 0"></div>
+                  <button aria-label="Question 1: Nets tickets last month" style="width:36px;height:36px;border-radius:8px;border:1px solid #26262B;background:#1E1E23;color:#00AEEF;font:500 12px/1 'JetBrains Mono',monospace;cursor:pointer">Q1</button>
+                  <button aria-label="Question 2: Top categories by revenue" style="width:36px;height:36px;border-radius:8px;border:1px solid transparent;background:transparent;color:#71717A;font:500 12px/1 'JetBrains Mono',monospace;cursor:pointer">Q2</button>
+                  <button aria-label="Question 3: Biggest gate by opponent" style="width:36px;height:36px;border-radius:8px;border:1px solid transparent;background:transparent;color:#71717A;font:500 12px/1 'JetBrains Mono',monospace;cursor:pointer">Q3</button>
+                </nav>
+                <div style="flex:1;min-width:0;padding:24px 20px 32px;display:flex;flex-direction:column;gap:16px">
+                  <div style="display:flex;align-items:center;gap:10px">
+                    <img src="brand/nets.svg" alt="Brooklyn Nets" style="width:24px;height:24px">
+                    <div style="font:400 13px/1.4 Inter,sans-serif;color:#A1A1AA">How many tickets did we sell for Nets home games last month?</div>
+                  </div>
+                  <div style="background:#16161A;border:1px solid #26262B;border-radius:12px;padding:22px 24px;display:flex;flex-direction:column;gap:14px">
+                    <p style="margin:0;font:500 24px/1.35 Archivo,sans-serif;color:#FFFFFF;letter-spacing:-.02em;text-wrap:pretty">We sold <span style="font-family:'JetBrains Mono',monospace">26,412</span> tickets in August 2026 — all of them for upcoming games, since the Nets play no home games in August.</p>
+                    <div style="display:flex;flex-wrap:wrap;gap:8px">
+                      <div style="display:inline-flex;align-items:center;gap:8px;height:30px;padding:0 11px;border-radius:8px;background:#1E1E23;border:1px solid #26262B;color:#A1A1AA;font:400 11.5px/1 Inter,sans-serif"><span style="color:#71717A;font-family:'JetBrains Mono',monospace">ASSUMED</span>August 2026, by purchase date</div>
+                      <div style="display:inline-flex;align-items:center;gap:8px;height:30px;padding:0 11px;border-radius:8px;background:#1E1E23;border:1px solid #26262B;color:#A1A1AA;font:400 11.5px/1 Inter,sans-serif"><span style="color:#71717A;font-family:'JetBrains Mono',monospace">ASSUMED</span>Refunds and comps excluded</div>
+                    </div>
+                  </div>
+                  <div style="background:#16161A;border:1px solid #26262B;border-radius:12px;overflow:hidden">
+                    <div style="display:flex;align-items:center;gap:4px;padding:0 14px;border-bottom:1px solid #26262B">
+                      <button style="height:44px;padding:0 6px;margin-right:12px;border:none;background:transparent;color:#FFFFFF;font:600 12.5px/1 Inter,sans-serif;cursor:pointer;box-shadow:inset 0 -2px 0 #00AEEF">Results</button>
+                      <button style="height:44px;padding:0 6px;margin-right:12px;border:none;background:transparent;color:#A1A1AA;font:500 12.5px/1 Inter,sans-serif;cursor:pointer">SQL</button>
+                      <button style="height:44px;padding:0 6px;border:none;background:transparent;color:#A1A1AA;font:500 12.5px/1 Inter,sans-serif;cursor:pointer">Chart</button>
+                      <div style="flex:1"></div>
+                      <div style="font:400 11.5px/1 'JetBrains Mono',monospace;color:#71717A">8 rows</div>
+                    </div>
+                    <table style="width:100%;border-collapse:collapse">
+                      <thead>
+                        <tr style="background:#121215">
+                          <th scope="col" style="text-align:left;padding:10px 16px;font:500 10.5px/1 'JetBrains Mono',monospace;color:#71717A;letter-spacing:.08em;border-bottom:1px solid #26262B">EVENT</th>
+                          <th scope="col" style="text-align:left;padding:10px 16px;font:500 10.5px/1 'JetBrains Mono',monospace;color:#71717A;letter-spacing:.08em;border-bottom:1px solid #26262B">DATE</th>
+                          <th scope="col" style="text-align:right;padding:10px 16px;font:500 10.5px/1 'JetBrains Mono',monospace;color:#71717A;letter-spacing:.08em;border-bottom:1px solid #26262B">TICKETS SOLD</th>
+                          <th scope="col" style="text-align:right;padding:10px 16px;font:500 10.5px/1 'JetBrains Mono',monospace;color:#71717A;letter-spacing:.08em;border-bottom:1px solid #26262B">AVG PRICE</th>
+                          <th scope="col" style="text-align:right;padding:10px 16px;font:500 10.5px/1 'JetBrains Mono',monospace;color:#71717A;letter-spacing:.08em;border-bottom:1px solid #26262B">GATE REVENUE</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td style="padding:12px 16px;border-bottom:1px solid #26262B"><span style="display:inline-flex;align-items:center;gap:9px;font:400 13px/1 Inter,sans-serif;color:#FFFFFF"><img src="brand/nets.svg" alt="Brooklyn Nets" style="width:24px;height:24px">Nets vs. Knicks</span></td>
+                          <td style="padding:12px 16px;border-bottom:1px solid #26262B;font:400 12px/1 'JetBrains Mono',monospace;color:#A1A1AA">2026-10-22</td>
+                          <td style="padding:12px 16px;border-bottom:1px solid #26262B;text-align:right;font:400 13px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">4,812</td>
+                          <td style="padding:12px 16px;border-bottom:1px solid #26262B;text-align:right;font:400 13px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">$184.20</td>
+                          <td style="padding:12px 16px;border-bottom:1px solid #26262B;text-align:right;font:400 13px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">$886,370</td>
+                        </tr>
+                        <tr>
+                          <td style="padding:12px 16px;border-bottom:1px solid #26262B"><span style="display:inline-flex;align-items:center;gap:9px;font:400 13px/1 Inter,sans-serif;color:#FFFFFF"><img src="brand/nets.svg" alt="Brooklyn Nets" style="width:24px;height:24px">Nets vs. Celtics</span></td>
+                          <td style="padding:12px 16px;border-bottom:1px solid #26262B;font:400 12px/1 'JetBrains Mono',monospace;color:#A1A1AA">2026-10-28</td>
+                          <td style="padding:12px 16px;border-bottom:1px solid #26262B;text-align:right;font:400 13px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">4,166</td>
+                          <td style="padding:12px 16px;border-bottom:1px solid #26262B;text-align:right;font:400 13px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">$171.55</td>
+                          <td style="padding:12px 16px;border-bottom:1px solid #26262B;text-align:right;font:400 13px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">$714,678</td>
+                        </tr>
+                        <tr>
+                          <td style="padding:12px 16px;border-bottom:1px solid #26262B"><span style="display:inline-flex;align-items:center;gap:9px;font:400 13px/1 Inter,sans-serif;color:#FFFFFF"><img src="brand/nets.svg" alt="Brooklyn Nets" style="width:24px;height:24px">Nets vs. 76ers</span></td>
+                          <td style="padding:12px 16px;border-bottom:1px solid #26262B;font:400 12px/1 'JetBrains Mono',monospace;color:#A1A1AA">2026-11-03</td>
+                          <td style="padding:12px 16px;border-bottom:1px solid #26262B;text-align:right;font:400 13px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">3,704</td>
+                          <td style="padding:12px 16px;border-bottom:1px solid #26262B;text-align:right;font:400 13px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">$158.90</td>
+                          <td style="padding:12px 16px;border-bottom:1px solid #26262B;text-align:right;font:400 13px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">$588,566</td>
+                        </tr>
+                        <tr>
+                          <td style="padding:12px 16px"><span style="display:inline-flex;align-items:center;gap:9px;font:400 13px/1 Inter,sans-serif;color:#FFFFFF"><img src="brand/nets.svg" alt="Brooklyn Nets" style="width:24px;height:24px">Nets vs. Bucks</span></td>
+                          <td style="padding:12px 16px;font:400 12px/1 'JetBrains Mono',monospace;color:#A1A1AA">2026-11-07</td>
+                          <td style="padding:12px 16px;text-align:right;font:400 13px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">3,388</td>
+                          <td style="padding:12px 16px;text-align:right;font:400 13px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">$152.40</td>
+                          <td style="padding:12px 16px;text-align:right;font:400 13px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">$516,331</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <div style="display:flex;align-items:center;gap:10px;padding:11px 16px;border-top:1px solid #26262B;background:#121215;font:400 11.5px/1 'JetBrains Mono',monospace;color:#71717A">claude-sonnet-5 · 2.16s · repaired once</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 768 -->
+        <div style="display:flex;gap:32px;align-items:flex-start">
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <div style="font:500 12px/1 'JetBrains Mono',monospace;color:#71717A;letter-spacing:.1em">14 · ASK, EMPTY · 768</div>
+            <div data-screen-label="14 Ask 768" style="width:768px;background:#0B0B0D;border:1px solid #26262B;border-radius:12px;overflow:hidden">
+              <div style="display:flex;align-items:center;gap:12px;height:56px;padding:0 16px;border-bottom:1px solid #26262B">
+                <img src="brand/bse.svg" alt="BSE Global" style="height:24px;width:auto;display:block">
+                <div style="width:1px;height:20px;background:#26262B"></div>
+                <div style="font:600 15px/1 Archivo,sans-serif;color:#FFFFFF">Insights</div>
+                <div style="flex:1"></div>
+                <button aria-label="What's in the data?" style="width:40px;height:40px;border-radius:8px;border:1px solid #26262B;background:#16161A;color:#FFFFFF;font:600 15px/1 'JetBrains Mono',monospace;cursor:pointer">?</button>
+              </div>
+              <div style="padding:48px 24px 24px;display:flex;flex-direction:column">
+                <h2 style="margin:0;font:600 32px/1.15 Archivo,sans-serif;color:#FFFFFF;letter-spacing:-.025em">Ask anything about ticket sales</h2>
+                <div style="margin-top:24px;display:flex;flex-direction:column;gap:8px">
+                  <label for="q14" style="font:500 13px/1 Inter,sans-serif;color:#A1A1AA">Your question</label>
+                  <div style="display:flex;gap:10px">
+                    <div id="q14" style="flex:1;display:flex;align-items:center;height:52px;padding:0 14px;background:#16161A;border:1px solid #26262B;border-radius:8px;font:400 14px/1.3 Inter,sans-serif;color:#71717A">e.g. How many tickets did we sell for Nets home games last month?</div>
+                    <button style="height:52px;padding:0 24px;border:none;border-radius:8px;background:#00AEEF;color:#0B0B0D;font:600 14px/1 Inter,sans-serif;cursor:pointer">Ask</button>
+                  </div>
+                </div>
+                <div style="margin-top:24px;display:flex;flex-wrap:wrap;gap:8px">
+                  <button style="display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 12px;border-radius:8px;border:1px solid #26262B;background:#16161A;color:#FFFFFF;font:400 12.5px/1 Inter,sans-serif;cursor:pointer"><img src="brand/nets.svg" alt="Brooklyn Nets" style="width:24px;height:24px">Nets tickets sold last month</button>
+                  <button style="height:40px;padding:0 12px;border-radius:8px;border:1px solid #26262B;background:#16161A;color:#FFFFFF;font:400 12.5px/1 Inter,sans-serif;cursor:pointer">Top 5 categories by revenue</button>
+                  <button style="display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 12px;border-radius:8px;border:1px solid #26262B;background:#16161A;color:#FFFFFF;font:400 12.5px/1 Inter,sans-serif;cursor:pointer"><img src="brand/liberty.svg" alt="New York Liberty" style="height:24px;width:auto">Highest average price, 2024</button>
+                  <button style="height:40px;padding:0 12px;border-radius:8px;border:1px solid #26262B;background:#16161A;color:#FFFFFF;font:400 12.5px/1 Inter,sans-serif;cursor:pointer">Biggest gate by opponent</button>
+                  <button style="height:40px;padding:0 12px;border-radius:8px;border:1px solid #26262B;background:#16161A;color:#FFFFFF;font:400 12.5px/1 Inter,sans-serif;cursor:pointer">Refund cost last season</button>
+                  <button style="height:40px;padding:0 12px;border-radius:8px;border:1px solid #26262B;background:#16161A;color:#FFFFFF;font:400 12.5px/1 Inter,sans-serif;cursor:pointer">Web vs box office, concerts</button>
+                </div>
+                <div style="margin-top:48px;border-top:1px solid #26262B;padding-top:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+                  <img src="brand/barclays-center.svg" alt="Barclays Center" style="height:20px;width:auto;display:block">
+                  <div style="font:400 12.5px/1 Inter,sans-serif;color:#A1A1AA">Events at Barclays Center, 2024 to today</div>
+                  <div style="display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:12px;background:#16161A;border:1px solid #26262B;color:#A1A1AA;font:400 11px/1 'JetBrains Mono',monospace">Demo · synthetic data</div>
+                </div>
+              </div>
+            </div>
+            <sc-if value="{{ showAnnotations }}" hint-placeholder-val="{{ true }}">
+              <div style="font:400 12px/1.6 'JetBrains Mono',monospace;color:#71717A;max-width:768px">Annotation · the header “?” is icon-only with accessible name “What's in the data?”.</div>
+            </sc-if>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <div style="font:500 12px/1 'JetBrains Mono',monospace;color:#71717A;letter-spacing:.1em">15 · ANSWER · 768</div>
+            <div data-screen-label="15 Answer 768" style="width:768px;background:#0B0B0D;border:1px solid #26262B;border-radius:12px;overflow:hidden">
+              <div style="display:flex;align-items:center;gap:12px;height:56px;padding:0 16px;border-bottom:1px solid #26262B">
+                <img src="brand/bse.svg" alt="BSE Global" style="height:24px;width:auto;display:block">
+                <div style="width:1px;height:20px;background:#26262B"></div>
+                <div style="font:600 15px/1 Archivo,sans-serif;color:#FFFFFF">Insights</div>
+                <div style="flex:1"></div>
+                <button aria-label="What's in the data?" style="width:40px;height:40px;border-radius:8px;border:1px solid #26262B;background:#16161A;color:#FFFFFF;font:600 15px/1 'JetBrains Mono',monospace;cursor:pointer">?</button>
+              </div>
+              <div style="padding:20px 24px 32px;display:flex;flex-direction:column;gap:16px">
+                <div style="display:flex;align-items:center;gap:10px">
+                  <img src="brand/nets.svg" alt="Brooklyn Nets" style="width:24px;height:24px">
+                  <div style="font:400 13px/1.4 Inter,sans-serif;color:#A1A1AA">How many tickets did we sell for Nets home games last month?</div>
+                </div>
+                <div style="background:#16161A;border:1px solid #26262B;border-radius:12px;padding:20px 22px">
+                  <p style="margin:0;font:500 22px/1.4 Archivo,sans-serif;color:#FFFFFF;letter-spacing:-.02em;text-wrap:pretty">We sold <span style="font-family:'JetBrains Mono',monospace">26,412</span> tickets in August 2026 — all of them for upcoming games, since the Nets play no home games in August.</p>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:8px">
+                  <div style="display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:8px;background:#16161A;border:1px solid #26262B;color:#A1A1AA;font:400 12px/1.4 Inter,sans-serif"><span style="color:#71717A;font-family:'JetBrains Mono',monospace;flex:none">ASSUMED</span>“Last month” means August 2026, by purchase date</div>
+                  <div style="display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:8px;background:#16161A;border:1px solid #26262B;color:#A1A1AA;font:400 12px/1.4 Inter,sans-serif"><span style="color:#71717A;font-family:'JetBrains Mono',monospace;flex:none">ASSUMED</span>Counts sold tickets only; refunds and comps excluded</div>
+                </div>
+                <div style="background:#16161A;border:1px solid #26262B;border-radius:12px;overflow:hidden">
+                  <div style="display:flex;align-items:center;gap:4px;padding:0 14px;border-bottom:1px solid #26262B">
+                    <button style="height:44px;padding:0 6px;margin-right:12px;border:none;background:transparent;color:#FFFFFF;font:600 12.5px/1 Inter,sans-serif;cursor:pointer;box-shadow:inset 0 -2px 0 #00AEEF">Results</button>
+                    <button style="height:44px;padding:0 6px;margin-right:12px;border:none;background:transparent;color:#A1A1AA;font:500 12.5px/1 Inter,sans-serif;cursor:pointer">SQL</button>
+                    <button style="height:44px;padding:0 6px;border:none;background:transparent;color:#A1A1AA;font:500 12.5px/1 Inter,sans-serif;cursor:pointer">Chart</button>
+                    <div style="flex:1"></div>
+                    <div style="font:400 11.5px/1 'JetBrains Mono',monospace;color:#71717A">8 rows</div>
+                  </div>
+                  <div style="overflow-x:auto">
+                    <table style="width:860px;border-collapse:collapse">
+                      <thead>
+                        <tr style="background:#121215">
+                          <th scope="col" style="text-align:left;padding:10px 16px;font:500 10.5px/1 'JetBrains Mono',monospace;color:#71717A;letter-spacing:.08em;border-bottom:1px solid #26262B">EVENT</th>
+                          <th scope="col" style="text-align:left;padding:10px 16px;font:500 10.5px/1 'JetBrains Mono',monospace;color:#71717A;letter-spacing:.08em;border-bottom:1px solid #26262B">DATE</th>
+                          <th scope="col" style="text-align:right;padding:10px 16px;font:500 10.5px/1 'JetBrains Mono',monospace;color:#71717A;letter-spacing:.08em;border-bottom:1px solid #26262B">TICKETS SOLD</th>
+                          <th scope="col" style="text-align:right;padding:10px 16px;font:500 10.5px/1 'JetBrains Mono',monospace;color:#71717A;letter-spacing:.08em;border-bottom:1px solid #26262B">AVG PRICE</th>
+                          <th scope="col" style="text-align:right;padding:10px 16px;font:500 10.5px/1 'JetBrains Mono',monospace;color:#71717A;letter-spacing:.08em;border-bottom:1px solid #26262B">GATE REVENUE</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td style="padding:12px 16px;border-bottom:1px solid #26262B"><span style="display:inline-flex;align-items:center;gap:9px;font:400 13px/1 Inter,sans-serif;color:#FFFFFF"><img src="brand/nets.svg" alt="Brooklyn Nets" style="width:24px;height:24px">Nets vs. Knicks</span></td>
+                          <td style="padding:12px 16px;border-bottom:1px solid #26262B;font:400 12px/1 'JetBrains Mono',monospace;color:#A1A1AA">2026-10-22</td>
+                          <td style="padding:12px 16px;border-bottom:1px solid #26262B;text-align:right;font:400 13px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">4,812</td>
+                          <td style="padding:12px 16px;border-bottom:1px solid #26262B;text-align:right;font:400 13px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">$184.20</td>
+                          <td style="padding:12px 16px;border-bottom:1px solid #26262B;text-align:right;font:400 13px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">$886,370</td>
+                        </tr>
+                        <tr>
+                          <td style="padding:12px 16px;border-bottom:1px solid #26262B"><span style="display:inline-flex;align-items:center;gap:9px;font:400 13px/1 Inter,sans-serif;color:#FFFFFF"><img src="brand/nets.svg" alt="Brooklyn Nets" style="width:24px;height:24px">Nets vs. Celtics</span></td>
+                          <td style="padding:12px 16px;border-bottom:1px solid #26262B;font:400 12px/1 'JetBrains Mono',monospace;color:#A1A1AA">2026-10-28</td>
+                          <td style="padding:12px 16px;border-bottom:1px solid #26262B;text-align:right;font:400 13px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">4,166</td>
+                          <td style="padding:12px 16px;border-bottom:1px solid #26262B;text-align:right;font:400 13px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">$171.55</td>
+                          <td style="padding:12px 16px;border-bottom:1px solid #26262B;text-align:right;font:400 13px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">$714,678</td>
+                        </tr>
+                        <tr>
+                          <td style="padding:12px 16px"><span style="display:inline-flex;align-items:center;gap:9px;font:400 13px/1 Inter,sans-serif;color:#FFFFFF"><img src="brand/nets.svg" alt="Brooklyn Nets" style="width:24px;height:24px">Nets vs. 76ers</span></td>
+                          <td style="padding:12px 16px;font:400 12px/1 'JetBrains Mono',monospace;color:#A1A1AA">2026-11-03</td>
+                          <td style="padding:12px 16px;text-align:right;font:400 13px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">3,704</td>
+                          <td style="padding:12px 16px;text-align:right;font:400 13px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">$158.90</td>
+                          <td style="padding:12px 16px;text-align:right;font:400 13px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">$588,566</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:10px;padding:11px 16px;border-top:1px solid #26262B;background:#121215;font:400 11.5px/1 'JetBrains Mono',monospace;color:#71717A">claude-sonnet-5 · 2.16s · repaired once</div>
+                </div>
+                <sc-if value="{{ showAnnotations }}" hint-placeholder-val="{{ true }}">
+                  <div style="font:400 11.5px/1.6 'JetBrains Mono',monospace;color:#71717A">Annotation · the table scrolls horizontally inside its own bordered container; the page never widens.</div>
+                </sc-if>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 390 -->
+        <div style="display:flex;gap:32px;align-items:flex-start">
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <div style="font:500 12px/1 'JetBrains Mono',monospace;color:#71717A;letter-spacing:.1em">16 · ASK, EMPTY · 390 × 844</div>
+            <div data-screen-label="16 Ask mobile" style="width:390px;height:844px;background:#0B0B0D;border:1px solid #26262B;border-radius:12px;overflow:hidden;display:flex;flex-direction:column">
+              <div style="display:flex;align-items:center;gap:10px;height:52px;padding:0 16px;border-bottom:1px solid #26262B;flex:none">
+                <button aria-label="Open session history" style="width:36px;height:36px;margin-left:-8px;border-radius:8px;border:none;background:transparent;color:#FFFFFF;font:400 16px/1 Inter,sans-serif;cursor:pointer">☰</button>
+                <img src="brand/bse.svg" alt="BSE Global" style="height:20px;width:auto;display:block">
+                <div style="flex:1"></div>
+                <button aria-label="What's in the data?" style="width:36px;height:36px;border-radius:8px;border:1px solid #26262B;background:#16161A;color:#FFFFFF;font:600 14px/1 'JetBrains Mono',monospace;cursor:pointer">?</button>
+              </div>
+              <div style="padding:32px 16px 16px;display:flex;flex-direction:column;gap:20px;flex:1;overflow:hidden">
+                <h2 style="margin:0;font:600 26px/1.2 Archivo,sans-serif;color:#FFFFFF;letter-spacing:-.02em">Ask anything about ticket sales</h2>
+                <div style="display:flex;flex-direction:column;gap:8px">
+                  <label for="q16" style="font:500 12.5px/1 Inter,sans-serif;color:#A1A1AA">Your question</label>
+                  <div id="q16" style="min-height:88px;padding:12px 14px;background:#16161A;border:1px solid #26262B;border-radius:8px;font:400 14px/1.45 Inter,sans-serif;color:#71717A">e.g. How many tickets did we sell for Nets home games last month?</div>
+                  <button style="height:48px;border:none;border-radius:8px;background:#00AEEF;color:#0B0B0D;font:600 15px/1 Inter,sans-serif;cursor:pointer">Ask</button>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:10px">
+                  <div style="font:500 11px/1 'JetBrains Mono',monospace;color:#71717A;letter-spacing:.1em">TRY ONE OF THESE</div>
+                  <div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:6px">
+                    <button style="flex:none;display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 12px;border-radius:8px;border:1px solid #26262B;background:#16161A;color:#FFFFFF;font:400 12.5px/1 Inter,sans-serif;white-space:nowrap"><img src="brand/nets.svg" alt="Brooklyn Nets" style="width:24px;height:24px">Nets tickets last month</button>
+                    <button style="flex:none;height:44px;padding:0 12px;border-radius:8px;border:1px solid #26262B;background:#16161A;color:#FFFFFF;font:400 12.5px/1 Inter,sans-serif;white-space:nowrap">Top 5 categories by revenue</button>
+                    <button style="flex:none;display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 12px;border-radius:8px;border:1px solid #26262B;background:#16161A;color:#FFFFFF;font:400 12.5px/1 Inter,sans-serif;white-space:nowrap"><img src="brand/liberty.svg" alt="New York Liberty" style="height:24px;width:auto">Highest average price</button>
+                  </div>
+                </div>
+                <div style="flex:1"></div>
+                <div style="border-top:1px solid #26262B;padding-top:14px;display:flex;flex-direction:column;gap:10px">
+                  <img src="brand/barclays-center.svg" alt="Barclays Center" style="height:20px;width:auto;display:block">
+                  <div style="font:400 12px/1.4 Inter,sans-serif;color:#A1A1AA">Events at Barclays Center, 2024 to today</div>
+                  <div style="align-self:flex-start;display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:12px;background:#16161A;border:1px solid #26262B;color:#A1A1AA;font:400 11px/1 'JetBrains Mono',monospace">Demo · synthetic data</div>
+                </div>
+              </div>
+            </div>
+            <sc-if value="{{ showAnnotations }}" hint-placeholder-val="{{ true }}">
+              <div style="font:400 11.5px/1.6 'JetBrains Mono',monospace;color:#71717A;max-width:390px">Annotation · icon buttons: “Open session history” (menu) and “What's in the data?” (?). Both 36px targets inside a 44px tap area. Schema opens full-screen.</div>
+            </sc-if>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <div style="font:500 12px/1 'JetBrains Mono',monospace;color:#71717A;letter-spacing:.1em">17 · ANSWER · 390 × 844</div>
+            <div data-screen-label="17 Answer mobile" style="width:390px;height:844px;background:#0B0B0D;border:1px solid #26262B;border-radius:12px;overflow:hidden;display:flex;flex-direction:column">
+              <div style="display:flex;align-items:center;gap:10px;height:52px;padding:0 16px;border-bottom:1px solid #26262B;flex:none">
+                <button aria-label="Open session history" style="width:36px;height:36px;margin-left:-8px;border-radius:8px;border:none;background:transparent;color:#FFFFFF;font:400 16px/1 Inter,sans-serif;cursor:pointer">☰</button>
+                <img src="brand/bse.svg" alt="BSE Global" style="height:20px;width:auto;display:block">
+                <div style="flex:1"></div>
+                <button aria-label="What's in the data?" style="width:36px;height:36px;border-radius:8px;border:1px solid #26262B;background:#16161A;color:#FFFFFF;font:600 14px/1 'JetBrains Mono',monospace;cursor:pointer">?</button>
+              </div>
+              <div style="padding:16px;display:flex;flex-direction:column;gap:14px;flex:1;overflow:hidden">
+                <div style="display:flex;align-items:flex-start;gap:9px">
+                  <img src="brand/nets.svg" alt="Brooklyn Nets" style="width:24px;height:24px;flex:none">
+                  <div style="font:400 12.5px/1.45 Inter,sans-serif;color:#A1A1AA">How many tickets did we sell for Nets home games last month?</div>
+                </div>
+                <div style="background:#16161A;border:1px solid #26262B;border-radius:12px;padding:16px">
+                  <p style="margin:0;font:500 19px/1.4 Archivo,sans-serif;color:#FFFFFF;letter-spacing:-.015em;text-wrap:pretty">We sold <span style="font-family:'JetBrains Mono',monospace">26,412</span> tickets in August 2026 — all for upcoming games, since the Nets play no home games in August.</p>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:8px">
+                  <div style="padding:9px 11px;border-radius:8px;background:#16161A;border:1px solid #26262B;color:#A1A1AA;font:400 11.5px/1.45 Inter,sans-serif"><span style="color:#71717A;font-family:'JetBrains Mono',monospace">ASSUMED </span>“Last month” means August 2026, by purchase date</div>
+                  <div style="padding:9px 11px;border-radius:8px;background:#16161A;border:1px solid #26262B;color:#A1A1AA;font:400 11.5px/1.45 Inter,sans-serif"><span style="color:#71717A;font-family:'JetBrains Mono',monospace">ASSUMED </span>Refunds and comps excluded</div>
+                </div>
+                <div style="background:#16161A;border:1px solid #26262B;border-radius:12px;overflow:hidden;flex:1;display:flex;flex-direction:column;min-height:0">
+                  <div style="display:flex;align-items:center;padding:0 12px;border-bottom:1px solid #26262B;flex:none">
+                    <button style="height:44px;padding:0 6px;margin-right:14px;border:none;background:transparent;color:#FFFFFF;font:600 12.5px/1 Inter,sans-serif;box-shadow:inset 0 -2px 0 #00AEEF">Results</button>
+                    <button style="height:44px;padding:0 6px;margin-right:14px;border:none;background:transparent;color:#A1A1AA;font:500 12.5px/1 Inter,sans-serif">SQL</button>
+                    <button style="height:44px;padding:0 6px;border:none;background:transparent;color:#A1A1AA;font:500 12.5px/1 Inter,sans-serif">Chart</button>
+                    <div style="flex:1"></div>
+                    <div style="font:400 11px/1 'JetBrains Mono',monospace;color:#71717A">8 rows</div>
+                  </div>
+                  <div style="overflow-x:auto;flex:1;min-height:0">
+                    <table style="width:620px;border-collapse:collapse">
+                      <thead>
+                        <tr style="background:#121215">
+                          <th scope="col" style="text-align:left;padding:9px 12px;font:500 10px/1 'JetBrains Mono',monospace;color:#71717A;letter-spacing:.08em;border-bottom:1px solid #26262B">EVENT</th>
+                          <th scope="col" style="text-align:left;padding:9px 12px;font:500 10px/1 'JetBrains Mono',monospace;color:#71717A;letter-spacing:.08em;border-bottom:1px solid #26262B">DATE</th>
+                          <th scope="col" style="text-align:right;padding:9px 12px;font:500 10px/1 'JetBrains Mono',monospace;color:#71717A;letter-spacing:.08em;border-bottom:1px solid #26262B">TICKETS</th>
+                          <th scope="col" style="text-align:right;padding:9px 12px;font:500 10px/1 'JetBrains Mono',monospace;color:#71717A;letter-spacing:.08em;border-bottom:1px solid #26262B">AVG PRICE</th>
+                          <th scope="col" style="text-align:right;padding:9px 12px;font:500 10px/1 'JetBrains Mono',monospace;color:#71717A;letter-spacing:.08em;border-bottom:1px solid #26262B">GATE</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td style="padding:11px 12px;border-bottom:1px solid #26262B"><span style="display:inline-flex;align-items:center;gap:8px;font:400 12.5px/1 Inter,sans-serif;color:#FFFFFF"><img src="brand/nets.svg" alt="Brooklyn Nets" style="width:24px;height:24px">Nets vs. Knicks</span></td>
+                          <td style="padding:11px 12px;border-bottom:1px solid #26262B;font:400 11.5px/1 'JetBrains Mono',monospace;color:#A1A1AA">2026-10-22</td>
+                          <td style="padding:11px 12px;border-bottom:1px solid #26262B;text-align:right;font:400 12.5px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">4,812</td>
+                          <td style="padding:11px 12px;border-bottom:1px solid #26262B;text-align:right;font:400 12.5px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">$184.20</td>
+                          <td style="padding:11px 12px;border-bottom:1px solid #26262B;text-align:right;font:400 12.5px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">$886,370</td>
+                        </tr>
+                        <tr>
+                          <td style="padding:11px 12px;border-bottom:1px solid #26262B"><span style="display:inline-flex;align-items:center;gap:8px;font:400 12.5px/1 Inter,sans-serif;color:#FFFFFF"><img src="brand/nets.svg" alt="Brooklyn Nets" style="width:24px;height:24px">Nets vs. Celtics</span></td>
+                          <td style="padding:11px 12px;border-bottom:1px solid #26262B;font:400 11.5px/1 'JetBrains Mono',monospace;color:#A1A1AA">2026-10-28</td>
+                          <td style="padding:11px 12px;border-bottom:1px solid #26262B;text-align:right;font:400 12.5px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">4,166</td>
+                          <td style="padding:11px 12px;border-bottom:1px solid #26262B;text-align:right;font:400 12.5px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">$171.55</td>
+                          <td style="padding:11px 12px;border-bottom:1px solid #26262B;text-align:right;font:400 12.5px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">$714,678</td>
+                        </tr>
+                        <tr>
+                          <td style="padding:11px 12px"><span style="display:inline-flex;align-items:center;gap:8px;font:400 12.5px/1 Inter,sans-serif;color:#FFFFFF"><img src="brand/nets.svg" alt="Brooklyn Nets" style="width:24px;height:24px">Nets vs. 76ers</span></td>
+                          <td style="padding:11px 12px;font:400 11.5px/1 'JetBrains Mono',monospace;color:#A1A1AA">2026-11-03</td>
+                          <td style="padding:11px 12px;text-align:right;font:400 12.5px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">3,704</td>
+                          <td style="padding:11px 12px;text-align:right;font:400 12.5px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">$158.90</td>
+                          <td style="padding:11px 12px;text-align:right;font:400 12.5px/1 'JetBrains Mono',monospace;color:#FFFFFF;font-variant-numeric:tabular-nums">$588,566</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <div style="padding:10px 12px;border-top:1px solid #26262B;background:#121215;font:400 11px/1 'JetBrains Mono',monospace;color:#71717A;flex:none">claude-sonnet-5 · 2.16s · repaired once</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+  </div>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;showAnnotations&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Design doc&quot;},&quot;showResponsive&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Design doc&quot;},&quot;showDemoPill&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Product&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      showAnnotations: this.props.showAnnotations ?? true,
+      showResponsive: this.props.showResponsive ?? true,
+      showDemoPill: this.props.showDemoPill ?? true
+    };
+  }
+}
+</script>
+</body>
+</html>

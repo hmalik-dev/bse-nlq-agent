@@ -130,8 +130,8 @@ def test_the_system_prompt_states_each_formatting_rule(rule: str) -> None:
             50,
             60,
             False,
-            "Answer shape: only the first rows are shown, so name the top 3, say that only the "
-            'first rows are shown, and end with "see the results below".',
+            "Answer shape: 60 rows, so name the top 3 "
+            'and end with "and 57 more in the results below".',
         ),
     ],
     ids=["one-row", "two-rows", "at-limit", "past-limit", "sixteen", "truncated", "capped"],

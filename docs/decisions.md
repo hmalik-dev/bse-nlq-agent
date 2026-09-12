@@ -591,9 +591,12 @@ carry the precision, so the sentence is the answer.
 
 The row counting is done in code, not by the model: `build_user_turn` adds an
 `Answer shape:` line naming the rule for this result and, past the limit, the
-exact "and N more" count. When the rows handed to the writer are truncated or
-capped, the line asks for "see the results below" instead, so the sentence never
-states a count of rows it cannot see. Rounding stays with the model: formatting
+exact "and N more" count. When the result is truncated, the line asks the
+sentence to say only the first rows are shown and to end with "see the results
+below", so it never states a count of rows it cannot see. A result the writer
+sees only 50 rows of (the answer cap) is not truncated: `row_count` is exact and
+the table below shows every row, so it keeps "and N more"; saying "only the
+first rows are shown" there would contradict the screen. Rounding stays with the model: formatting
 in code would mean guessing which columns are money from their names, and
 rounding a displayed figure is not adding rows up, so it does not cut against
 the total counted in code (BSE-17).

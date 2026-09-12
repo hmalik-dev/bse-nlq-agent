@@ -107,7 +107,7 @@ def build_user_turn(
         lines.append("Assumptions:")
         lines.extend(f"- {assumption}" for assumption in assumptions)
         lines.append("")
-    lines.append(answer_shape(len(rows), row_count, truncated))
+    lines.append(answer_shape(row_count, truncated))
     lines.append("")
     lines.append(f"Results ({_row_summary(len(rows), row_count, truncated)}):")
     lines.append(" | ".join(columns))
@@ -137,9 +137,13 @@ def count_total(
     return f"Total {columns[-1]} across all {row_count} rows: {sum(values)}"
 
 
-def answer_shape(shown: int, row_count: int, truncated: bool) -> str:
-    """How much of the result the sentence names, decided in code so the model never counts."""
-    if truncated or shown < row_count:
+def answer_shape(row_count: int, truncated: bool) -> str:
+    """How much of the result the sentence names, decided in code so the model never counts.
+
+    Only a truncated result hides its size. Rows held back from the writer by the
+    answer cap are still counted in `row_count` and still shown in the table below.
+    """
+    if truncated:
         return (
             f"Answer shape: only the first rows are shown, so name the top {TOP_ROWS_PAST_LIMIT}, "
             'say that only the first rows are shown, and end with "see the results below".'

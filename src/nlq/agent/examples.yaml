@@ -112,10 +112,10 @@
       AND e.event_date < '2026-09-11'
     GROUP BY a.team_id
     ORDER BY average_gate DESC
-    LIMIT 5
+    LIMIT 1
   assumptions:
     - Gate is face-value revenue from sold tickets, averaged per game played.
-    - Only games already played are counted.
+    - Only games already played are counted; the question asks for one opponent.
   decline_reason: null
   decline_category: null
 

@@ -25,5 +25,16 @@ Judgement call (advisory, not a blocker): `map_api_error`'s
 but never the key or the prompt. Acceptable for a single-user demo; if a multi-user or
 hosted surface appears, reduce it to a generic sentence and keep the detail in the trace.
 
+BSE-7 (eval harness, 2026-09-12) — PASS after one fix. Confirmed pattern worth reusing:
+**any generated artifact a scripted/fake mode can overwrite must record its provenance.**
+`eval.run --fake` wrote `docs/eval-results.md` and `eval/results/*.json` with fabricated
+15/15 numbers indistinguishable from a live sweep; fixed by threading `fake` into both
+writers. Verified clean there: reference SQL goes through `sql_guard.guard` + read-only
+`Executor`, no unsafe golden entry carries SQL, artifacts hold `database.name` only (no
+home path, key or email), `--fake` needs the explicit flag, no new dependency, and the
+prompt edits (LIMIT 1 guidance, season rules) leave the read-only and decline rules intact.
+`--out`/`--models` reach `Path.write_text` unvalidated but are operator-only on a local
+CLI — not a finding, do not re-raise.
+
 Non-issue: `tests/fakes.py` imports `httpx2` (anthropic's transport) without declaring it;
 `httpx2-jsfetch` in `uv.lock` is an emscripten-only extra of `httpx2`, not installed.

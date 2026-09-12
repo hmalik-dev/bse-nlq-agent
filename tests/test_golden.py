@@ -10,11 +10,19 @@ import pytest
 import sqlglot
 from sqlglot import exp
 
+from eval.fake_client import GoldenFakeClient
 from eval.score import GOLDEN_PATH, GoldenEntry, load_golden
+from nlq.agent.agent import Agent
+from nlq.agent.answer import AnswerWriter
 from nlq.agent.executor import Executor
+from nlq.agent.llm import SqlWriter
+from nlq.agent.models import AskResult
 from nlq.agent.sql_guard import guard
 from nlq.db.seed import seed_database
 
+FAKE_MODEL = "claude-fake"
+NETS_LAST_MONTH = "How many tickets were sold for Brooklyn Nets home games last month?"
+PROMO_THIS_YEAR = "How many orders used a promo code this year?"
 TODAY = date(2026, 9, 11)
 SCALE = 0.005
 MAX_ROWS = 500
@@ -142,6 +150,43 @@ def test_the_empty_entry_really_has_no_rows_behind_it(
     for entry in empty:
         assert entry.sql, entry.id
         assert executor.run(guard(entry.sql, max_rows=MAX_ROWS).sql).row_count == 0, entry.id
+
+
+def test_the_nets_question_comes_back_as_one_row_per_game_with_the_total_to_state(
+    entries: list[GoldenEntry], db_path: Path
+) -> None:
+    result, client = _ask_through_the_fake_client(entries, db_path, NETS_LAST_MONTH)
+
+    assert result.status == "answered"
+    assert result.columns == ["name", "event_date", "tickets_sold"]
+    assert result.row_count > 1
+    assert len({row[0] + row[1] for row in result.rows}) == result.row_count
+    answer_turn = client.calls[-1]
+    assert "state the total across all the rows" in answer_turn["system"]
+    assert f"Results ({result.row_count} rows):" in answer_turn["messages"][0]["content"]
+
+
+def test_the_promo_question_with_nothing_to_group_by_stays_one_scalar_row(
+    entries: list[GoldenEntry], db_path: Path
+) -> None:
+    result, _ = _ask_through_the_fake_client(entries, db_path, PROMO_THIS_YEAR)
+
+    assert result.status == "answered"
+    assert result.columns == ["orders_with_promo"]
+    assert result.row_count == 1 and isinstance(result.rows[0][0], int)
+
+
+def _ask_through_the_fake_client(
+    entries: list[GoldenEntry], db_path: Path, question: str
+) -> tuple[AskResult, GoldenFakeClient]:
+    client = GoldenFakeClient(entries)
+    agent = Agent(
+        SqlWriter(client, model=FAKE_MODEL),
+        Executor(db_path),
+        AnswerWriter(client, model=FAKE_MODEL),
+        today=TODAY,
+    )
+    return agent.ask(question), client
 
 
 def _tables(entry: GoldenEntry) -> set[str]:

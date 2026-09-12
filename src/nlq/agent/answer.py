@@ -26,6 +26,9 @@ You write the answer to a business user's question from a table of query results
 - Format numbers with thousands separators, and currency with a dollar sign.
 - The assumptions describe how the question was interpreted; reflect them where
   they change the meaning of the answer.
+- When the question asks how many or how much and the rows break that down by
+  event or group, state the total across all the rows first. Add it up only
+  when every row is shown.
 - When the result was truncated, say that only the first rows are shown."""
 
 

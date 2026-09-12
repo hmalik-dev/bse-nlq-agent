@@ -49,7 +49,8 @@ def test_the_call_carries_the_system_prompt_and_one_user_turn() -> None:
     assert set(call) == {"model", "max_tokens", "system", "messages"}
     assert call["model"] == "claude-haiku-4-5"
     assert call["max_tokens"] == MAX_TOKENS
-    for rule in ("two sentences", "only the rows", "thousands", "dollar", "truncated"):
+    rules = ("two sentences", "only the rows", "thousands", "dollar", "truncated", "total across")
+    for rule in rules:
         assert rule in call["system"]
     assert len(call["messages"]) == 1 and call["messages"][0]["role"] == "user"
     assert result.text == "NBA leads with $201,512,122.83 in revenue."

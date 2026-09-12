@@ -13,6 +13,31 @@ answer, the assumptions behind it, and the SQL that produced it.
 Header lockup: the BSE wordmark, a hairline divider, then the product word
 "Insights". A small `Demo · synthetic data` badge sits in the footer.
 
+## Example questions
+
+The six starter chips on the ask screen, in order. `GET /api/examples` serves this
+list; the badge column is the club mark shown on the chip.
+
+| # | Question | Badge |
+|---|---|---|
+| 1 | How many tickets did we sell for Nets home games last month? | Nets |
+| 2 | Top 5 event categories by total revenue | |
+| 3 | Which 2024 events had the highest average ticket price? | |
+| 4 | Which Liberty home games sold the most tickets this season? | Liberty |
+| 5 | How much revenue did refunds cost us last season? | |
+| 6 | Compare web and box office sales for concerts | |
+
+Chip 4 replaces the canvas's "Which opponent drives the biggest gate?", which put
+the Liberty mark on a question that had nothing to do with the Liberty. It keeps the
+canvas's position and styling.
+
+## The canvas is a style reference
+
+Everything in `design-plan/BSE Insights.dc.html` that looks like data is
+illustrative: event names, categories, numbers, column names and SQL text. The
+running app always shows the real dataset, and design parity is judged on layout,
+tokens, typography and component presence, never on data content.
+
 ## Brand assets
 
 Committed at `web/public/brand/`. Measured, not assumed:
@@ -117,7 +142,8 @@ rings; the table is a real `<table>` with scope'd headers.
 
 ## The Claude Design prompt
 
-> Pasted into Claude Design to produce the mockups.
+> Pasted into Claude Design to produce the mockups. Kept as a record; where it
+> lists example questions or sample data, the sections above win.
 
 ```text
 Design an internal web tool called BSE Insights for Brooklyn Sports & Entertainment

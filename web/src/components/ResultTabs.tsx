@@ -64,7 +64,7 @@ export function ResultTabs({ result }: { result: AskResult }): JSX.Element {
           ))}
         </div>
         <span className="flex-1" />
-        {active !== "chart" && <span className="font-mono text-xs tabular-nums text-ink-3">{result.row_count} rows</span>}
+        {active !== "chart" && <span className="whitespace-nowrap font-mono text-xs tabular-nums text-ink-3">{result.row_count} rows</span>}
         {active === "results" && result.rows.length > 0 && (
           <button
             type="button"

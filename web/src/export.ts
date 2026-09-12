@@ -2,7 +2,7 @@
 import type { Cell } from "./types";
 
 const CRLF = "\r\n";
-const NEEDS_QUOTES = /[",\r\n]/;
+const NEEDS_QUOTES = /[",;\r\n]/; // `;` too: Excel splits on it in many locales
 const FORMULA_START = /^[=+\-@\t\r]/;
 const SLUG_MAX = 60;
 const SVG_NS = "http://www.w3.org/2000/svg";

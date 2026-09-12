@@ -66,7 +66,7 @@ export function BarChart({ result, svgRef }: Props): JSX.Element | null {
           <Bar
             key={index}
             top={barsTop + index * (BAR_HEIGHT + BAR_GAP)}
-            length={max > 0 ? ((values[index] ?? 0) / max) * span : 0}
+            length={max > 0 ? (Math.max(values[index] ?? 0, 0) / max) * span : 0}
             largest={values[index] === max}
             label={formatCell(row[xIndex] ?? null, chart.x)}
             value={formatCell(row[yIndex] ?? null, chart.y)}

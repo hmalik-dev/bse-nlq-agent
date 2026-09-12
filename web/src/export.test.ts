@@ -14,6 +14,10 @@ describe("toCsv", () => {
     );
   });
 
+  it("quotes a semicolon so a locale that splits on it cannot start a formula mid-cell", () => {
+    expect(toCsv(["a"], [['Acme;=HYPERLINK("x")']])).toBe('a\r\n"Acme;=HYPERLINK(""x"")"\r\n');
+  });
+
   it("writes null as an empty field and booleans as words", () => {
     expect(toCsv(["a", "b", "c"], [[null, "x", true]])).toBe("a,b,c\r\n,x,true\r\n");
   });

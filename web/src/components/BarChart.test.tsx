@@ -28,4 +28,11 @@ describe("BarChart", () => {
     expect(widths[0]).toBeCloseTo((720 - 64 - 200) * 0.78);
     expect(widths[1]).toBeCloseTo(((widths[0] ?? 0) * 61204880) / 118400215.5);
   });
+
+  it("draws a negative value as an empty bar with its value beside it, as the div chart did", () => {
+    render(<BarChart result={{ ...ANSWERED, rows: [["NBA", 100], ["WNBA", -100]] }} />);
+    const bar = screen.getByRole("img", { name: "WNBA: -$100.00" });
+    expect(bar.getAttribute("width")).toBe("0");
+    expect(Number(screen.getByText("-$100.00").getAttribute("x"))).toBe(Number(bar.getAttribute("x")) + 12);
+  });
 });

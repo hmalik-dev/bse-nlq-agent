@@ -27,9 +27,11 @@ another dependency and no safety gain here).
 
 **One row per seat in `tickets`.** "How many tickets were sold" becomes a plain
 `COUNT(*)`, which is the shape the model handles most reliably. The cost is size:
-2.6M ticket rows, 1.1M orders, about 289MB on disk, seeded in 12 seconds.
-Aggregates over the whole ticket table still return in under 350ms, and the
-container seeds at startup rather than baking that file into the image. Rejected:
+about 5M ticket rows and 2M orders once the data pass lands, roughly 650MB on
+disk and a 40-second seed, with the measured figures recorded in
+`docs/data-spec.md`. Aggregates over the whole ticket table still return in under
+a second, and the container seeds at startup rather than baking that file into
+the image. Rejected:
 an order-line table with a quantity column, which needs `SUM(quantity)` and invites
 off-by-one errors in generated SQL.
 
@@ -85,6 +87,13 @@ is the part being graded hardest.
 **The database is generated, not committed.** `seed.py` builds it relative to the
 current date, so "last month" always has data in it. The seed is deterministic
 (fixed RNG seed), so two machines produce identical data for the same date.
+
+**The seed and the agent share one "today".** `seed_database()` defaults to
+`config.today()`, which honours `NLQ_TODAY`, so a pinned date drives the seed, the
+agent's relative-date resolution and the evaluation together. Without that, a
+container seeded on the real date and an agent pinned to another would disagree on
+what "last month" holds. Rejected: pinning only the agent (the "nothing bought
+after today" guarantee would silently break).
 
 **Deliberate ambiguity in the data.** Refunded tickets, comps priced at zero, a
 separate `fee` column, and a purchase date that is not the event date. These make
@@ -150,6 +159,14 @@ is **BSE Insights**, and the real BSE, Nets, Liberty and Barclays Center marks s
 in `web/public/brand/`, supplied by the candidate rather than scraped. A small
 `Demo · synthetic data` pill in the footer keeps the demo honest without making it
 look like a mock-up.
+
+**The design canvas is a style reference, not data.** Everything in
+`design-plan/BSE Insights.dc.html` that looks like data is illustrative: event
+names, categories, numbers, column names and SQL text. The running app always
+shows the real dataset, and parity is judged on layout, tokens, typography and
+component presence, never on data content. The one content change is the fourth
+example chip: the canvas put the Liberty mark on an opponent question, so that chip
+becomes a Liberty question in the same position.
 
 **The interface is dark because the assets require it.** The BSE and Nets marks are
 solid white artwork, so they are invisible on light surfaces. The accent palette is

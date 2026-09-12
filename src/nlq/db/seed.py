@@ -16,6 +16,7 @@ from dataclasses import dataclass
 from datetime import date, timedelta
 from pathlib import Path
 
+from nlq import config
 from nlq.config import DATABASE_PATH, SCHEMA_PATH
 
 RNG_SEED = 20260911
@@ -59,30 +60,60 @@ HOME_CLUBS = (
 
 # (name, draw multiplier) — bigger names sell more seats at higher prices.
 NBA_OPPONENTS = (
-    ("Los Angeles Lakers", 1.60), ("New York Knicks", 1.55), ("Golden State Warriors", 1.50),
-    ("Boston Celtics", 1.45), ("Philadelphia 76ers", 1.25), ("Milwaukee Bucks", 1.20),
-    ("Miami Heat", 1.20), ("Denver Nuggets", 1.20), ("Dallas Mavericks", 1.20),
-    ("Oklahoma City Thunder", 1.20), ("Phoenix Suns", 1.15), ("Cleveland Cavaliers", 1.10),
-    ("Chicago Bulls", 1.10), ("San Antonio Spurs", 1.10), ("LA Clippers", 1.10),
-    ("Minnesota Timberwolves", 1.05), ("Atlanta Hawks", 1.00), ("Toronto Raptors", 1.00),
-    ("Indiana Pacers", 1.00), ("Houston Rockets", 1.00), ("Orlando Magic", 0.95),
-    ("Memphis Grizzlies", 0.95), ("New Orleans Pelicans", 0.95), ("Sacramento Kings", 0.95),
-    ("Detroit Pistons", 0.90), ("Portland Trail Blazers", 0.90), ("Charlotte Hornets", 0.85),
-    ("Washington Wizards", 0.85), ("Utah Jazz", 0.85),
+    ("Los Angeles Lakers", 1.60),
+    ("New York Knicks", 1.55),
+    ("Golden State Warriors", 1.50),
+    ("Boston Celtics", 1.45),
+    ("Philadelphia 76ers", 1.25),
+    ("Milwaukee Bucks", 1.20),
+    ("Miami Heat", 1.20),
+    ("Denver Nuggets", 1.20),
+    ("Dallas Mavericks", 1.20),
+    ("Oklahoma City Thunder", 1.20),
+    ("Phoenix Suns", 1.15),
+    ("Cleveland Cavaliers", 1.10),
+    ("Chicago Bulls", 1.10),
+    ("San Antonio Spurs", 1.10),
+    ("LA Clippers", 1.10),
+    ("Minnesota Timberwolves", 1.05),
+    ("Atlanta Hawks", 1.00),
+    ("Toronto Raptors", 1.00),
+    ("Indiana Pacers", 1.00),
+    ("Houston Rockets", 1.00),
+    ("Orlando Magic", 0.95),
+    ("Memphis Grizzlies", 0.95),
+    ("New Orleans Pelicans", 0.95),
+    ("Sacramento Kings", 0.95),
+    ("Detroit Pistons", 0.90),
+    ("Portland Trail Blazers", 0.90),
+    ("Charlotte Hornets", 0.85),
+    ("Washington Wizards", 0.85),
+    ("Utah Jazz", 0.85),
 )
 
 WNBA_OPPONENTS = (
-    ("Indiana Fever", 1.50), ("Las Vegas Aces", 1.35), ("Seattle Storm", 1.15),
-    ("Phoenix Mercury", 1.10), ("Minnesota Lynx", 1.05), ("Chicago Sky", 1.05),
-    ("Los Angeles Sparks", 1.05), ("Connecticut Sun", 1.00), ("Dallas Wings", 1.00),
-    ("Golden State Valkyries", 1.00), ("Washington Mystics", 0.95), ("Atlanta Dream", 0.95),
+    ("Indiana Fever", 1.50),
+    ("Las Vegas Aces", 1.35),
+    ("Seattle Storm", 1.15),
+    ("Phoenix Mercury", 1.10),
+    ("Minnesota Lynx", 1.05),
+    ("Chicago Sky", 1.05),
+    ("Los Angeles Sparks", 1.05),
+    ("Connecticut Sun", 1.00),
+    ("Dallas Wings", 1.00),
+    ("Golden State Valkyries", 1.00),
+    ("Washington Mystics", 0.95),
+    ("Atlanta Dream", 0.95),
 )
 
 # Fictional acts, so no real performer is implied to have played these dates.
 SPECIAL_ACTS = (
-    ("Neon Harbor", "Concert", 1, 1.30), ("Kaia Monroe", "Concert", 1, 1.45),
-    ("Static Parade", "Concert", 1, 1.15), ("The Velvet Line", "Concert", 2, 1.00),
-    ("Rumble & Vine", "Concert", 2, 0.95), ("Sofia Reign", "Concert", 1, 1.35),
+    ("Neon Harbor", "Concert", 1, 1.30),
+    ("Kaia Monroe", "Concert", 1, 1.45),
+    ("Static Parade", "Concert", 1, 1.15),
+    ("The Velvet Line", "Concert", 2, 1.00),
+    ("Rumble & Vine", "Concert", 2, 0.95),
+    ("Sofia Reign", "Concert", 1, 1.35),
     ("Bridge & Tunnel Collective", "Concert", 3, 0.80),
     ("Harbor Lights Session", "Concert", 3, 0.75),
     ("Danny Ortiz: Third Act", "Comedy", 3, 0.85),
@@ -95,19 +126,78 @@ SPECIAL_ACTS = (
 )
 
 FIRST_NAMES = (
-    "Alex", "Maria", "Jordan", "Priya", "Marcus", "Nina", "Devon", "Sofia", "Elijah", "Grace",
-    "Tomas", "Aisha", "Ryan", "Leila", "Andre", "Chloe", "Hassan", "Erin", "Victor", "Dana",
-    "Malik", "Rosa", "Kevin", "Yuki", "Omar", "Beth", "Carlos", "Ivy", "Nathan", "Simone",
+    "Alex",
+    "Maria",
+    "Jordan",
+    "Priya",
+    "Marcus",
+    "Nina",
+    "Devon",
+    "Sofia",
+    "Elijah",
+    "Grace",
+    "Tomas",
+    "Aisha",
+    "Ryan",
+    "Leila",
+    "Andre",
+    "Chloe",
+    "Hassan",
+    "Erin",
+    "Victor",
+    "Dana",
+    "Malik",
+    "Rosa",
+    "Kevin",
+    "Yuki",
+    "Omar",
+    "Beth",
+    "Carlos",
+    "Ivy",
+    "Nathan",
+    "Simone",
 )
 LAST_NAMES = (
-    "Alvarez", "Bennett", "Chen", "Diallo", "Espinoza", "Foster", "Greco", "Hughes", "Ibrahim",
-    "Jensen", "Kowalski", "Lombardi", "Mercado", "Novak", "Okafor", "Patel", "Quinn", "Ramirez",
-    "Silva", "Thompson", "Ueda", "Vasquez", "Walsh", "Xu", "Yates", "Zimmer",
+    "Alvarez",
+    "Bennett",
+    "Chen",
+    "Diallo",
+    "Espinoza",
+    "Foster",
+    "Greco",
+    "Hughes",
+    "Ibrahim",
+    "Jensen",
+    "Kowalski",
+    "Lombardi",
+    "Mercado",
+    "Novak",
+    "Okafor",
+    "Patel",
+    "Quinn",
+    "Ramirez",
+    "Silva",
+    "Thompson",
+    "Ueda",
+    "Vasquez",
+    "Walsh",
+    "Xu",
+    "Yates",
+    "Zimmer",
 )
 BUYER_CITIES = (
-    ("Brooklyn", "NY"), ("New York", "NY"), ("Queens", "NY"), ("Jersey City", "NJ"),
-    ("Hoboken", "NJ"), ("Uniondale", "NY"), ("Garden City", "NY"), ("Stamford", "CT"),
-    ("Newark", "NJ"), ("Yonkers", "NY"), ("Philadelphia", "PA"), ("Boston", "MA"),
+    ("Brooklyn", "NY"),
+    ("New York", "NY"),
+    ("Queens", "NY"),
+    ("Jersey City", "NJ"),
+    ("Hoboken", "NJ"),
+    ("Uniondale", "NY"),
+    ("Garden City", "NY"),
+    ("Stamford", "CT"),
+    ("Newark", "NJ"),
+    ("Yonkers", "NY"),
+    ("Philadelphia", "PA"),
+    ("Boston", "MA"),
 )
 
 
@@ -133,9 +223,7 @@ MIDSIZE_TIERS = (
     Tier("Lower Bowl", 0.44, 120.0, tuple(str(n) for n in range(101, 121))),
     Tier("Upper Bowl", 0.50, 58.0, tuple(str(n) for n in range(201, 221))),
 )
-GA_TIERS = (
-    Tier("General Admission", 1.0, 65.0, ("FLOOR", "BALCONY")),
-)
+GA_TIERS = (Tier("General Admission", 1.0, 65.0, ("FLOOR", "BALCONY")),)
 VENUE_TIERS = {1: ARENA_TIERS, 2: MIDSIZE_TIERS, 3: GA_TIERS}
 VENUE_CAPACITY = {venue_id: capacity for venue_id, _, _, _, capacity in VENUES}
 
@@ -156,8 +244,15 @@ class Event:
 
     def row(self) -> tuple[object, ...]:
         return (
-            self.event_id, self.venue_id, self.name, self.category, self.home_team_id,
-            self.away_team_id, self.event_date.isoformat(), self.season, self.is_playoff,
+            self.event_id,
+            self.venue_id,
+            self.name,
+            self.category,
+            self.home_team_id,
+            self.away_team_id,
+            self.event_date.isoformat(),
+            self.season,
+            self.is_playoff,
             self.announced_date.isoformat(),
         )
 
@@ -214,19 +309,34 @@ def _nba_events(rng: random.Random, start_year: int, next_id: int) -> list[Event
     season = f"{start_year}-{str(start_year + 1)[2:]}"
     opponents = list(NBA_OPPONENTS)
     rng.shuffle(opponents)
-    dates = _spread_dates(rng, date(start_year, 10, 22), date(start_year + 1, 4, 12),
-                          NBA_HOME_GAMES)
+    dates = _spread_dates(
+        rng, date(start_year, 10, 22), date(start_year + 1, 4, 12), NBA_HOME_GAMES
+    )
     events = []
     for index, event_date in enumerate(dates):
         name, draw = opponents[index % len(opponents)]
-        events.append(_sport_event(next_id + index, "NBA", NETS_TEAM_ID, name, draw, event_date,
-                                   season, is_playoff=0))
-    playoff_dates = _spread_dates(rng, date(start_year + 1, 4, 20), date(start_year + 1, 5, 28),
-                                  NBA_PLAYOFF_HOME_GAMES)
+        events.append(
+            _sport_event(
+                next_id + index, "NBA", NETS_TEAM_ID, name, draw, event_date, season, is_playoff=0
+            )
+        )
+    playoff_dates = _spread_dates(
+        rng, date(start_year + 1, 4, 20), date(start_year + 1, 5, 28), NBA_PLAYOFF_HOME_GAMES
+    )
     for index, event_date in enumerate(playoff_dates):
         name, draw = opponents[index % len(opponents)]
-        events.append(_sport_event(next_id + NBA_HOME_GAMES + index, "NBA", NETS_TEAM_ID, name,
-                                   draw * 1.35, event_date, season, is_playoff=1))
+        events.append(
+            _sport_event(
+                next_id + NBA_HOME_GAMES + index,
+                "NBA",
+                NETS_TEAM_ID,
+                name,
+                draw * 1.35,
+                event_date,
+                season,
+                is_playoff=1,
+            )
+        )
     return events
 
 
@@ -238,19 +348,48 @@ def _wnba_events(rng: random.Random, year: int, next_id: int) -> list[Event]:
     events = []
     for index, event_date in enumerate(dates):
         name, draw = opponents[index % len(opponents)]
-        events.append(_sport_event(next_id + index, "WNBA", LIBERTY_TEAM_ID, name, draw,
-                                   event_date, season, is_playoff=0))
-    playoff_dates = _spread_dates(rng, date(year, 9, 14), date(year, 10, 8),
-                                  WNBA_PLAYOFF_HOME_GAMES)
+        events.append(
+            _sport_event(
+                next_id + index,
+                "WNBA",
+                LIBERTY_TEAM_ID,
+                name,
+                draw,
+                event_date,
+                season,
+                is_playoff=0,
+            )
+        )
+    playoff_dates = _spread_dates(
+        rng, date(year, 9, 14), date(year, 10, 8), WNBA_PLAYOFF_HOME_GAMES
+    )
     for index, event_date in enumerate(playoff_dates):
         name, draw = opponents[index % len(opponents)]
-        events.append(_sport_event(next_id + WNBA_HOME_GAMES + index, "WNBA", LIBERTY_TEAM_ID,
-                                   name, draw * 1.4, event_date, season, is_playoff=1))
+        events.append(
+            _sport_event(
+                next_id + WNBA_HOME_GAMES + index,
+                "WNBA",
+                LIBERTY_TEAM_ID,
+                name,
+                draw * 1.4,
+                event_date,
+                season,
+                is_playoff=1,
+            )
+        )
     return events
 
 
-def _sport_event(event_id: int, category: str, home_team_id: int, opponent: str, draw: float,
-                 event_date: date, season: str, is_playoff: int) -> Event:
+def _sport_event(
+    event_id: int,
+    category: str,
+    home_team_id: int,
+    opponent: str,
+    draw: float,
+    event_date: date,
+    season: str,
+    is_playoff: int,
+) -> Event:
     opponent_ids = NBA_OPPONENT_IDS if category == "NBA" else WNBA_OPPONENT_IDS
     away_id = opponent_ids[opponent]
     home_name = "Brooklyn Nets" if home_team_id == NETS_TEAM_ID else "New York Liberty"
@@ -278,19 +417,21 @@ def _special_events(rng: random.Random, start: date, end: date, next_id: int) ->
     events = []
     for index, event_date in enumerate(dates):
         name, category, venue_id, draw = SPECIAL_ACTS[index % len(SPECIAL_ACTS)]
-        events.append(Event(
-            event_id=next_id + index,
-            venue_id=venue_id,
-            name=f"{name} — {event_date:%b %-d, %Y}",  # dated, so two nights read distinctly
-            category=category,
-            home_team_id=None,
-            away_team_id=None,
-            event_date=event_date,
-            season=None,
-            is_playoff=0,
-            announced_date=event_date - timedelta(days=ON_SALE_LEAD_DAYS),
-            draw=draw * rng.uniform(0.85, 1.2),
-        ))
+        events.append(
+            Event(
+                event_id=next_id + index,
+                venue_id=venue_id,
+                name=f"{name} — {event_date:%b %-d, %Y}",  # dated, so two nights read distinctly
+                category=category,
+                home_team_id=None,
+                away_team_id=None,
+                event_date=event_date,
+                season=None,
+                is_playoff=0,
+                announced_date=event_date - timedelta(days=ON_SALE_LEAD_DAYS),
+                draw=draw * rng.uniform(0.85, 1.2),
+            )
+        )
     return events
 
 
@@ -318,15 +459,17 @@ def _build_customers(rng: random.Random, today: date) -> list[tuple[object, ...]
         last = rng.choice(LAST_NAMES)
         city, state = rng.choice(BUYER_CITIES)
         created = today - timedelta(days=rng.randint(30, 1500))
-        rows.append((
-            customer_id,
-            f"{first} {last}",
-            f"{first.lower()}.{last.lower()}{customer_id}@example.com",
-            city,
-            state,
-            1 if rng.random() < 0.08 else 0,
-            created.isoformat(),
-        ))
+        rows.append(
+            (
+                customer_id,
+                f"{first} {last}",
+                f"{first.lower()}.{last.lower()}{customer_id}@example.com",
+                city,
+                state,
+                1 if rng.random() < 0.08 else 0,
+                created.isoformat(),
+            )
+        )
     return rows
 
 
@@ -378,8 +521,9 @@ def _ticket_status(rng: random.Random) -> str:
     return "sold"
 
 
-def _build_sales(rng: random.Random, events: list[Event], today: date,
-                 scale: float) -> tuple[list[tuple[object, ...]], list[tuple[object, ...]]]:
+def _build_sales(
+    rng: random.Random, events: list[Event], today: date, scale: float
+) -> tuple[list[tuple[object, ...]], list[tuple[object, ...]]]:
     """Group seats into orders, one order per buyer per event."""
     orders: list[tuple[object, ...]] = []
     tickets: list[tuple[object, ...]] = []
@@ -393,23 +537,33 @@ def _build_sales(rng: random.Random, events: list[Event], today: date,
             group = min(seats_left, rng.choices(GROUP_SIZES, GROUP_WEIGHTS)[0])
             seats_left -= group
             order_id += 1
-            orders.append((
-                order_id,
-                _pick_customer(rng),
-                _order_timestamp(event, today, rng),
-                rng.choices(CHANNELS, CHANNEL_WEIGHTS)[0],
-                rng.choice(PROMO_CODES),
-            ))
+            orders.append(
+                (
+                    order_id,
+                    _pick_customer(rng),
+                    _order_timestamp(event, today, rng),
+                    rng.choices(CHANNELS, CHANNEL_WEIGHTS)[0],
+                    rng.choice(PROMO_CODES),
+                )
+            )
             tier = rng.choices(tiers, weights)[0]
             price = _ticket_price(tier, event, today, rng)
             for _ in range(group):
                 ticket_id += 1
                 status = _ticket_status(rng)
                 paid = 0.0 if status == "comp" else price
-                tickets.append((
-                    ticket_id, order_id, event.event_id, rng.choice(tier.sections), tier.name,
-                    paid, round(paid * FEE_RATE, 2), status,
-                ))
+                tickets.append(
+                    (
+                        ticket_id,
+                        order_id,
+                        event.event_id,
+                        rng.choice(tier.sections),
+                        tier.name,
+                        paid,
+                        round(paid * FEE_RATE, 2),
+                        status,
+                    )
+                )
     return orders, tickets
 
 
@@ -419,14 +573,17 @@ def _pick_customer(rng: random.Random) -> int:
     return rng.randint(1, CUSTOMER_COUNT)
 
 
-def seed_database(db_path: Path = DATABASE_PATH, *, today: date | None = None,
-                  scale: float = 1.0) -> dict[str, int]:
+def seed_database(
+    db_path: Path = DATABASE_PATH, *, today: date | None = None, scale: float = 1.0
+) -> dict[str, int]:
     """Create `db_path` from scratch and fill it with generated data.
 
-    `scale` shrinks attendance per event; tests use a small value to keep the
-    fixture fast. Row counts are returned for logging.
+    `today` defaults to `config.today()`, so NLQ_TODAY pins the seed, the agent
+    and the evaluation to one date. `scale` shrinks attendance per event; tests
+    use a small value to keep the fixture fast. Row counts are returned for
+    logging.
     """
-    as_of = today or date.today()
+    as_of = today or config.today()
     rng = random.Random(RNG_SEED)
     db_path.parent.mkdir(parents=True, exist_ok=True)
     db_path.unlink(missing_ok=True)
@@ -442,8 +599,10 @@ def seed_database(db_path: Path = DATABASE_PATH, *, today: date | None = None,
         conn.executescript(SCHEMA_PATH.read_text(encoding="utf-8"))
         conn.executemany("INSERT INTO venues VALUES (?, ?, ?, ?, ?)", VENUES)
         conn.executemany("INSERT INTO teams VALUES (?, ?, ?, ?)", _team_rows())
-        conn.executemany("INSERT INTO events VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                         [event.row() for event in events])
+        conn.executemany(
+            "INSERT INTO events VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            [event.row() for event in events],
+        )
         conn.executemany("INSERT INTO customers VALUES (?, ?, ?, ?, ?, ?, ?)", customers)
         conn.executemany("INSERT INTO orders VALUES (?, ?, ?, ?, ?)", orders)
         conn.executemany("INSERT INTO tickets VALUES (?, ?, ?, ?, ?, ?, ?, ?)", tickets)

@@ -1,6 +1,7 @@
 # A local demo image: the built interface and the API in one container that
 # seeds its own database on first start (see docker/entrypoint.sh). Plain by
-# design: no health check, no non-root user, nothing production-shaped.
+# design: no health check, nothing production-shaped, but the server does not
+# run as root (docs/security.md).
 
 # Stage 1: build the web interface into src/nlq/static.
 FROM node:24-alpine AS web
@@ -27,6 +28,10 @@ COPY --from=web /build/src/nlq/static src/nlq/static
 RUN uv sync --frozen --no-dev
 
 COPY docker/entrypoint.sh docker/entrypoint.sh
-RUN mkdir -p /data
+# The app files stay root-owned, so the server cannot rewrite them; only /data,
+# where the database is seeded, belongs to it.
+RUN useradd --system --no-create-home --uid 10001 nlq \
+    && mkdir -p /data && chown nlq:nlq /data
+USER nlq
 EXPOSE 8000
 ENTRYPOINT ["/app/docker/entrypoint.sh"]

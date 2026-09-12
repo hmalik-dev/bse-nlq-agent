@@ -1,31 +1,28 @@
 ---
 name: api-boundary-audit
-description: Audit conclusions for the FastAPI surface (src/nlq/api.py — /api/ask, /schema, /examples, /health, SPA catch-all) — what was proven safe and the two accepted low-severity notes
+description: Audit conclusions for the FastAPI surface (src/nlq/api.py) — traversal probes that passed, what was fixed since BSE-6, and the accepted low notes not to re-flag
 metadata:
   type: project
 ---
 
-Audited 2026-09-12 on branch worktree-BSE-6 (BSE-6: `api.py`, `agent/fake.py`, `examples.py`).
-Verdict PASS. Out of scope by ticket decision: auth, rate limiting, spend guard, sessions,
-CORS/CSP. App is run locally by one reviewer with their own key.
+BSE-6 (2026-09-12) PASS; re-verified in BSE-23 whole-app audit (2026-09-12).
+Out of scope by product decision: auth, rate limiting, spend guard, sessions. Single local
+reviewer with their own key.
 
-Proven safe by probing the running app — do not re-derive unless `_serve_ui` changes:
-- `_serve_ui`'s catch-all resolves then checks `is_relative_to(static_dir.resolve())`, so
-  `/../secret`, `//etc/hosts`, `/%2e%2e/...` and a **symlink inside static pointing out** all
-  fall through to `index.html`. `/api/...` is 404'd before the filesystem is touched.
-- Agent exceptions are caught in `ask`, logged with `logger.exception` (fixed message, no
-  question, no body) and answered as `error`/`internal` with a fixed sentence.
-- `Executor.run` opens a fresh connection per call, so FastAPI's threadpool is fine and the
-  lazy `_agent` race only ever builds one extra stateless Agent.
-- `NLQ_FAKE_AGENT` defaults off and bypasses nothing security-relevant.
+Proven safe (re-derive only if `_serve_ui`/`_static_file` change): `..`, `%2e%2e`, `..%2f`,
+absolute `//path`, `/assets/..` and a symlink out of static all 404 (BSE-23 changed
+out-of-root from index fallback to 404); `/%00` now serves index, not 500. Agent exceptions
+become fixed `internal` "Something went wrong." (probe with key/path in the exception: no
+leak). `DatabaseMissing` no longer carries the path (logged only). Question cap is now in
+both `AskRequest` and `ask.py`.
 
-Accepted low notes (advisory, already reported once — do not re-flag as blockers):
-1. `db/connection.py:22` puts the absolute database path in `DatabaseMissing`, which now
-   reaches the JSON body of `POST /api/ask`. Home-directory disclosure only; `FakeAgent`'s
-   `ERROR_MESSAGES["database_missing"]` is the path-free wording if it ever matters.
-2. `GET /%00` raises `ValueError: embedded null character` out of `spa` → 500
-   "Internal Server Error" (no detail in the body, traceback to the server log only).
-3. No request-body size cap before pydantic parses; same class as the out-of-scope rate limit.
+Accepted low notes (advisory, do not re-flag as blockers):
+1. No request-body size cap; FastAPI's 422 echoes `input`, so a 5 MB question returns 5 MB.
+2. `/docs` and `/openapi.json` are exposed (200). Local-only app.
+3. `text/plain` / form POSTs to /api/ask get 422 (no CSRF via simple requests); no CORS
+   middleware, preflight 405.
 
-See also [[llm-boundary-audit]] (`map_api_error` detail, same single-user rationale) and
-[[sql-guard-bypasses]].
+Raised in BSE-23 as low finding: any `Host` header gets 200 (no TrustedHostMiddleware), so a
+DNS-rebinding page can drive /api/ask and spend the key. If the caller rejects it as a
+product decision, move it to the accepted list.
+See [[llm-boundary-audit]], [[sql-guard-bypasses]].

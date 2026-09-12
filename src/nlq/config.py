@@ -26,6 +26,7 @@ DEFAULT_MAX_ROWS = 500
 DEFAULT_MODEL = "claude-sonnet-5"
 DEFAULT_LLM_TIMEOUT_S = 60
 DEFAULT_MAX_QUESTION_CHARS = 500
+DEFAULT_ALLOWED_HOSTS = "localhost,127.0.0.1"
 
 
 def load_project_env() -> None:
@@ -85,6 +86,16 @@ def llm_timeout_s() -> int:
 def max_question_chars() -> int:
     """The longest question the API accepts; anything longer is refused before the agent."""
     return _int_env("NLQ_MAX_QUESTION_CHARS", DEFAULT_MAX_QUESTION_CHARS)
+
+
+def allowed_hosts() -> list[str]:
+    """The host names the API answers to; anything else is refused (DNS rebinding).
+
+    Local by default. A deployment behind its own domain sets NLQ_ALLOWED_HOSTS
+    to a comma-separated list.
+    """
+    raw = _str_env("NLQ_ALLOWED_HOSTS", DEFAULT_ALLOWED_HOSTS)
+    return [host.strip() for host in raw.split(",") if host.strip()]
 
 
 def fake_agent() -> bool:

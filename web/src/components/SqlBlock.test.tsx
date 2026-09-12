@@ -17,6 +17,13 @@ describe("SqlBlock", () => {
     expect(screen.getByText("events").className).toBe("");
   });
 
+  it("renders markup in the statement as text, never as an element", () => {
+    const { container } = render(<SqlBlock sql={"SELECT '<img src=x onerror=alert(1)>' -- <script>alert(1)</script>"} />);
+    expect(screen.getByText("'<img src=x onerror=alert(1)>'")).toBeTruthy();
+    expect(screen.getByText("-- <script>alert(1)</script>")).toBeTruthy();
+    expect(container.querySelectorAll("img, script")).toHaveLength(0);
+  });
+
   it("copies the SQL and says Copied for two seconds", async () => {
     vi.useFakeTimers();
     const writeText = vi.fn().mockResolvedValue(undefined);

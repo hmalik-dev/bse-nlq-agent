@@ -16,10 +16,11 @@ from nlq.agent.agent import (
     EMPTY_SUGGESTIONS,
     INTERNAL_MESSAGE,
     Agent,
+    chart_for,
 )
 from nlq.agent.answer import AnswerWriter
 from nlq.agent.context import load_examples
-from nlq.agent.executor import Executor
+from nlq.agent.executor import Executor, QueryResult
 from nlq.agent.fake import FakeAgent
 from nlq.agent.llm import SqlWriter
 from nlq.agent.models import AnswerText, AskResult, SqlPlan
@@ -134,6 +135,23 @@ def test_answered_with_a_chart_when_two_columns_fit_one(db_path: Path) -> None:
     assert len(answer_client.calls) == 1
 
 
+@pytest.mark.parametrize(
+    ("columns", "rows"),
+    [
+        (["year", "tickets"], [[2025, 10], [2026, 12]]),  # the label column is not text
+        (["category", "top_event"], [["NBA", "Nets vs Knicks"], ["WNBA", "Liberty vs Aces"]]),
+        (["category", "tickets"], [["NBA", 10]]),  # one bar is not a comparison
+        (["category", "tickets"], [[f"c{n}", n] for n in range(26)]),  # too many bars to read
+    ],
+    ids=["numeric-labels", "text-values", "one-row", "twenty-six-rows"],
+)
+def test_no_chart_is_offered_for_an_ambiguous_shape(columns: list[str], rows: list[list]) -> None:
+    query = QueryResult(
+        columns=columns, rows=rows, row_count=len(rows), truncated=False, elapsed_ms=1
+    )
+    assert chart_for(query) is None
+
+
 def test_answered_without_a_chart_when_there_are_three_columns(db_path: Path) -> None:
     agent, _, _ = make_agent(db_path, [plan(THREE_COLUMN_SQL)])
     result = agent.ask(QUESTION)
@@ -223,6 +241,7 @@ def test_a_repaired_query_succeeds_and_the_repair_turn_carries_the_error(db_path
 
     assert result.status == "answered"
     assert result.trace.repairs == 1
+    assert [step.name for step in result.trace.steps] == STEP_NAMES  # a repair adds time, not steps
     assert len(sql_client.calls) == 2
     repair_turn = sql_client.calls[1]["messages"][-1]["content"]
     assert UNKNOWN_TABLE_SQL in repair_turn

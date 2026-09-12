@@ -145,6 +145,10 @@ def _cte_reference_ids(statement: exp.Expression) -> set[int]:
     `SELECT * FROM sqlite_master WHERE 1 IN (WITH sqlite_master AS (...) SELECT ...)`
     exempt the outer read of a table the allowlist never permitted.
 
+    The match is on the table's own name among the scope's CTEs, never its alias:
+    in `FROM (SELECT 1) AS x, sqlite_master AS x` the alias `x` is a subquery
+    source, and matching on it would exempt `sqlite_master`.
+
     If sqlglot cannot resolve the scopes, nothing is exempted and every table is
     checked, which errs towards refusing rather than allowing.
     """
@@ -156,8 +160,7 @@ def _cte_reference_ids(statement: exp.Expression) -> set[int]:
         id(table)
         for scope in scopes
         for table in scope.tables
-        if not isinstance(scope.sources.get(table.alias_or_name), exp.Table)
-        and table.alias_or_name in scope.sources
+        if not table.args.get("db") and table.name in scope.cte_sources
     }
 
 

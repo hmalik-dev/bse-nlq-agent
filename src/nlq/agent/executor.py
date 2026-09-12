@@ -17,9 +17,9 @@ from nlq.db.connection import open_read_only
 # callback costs nothing on a query that returns quickly.
 PROGRESS_INSTRUCTIONS = 1000
 
-# The row cap bounds how many rows come back, not how large one row is:
-# `SELECT hex(zeroblob(20000000))` returns a handful of rows, finishes inside
-# the deadline, and still exhausts memory. This bounds the result in bytes too.
+# The row cap bounds how many rows come back, not how large they are. SQLite's
+# own length limit (db/connection.py) caps one value; this caps the whole result,
+# so 500 rows of large values cannot exhaust memory either.
 MAX_RESULT_BYTES = 8_000_000
 _ASSUMED_VALUE_BYTES = 8  # numbers and NULLs, which are not worth measuring
 

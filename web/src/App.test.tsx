@@ -98,6 +98,28 @@ describe("App", () => {
     expect(screen.getByRole("heading", { name: "Ask anything about ticket sales" })).toBeTruthy();
   });
 
+  it("renders markup in a question, the answer and a cell as text in the answer, table and rail", async () => {
+    const payload = "<img src=x onerror=alert(1)>";
+    const hostile = { ...ANSWERED, answer: `Answer ${payload}`, columns: ["name", "n"], rows: [[payload, 1]], chart: null };
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((url: string, init?: RequestInit) => {
+        if (url === "/api/examples") return Promise.resolve(jsonResponse(EXAMPLES));
+        const { question } = JSON.parse(String(init?.body)) as { question: string };
+        return Promise.resolve(jsonResponse({ ...hostile, question }));
+      }),
+    );
+    const user = userEvent.setup();
+    render(<App />);
+    await user.type(await screen.findByLabelText("Your question"), `Top ${payload}{Enter}`);
+
+    expect(await screen.findByText(`Answer ${payload}`)).toBeTruthy();
+    expect(screen.getByRole("cell", { name: payload })).toBeTruthy();
+    const rail = screen.getByRole("navigation", { name: "Session history" });
+    expect(rail.textContent).toContain(`Top ${payload}`);
+    expect(document.querySelector('img[src="x"]')).toBeNull();
+  });
+
   it("shows the pipeline steps while the request is in flight", async () => {
     const user = userEvent.setup();
     let resolve: (value: Response) => void = () => undefined;

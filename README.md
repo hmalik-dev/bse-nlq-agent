@@ -310,6 +310,9 @@ specification are in `docs/data-spec.md`.
   and states it, because a single-question tool has no conversation to ask in.
 - *SQLite over Postgres or DuckDB:* nothing to install and a real read-only
   guarantee, at the price of a smaller SQL dialect.
+- *Local, single-user security:* no auth, rate limit or spend guard, because the
+  person asking owns the key. Every trust boundary, its control and the test
+  that proves it are in [`docs/security.md`](docs/security.md).
 - *Sonnet over Haiku:* almost three times the cost per question for two more
   right answers out of eighteen, the right trade when a wrong number costs more
   than a cent.

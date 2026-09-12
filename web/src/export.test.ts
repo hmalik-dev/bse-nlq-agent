@@ -68,6 +68,17 @@ describe("serializeChart", () => {
     expect(text).toMatch(/^<svg xmlns="http:\/\/www\.w3\.org\/2000\/svg"><rect width="100%" height="100%" fill="#16161A"\/><rect\/><\/svg>$/);
     expect(svg.childNodes).toHaveLength(1);
   });
+
+  it("escapes markup in a label, so the file carries no script and no live element", () => {
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    label.textContent = "<script>alert(1)</script><img src=x onerror=alert(1)>";
+    svg.appendChild(label);
+    const text = serializeChart(svg);
+    expect(text).toContain("<text>&lt;script&gt;alert(1)&lt;/script&gt;&lt;img src=x onerror=alert(1)&gt;</text>");
+    const parsed = new DOMParser().parseFromString(text, "image/svg+xml");
+    expect(parsed.querySelectorAll("script, img")).toHaveLength(0);
+  });
 });
 
 describe("downloadFile", () => {

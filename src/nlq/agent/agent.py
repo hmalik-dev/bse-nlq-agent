@@ -17,7 +17,7 @@ from typing import Any
 
 from nlq import config
 from nlq.agent.answer import AnswerWriter
-from nlq.agent.context import PromptContext, build_context
+from nlq.agent.context import Example, PromptContext, build_context, load_examples
 from nlq.agent.errors import ModelRefused, NlqError, UnsafeSql
 from nlq.agent.executor import Executor, QueryResult
 from nlq.agent.llm import SqlWriter
@@ -47,10 +47,6 @@ BLOCKED_ANSWER = (
     "This request was refused before anything ran: the agent only reads data, "
     "and its database connection is read-only."
 )
-EMPTY_SUGGESTIONS = [
-    "Try a wider date range.",
-    "Try naming the club, category or channel differently.",
-]
 INTERNAL_MESSAGE = "Something went wrong."
 
 
@@ -106,7 +102,7 @@ class Agent:
                     return run.failed("repairs_exhausted", error.message)
                 attempts.append(Attempt(sql=plan.sql or "", error=error.message))
                 continue
-            return self._answer(question, plan, query, run)
+            return self._answer(question, plan, query, run, context)
 
     def _write_sql(
         self, question: str, context: PromptContext, attempts: list[Attempt], run: _Run
@@ -127,14 +123,16 @@ class Agent:
         with run.step("Running query"):
             return self.executor.run(guarded.sql)
 
-    def _answer(self, question: str, plan: SqlPlan, query: QueryResult, run: _Run) -> AskResult:
+    def _answer(
+        self, question: str, plan: SqlPlan, query: QueryResult, run: _Run, context: PromptContext
+    ) -> AskResult:
         if query.row_count == 0:
             return run.finish(
                 "empty",
                 sql=run.sql,
                 assumptions=plan.assumptions,
                 columns=query.columns,
-                suggestions=EMPTY_SUGGESTIONS,
+                suggestions=example_questions(context.examples),
             )
         with run.step("Writing answer"):
             answer = _priced(
@@ -186,14 +184,22 @@ def _declined(run: _Run, plan: SqlPlan, context: PromptContext) -> AskResult:
     return run.finish(
         "unanswerable",
         answer=plan.decline_reason or "",
-        suggestions=example_questions(context),
+        suggestions=example_questions(context.examples),
     )
 
 
-def example_questions(context: PromptContext) -> list[str]:
-    """The first answerable worked examples, offered when a question cannot be answered."""
-    answerable = (example.question for example in context.examples if example.plan.answerable)
+def example_questions(examples: tuple[Example, ...]) -> list[str]:
+    """The first answerable worked examples: questions a chip can ask and get an answer to.
+
+    Offered when a question returned no rows or cannot be answered, so a suggestion
+    is never advice ("try a wider date range") that the agent would itself decline.
+    """
+    answerable = (example.question for example in examples if example.plan.answerable)
     return list(answerable)[:SUGGESTION_COUNT]
+
+
+# What an empty result offers with the shipped worked examples; the fake agent shows it too.
+EMPTY_SUGGESTIONS = example_questions(load_examples())
 
 
 def chart_for(query: QueryResult) -> ChartSpec | None:

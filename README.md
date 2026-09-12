@@ -82,7 +82,7 @@ with a `status` field, so the interface renders one shape:
 | Status | Meaning | What you see |
 |---|---|---|
 | `answered` | Rows came back and an answer was written. | The answer, assumptions, a table or bar chart, the SQL tab and a trace with per-step timings and cost. |
-| `empty` | The query ran and returned no rows. | A card saying so, opened on the SQL tab, with two fixed rewordings to try. |
+| `empty` | The query ran and returned no rows. | A card saying so, opened on the SQL tab, with three example questions to try instead. |
 | `unanswerable` | The data cannot answer this. | The model's one-line reason and three example questions that work. |
 | `blocked` | Refused before anything ran: a destructive request or write-shaped SQL. | A fixed sentence about the read-only connection, plus the rejected statement when there is one. |
 | `error` | Something failed; `error.code` says what. | One sentence per code (below) and a Retry button. The raw message is never shown. |

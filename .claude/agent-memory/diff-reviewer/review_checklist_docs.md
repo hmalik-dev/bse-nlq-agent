@@ -20,3 +20,7 @@ standing in decisions.md).
 diff removed or cancelled, and check that every "see X above/below" cross-reference
 resolves in the stated direction. Report contradictions as correctness findings —
 for a docs/config ticket they are the defect class that matters.
+
+Also: when a backend-only diff changes what a result field *means* (e.g. BSE-14
+empty `suggestions`), grep `web/src` copy, JSDoc and `test-fixtures.ts`, and the
+design-brief screen list (not just its JSON block) for the old meaning.

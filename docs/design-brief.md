@@ -146,7 +146,7 @@ Taken from the assets themselves, so the UI and the logos share one palette.
     "cost_usd": 0.0227                      // priced from src/nlq/pricing.py
   },
   "error": { "code": "rate_limited", "message": "…" } | null,
-  "suggestions": []                         // fixed rewordings for empty; example questions for unanswerable
+  "suggestions": []                         // example questions, for empty and unanswerable
 }
 ```
 
@@ -204,8 +204,8 @@ five-category chart.
    chips, tabbed panel, trace strip.
 4. **Answer — Chart tab.** Horizontal bars in seafoam, one emphasised.
 5. **Answer — SQL tab.** Monospace, syntax-highlighted, copy button.
-6. **Empty result.** "No rows matched", the assumptions, the SQL, two suggested
-   rewordings.
+6. **Empty result.** "No rows matched", the assumptions, the SQL, three example
+   questions to ask instead.
 7. **Unanswerable.** What the data does not hold, what it does, three examples.
 8. **Blocked.** A destructive request refused before execution, with the reason
    and a note that the connection is read-only.
@@ -324,7 +324,7 @@ Design these frames at 1440 wide.
 
 6. EMPTY RESULT. Same frame shape, but the answer card reads "No rows matched this
    question" with a muted explanation, the assumption chips, the SQL still shown,
-   and two suggested rewordings as clickable chips.
+   and three example questions as clickable chips.
 
 7. UNANSWERABLE. The question was "What's the weather for the next home game?".
    The card explains the data holds no weather information, lists what it does

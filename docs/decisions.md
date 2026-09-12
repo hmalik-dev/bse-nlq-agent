@@ -193,6 +193,34 @@ in "what I would do next", not at seven tables.
 reading and returns its assumptions, which the UI shows next to the answer. There
 is no clarifying-question turn, because there is no conversation.
 
+**The row cap is applied as `LIMIT max_rows + 1`.** Asking for one row more than
+the interface will ever show is how truncation is detected: if the extra row comes
+back, the result was cut off and the answer says so. Rejected: a second `COUNT(*)`
+query to learn the true size (two round trips, and the count can disagree with the
+rows under concurrent writes), and trusting the model to add its own `LIMIT`.
+
+**The model's SQL text is preserved when a `LIMIT` is only appended.** The interface
+shows that text, and re-rendering the statement through sqlglot reformats
+whitespace, casing and aliases the model chose deliberately. Only the two cases
+that genuinely rewrite the statement - lowering a `LIMIT` that exceeds the cap -
+go back through sqlglot's renderer.
+
+**The query deadline is a progress handler, not a statement timeout.** SQLite has
+no statement timeout: `sqlite3_busy_timeout` only covers lock contention, and a
+runaway recursive CTE holds no lock. `connection.set_progress_handler` runs a
+callback every thousand VM instructions, and returning non-zero interrupts the
+query from inside SQLite, which surfaces as "interrupted" and becomes a
+`QueryTimeout`. Rejected: running the query on a worker thread and abandoning it
+(the thread keeps burning CPU), and a `SIGALRM` alarm (signals only work on the
+main thread, and the API serves on worker threads).
+
+**An unknown table is repairable, a write is not.** A parse error or a table the
+schema does not have means the model guessed; the error goes back to it and the
+repair loop tries again. Anything write-shaped is refused outright and never
+retried, because a retry of a `DROP` is still a `DROP`. The table allowlist is
+built by reading the `CREATE TABLE` names out of `schema.sql` at import rather
+than being listed in the guard, so the two cannot drift apart.
+
 **The answer is written from the returned rows only**, in a second call that never
 sees the database. Empty results are reported by code, not by the model, so there
 is nothing to hallucinate.

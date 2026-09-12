@@ -3,14 +3,17 @@ import { SCHEMA_TITLE } from "./SchemaDrawer";
 
 type Open = (button: HTMLElement) => void;
 
+export const HOME_LABEL = "BSE Insights — back to the start";
+
 interface Props {
+  onHome: () => void;
   onOpenSchema: Open;
   /** Present when the session has history to show; the button only renders below 1024. */
   onOpenHistory: Open | null;
 }
 
-/** The lockup, the history button on narrow screens, and the button that opens the schema drawer. */
-export function Header({ onOpenSchema, onOpenHistory }: Props): JSX.Element {
+/** The lockup that leads back to the ask screen, the history button on narrow screens, and the button that opens the schema drawer. */
+export function Header({ onHome, onOpenSchema, onOpenHistory }: Props): JSX.Element {
   return (
     <header className="flex h-16 items-center gap-3 border-b border-hairline px-4 lg:gap-4 lg:px-6">
       {onOpenHistory && (
@@ -23,9 +26,11 @@ export function Header({ onOpenSchema, onOpenHistory }: Props): JSX.Element {
           <MenuIcon />
         </button>
       )}
-      <img src="/brand/bse.svg" alt="BSE Global" width={672} height={254} className="block h-5 w-auto lg:h-7" />
-      <div className="h-6 w-px bg-hairline" aria-hidden="true" />
-      <span className="font-display text-[17px] font-semibold tracking-[-0.01em]">Insights</span>
+      <button type="button" aria-label={HOME_LABEL} onClick={onHome} className="flex items-center gap-3 rounded-control lg:gap-4">
+        <img src="/brand/bse.svg" alt="" width={672} height={254} className="block h-5 w-auto lg:h-7" />
+        <span className="h-6 w-px bg-hairline" aria-hidden="true" />
+        <span className="font-display text-[17px] font-semibold tracking-[-0.01em]">Insights</span>
+      </button>
       <div className="flex-1" />
       <button
         type="button"

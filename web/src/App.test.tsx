@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi, type Mock } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { App } from "./App";
+import { HOME_LABEL } from "./components/Header";
 import { ANSWERED, BLOCKED, EMPTY, ERROR, EXAMPLES, NETS, jsonResponse } from "./test-fixtures";
 
 /** Routes /api/examples to the chips and /api/ask to a result picked by keyword, like the fake agent. */
@@ -185,5 +186,46 @@ describe("App", () => {
     await user.keyboard("{Escape}");
     expect(screen.queryByRole("dialog")).toBeNull();
     expect(document.activeElement).toBe(opener);
+  });
+
+  it("returns from the answer screen to an empty ask screen from the lockup, keeping the history", async () => {
+    const user = userEvent.setup();
+    stubApi();
+    render(<App />);
+    await user.click(await screen.findByRole("button", { name: "Top 5 event categories by total revenue" }));
+    await screen.findByText(ANSWERED.answer);
+    expect(document.querySelector("[aria-current]")).toBeTruthy();
+    await user.click(screen.getByRole("button", { name: HOME_LABEL }));
+    expect(screen.getByRole("heading", { name: "Ask anything about ticket sales" })).toBeTruthy();
+    expect(screen.queryByText(ANSWERED.answer)).toBeNull();
+    expect((screen.getByLabelText("Your question") as HTMLTextAreaElement).value).toBe("");
+    const rail = screen.getAllByRole("navigation", { name: "Session history" })[0] as HTMLElement;
+    expect(rail.textContent).toContain("Top 5 event categories by total revenue");
+    expect(document.querySelector("[aria-current]")).toBeNull();
+  });
+
+  it("makes the lockup a keyboard control that leaves a draft alone on the ask screen", async () => {
+    const user = userEvent.setup();
+    stubApi();
+    render(<App />);
+    const box = await screen.findByLabelText("Your question");
+    await user.type(box, "half a question");
+    box.blur();
+    await user.tab();
+    expect(document.activeElement).toBe(screen.getByRole("button", { name: HOME_LABEL }));
+    await user.keyboard("{Enter}");
+    await user.keyboard(" ");
+    expect((screen.getByLabelText("Your question") as HTMLTextAreaElement).value).toBe("half a question");
+  });
+
+  it("activates the lockup with Enter from the answer screen", async () => {
+    const user = userEvent.setup();
+    stubApi();
+    render(<App />);
+    await user.click(await screen.findByRole("button", { name: "Top 5 event categories by total revenue" }));
+    await screen.findByText(ANSWERED.answer);
+    screen.getByRole("button", { name: HOME_LABEL }).focus();
+    await user.keyboard("{Enter}");
+    expect(screen.getByRole("heading", { name: "Ask anything about ticket sales" })).toBeTruthy();
   });
 });

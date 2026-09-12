@@ -167,10 +167,15 @@ error is a 422 for a malformed body: a missing, blank or over-long question
     {
       "name": "tickets",
       "description": "One row per seat. The fact table for counts and revenue.",
-      "columns": [{"name": "price", "type": "REAL", "description": "Face value paid, excluding fee. 0 for comps."}]
+      "columns": [
+        {"name": "event_id", "type": "INTEGER", "references": "events", "description": "Event the seat is for."},
+        {"name": "price", "type": "REAL", "references": null, "description": "Face value paid, excluding fee. 0 for comps."}
+      ]
     }
   ],
-  "definitions": ["Revenue is SUM(price) over tickets with status = 'sold'. …"]  // the business rules
+  "definitions": [                          // for people, not the prompt's business rules
+    {"term": "Tickets sold", "text": "counts tickets with status `'sold'` only."}
+  ]
 }
 ```
 

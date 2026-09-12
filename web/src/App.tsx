@@ -58,6 +58,11 @@ export function App(): JSX.Element {
     setScreen({ kind: "ask" });
   }
 
+  /** The lockup: from an answer back to a blank ask screen, history kept; anywhere else, nothing to do. */
+  function goHome(): void {
+    if (screen.kind === "answer") reset();
+  }
+
   function show(id: number): void {
     const entry = history.find((item) => item.id === id);
     setPanel(null);
@@ -82,6 +87,7 @@ export function App(): JSX.Element {
   return (
     <div className="flex min-h-screen flex-col">
       <Header
+        onHome={goHome}
         onOpenSchema={(opener) => setPanel({ kind: "schema", opener })}
         onOpenHistory={showRail ? (opener) => setPanel({ kind: "history", opener }) : null}
       />

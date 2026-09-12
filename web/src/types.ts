@@ -56,6 +56,8 @@ export interface ExampleQuestion {
 export interface ColumnInfo {
   name: string;
   type: string;
+  /** The table a foreign key points at, or null for a plain column. */
+  references: string | null;
   description: string;
 }
 
@@ -65,7 +67,13 @@ export interface TableInfo {
   columns: ColumnInfo[];
 }
 
+/** One sentence for people: the term, then the rest, with `backticks` around literal values. */
+export interface Definition {
+  term: string;
+  text: string;
+}
+
 export interface Schema {
   tables: TableInfo[];
-  definitions: string[];
+  definitions: Definition[];
 }

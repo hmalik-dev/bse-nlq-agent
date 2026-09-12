@@ -17,3 +17,6 @@ PRESENTATION_NOTES.md
 
 # Built web assets, produced by the Vite build into the package.
 src/nlq/static/
+
+# Lane worktrees created by the orchestrator. Never part of the tree.
+.claude/worktrees/

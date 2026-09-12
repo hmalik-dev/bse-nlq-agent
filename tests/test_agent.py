@@ -29,6 +29,7 @@ from tests.fakes import (
     FAKE_OUTPUT_TOKENS,
     FakeAnthropic,
     rate_limit_error,
+    refusal,
 )
 
 TODAY = date(2026, 9, 11)
@@ -225,6 +226,8 @@ def test_a_rate_limited_writer_is_reported_not_raised(db_path: Path) -> None:
     assert result.error is not None and result.error.code == "rate_limited"
     assert result.sql is None
     assert [step.name for step in result.trace.steps] == ["Reading schema", "Writing SQL"]
+    assert (result.trace.input_tokens, result.trace.output_tokens) == (0, 0)
+    assert result.trace.cost_usd == 0.0
 
 
 def test_a_missing_database_is_reported_after_the_guard(tmp_path: Path) -> None:
@@ -298,6 +301,46 @@ def test_calls_made_before_an_error_are_still_priced(db_path: Path) -> None:
     assert trace.repairs == 1
     assert trace.input_tokens == FAKE_INPUT_TOKENS
     assert trace.cost_usd == cost_usd(SQL_MODEL, FAKE_INPUT_TOKENS, FAKE_OUTPUT_TOKENS)
+
+
+def test_a_plan_that_fails_validation_is_still_priced(db_path: Path) -> None:
+    agent, _, answer_client = make_agent(db_path, ['{"answerable": true, "sql": ""}'])
+
+    result = agent.ask(QUESTION)
+
+    assert result.status == "error"
+    assert result.error is not None and result.error.code == "model_refused"
+    assert result.trace.input_tokens == FAKE_INPUT_TOKENS
+    assert result.trace.output_tokens == FAKE_OUTPUT_TOKENS
+    assert result.trace.cost_usd == cost_usd(SQL_MODEL, FAKE_INPUT_TOKENS, FAKE_OUTPUT_TOKENS)
+    assert answer_client.calls == []
+
+
+def test_a_refusal_is_priced_for_the_prompt_it_read(db_path: Path) -> None:
+    agent, _, _ = make_agent(db_path, [refusal()])
+
+    result = agent.ask(QUESTION)
+
+    assert result.status == "error"
+    assert result.error is not None and result.error.code == "model_refused"
+    assert result.trace.input_tokens == FAKE_INPUT_TOKENS
+    assert result.trace.output_tokens == 0
+    assert result.trace.cost_usd == cost_usd(SQL_MODEL, FAKE_INPUT_TOKENS, 0)
+
+
+def test_an_answer_refusal_is_priced_on_top_of_the_sql_call(db_path: Path) -> None:
+    agent, _, _ = make_agent(db_path, [plan(TWO_COLUMN_SQL)], [refusal()])
+
+    result = agent.ask(QUESTION)
+
+    assert result.status == "error"
+    assert result.error is not None and result.error.code == "model_refused"
+    assert result.trace.input_tokens == 2 * FAKE_INPUT_TOKENS
+    assert result.trace.output_tokens == FAKE_OUTPUT_TOKENS
+    expected = cost_usd(SQL_MODEL, FAKE_INPUT_TOKENS, FAKE_OUTPUT_TOKENS) + cost_usd(
+        ANSWER_MODEL, FAKE_INPUT_TOKENS, 0
+    )
+    assert result.trace.cost_usd == round(expected, 6)
 
 
 def test_an_unexpected_exception_is_logged_once_and_reported_as_internal(

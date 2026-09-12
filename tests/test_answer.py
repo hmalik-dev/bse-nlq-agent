@@ -106,6 +106,13 @@ def test_each_api_failure_becomes_a_named_error(
     assert raised.value.code == code
 
 
+def test_a_refusal_carries_the_tokens_the_call_was_billed_for() -> None:
+    with pytest.raises(ModelRefused) as raised:
+        _write(FakeAnthropic([refusal()]))
+    assert raised.value.input_tokens == FAKE_INPUT_TOKENS
+    assert raised.value.output_tokens == 0
+
+
 def test_a_missing_key_is_refused_before_any_client_is_built(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

@@ -371,6 +371,27 @@ states). Temperature 0 never guaranteed identical output on earlier models
 either, so the evaluation is quoted as what it is: one pass of the shipped
 configuration.
 
+**Prompt caching is measured and declined.** The SQL call sends the same prefix
+on every question — the system prompt of rules, schema and dictionary (4,773
+tokens), the ten worked examples and the output schema, 7,851 tokens in all
+(`count_tokens` on Sonnet 5 returns 7,869 with an 18-token question) — against a
+question of a couple of dozen tokens at most, which is the shape prompt caching
+exists for. It clears Sonnet 5's 1,024-token minimum
+seven times over, and a warm read prices that prefix at a tenth of the input
+rate. It still is not worth it. Reads and writes bill at their own rates, so
+`cost_usd` would have to price four classes of token instead of two, and the
+evaluation's cost per question — the number the model decision rests on — would
+start depending on whether a run followed another inside the five-minute
+window. That trades a reproducible measurement for roughly twenty cents across a
+fifteen-question sweep (one write at 1.25 times the input rate and fourteen
+reads at a tenth, against fifteen full-price prefixes at $2 per million). The
+answer writer is out of reach regardless: its system prompt is 180 tokens,
+under a fifth of the minimum, so a breakpoint there would cache nothing.
+Rejected: caching with the evaluation pinned to a cold cache (a flag whose only
+job is to switch off the feature it is measuring); the one-hour TTL (twice the
+input rate per write to hold a prefix warm for traffic this project does not
+have).
+
 **The evaluation was re-run once, last, after BSE-13 and BSE-17** (2026-09-12,
 $0.38). BSE-13 changed what the trace prices and BSE-17 changed the prompt (a
 per-event breakdown rule, a tenth worked example and a computed total for the

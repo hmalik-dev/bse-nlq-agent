@@ -387,7 +387,13 @@ tickets than the agent did, and the brief grades it least.
 look up the tables it needs rather than reading all of them. Attendance and scan
 data alongside tickets sold. A feedback loop that records whether an answer was
 right and feeds the misses back into the worked examples. Conversation memory,
-so a follow-up question can refer to the last one.
+so a follow-up question can refer to the last one. Prompt caching on the SQL
+call: the 7,851-token prefix of rules, schema, dictionary, worked examples and
+output schema is identical across questions and clears Sonnet 5's 1,024-token
+minimum, so a warm cache would price it at a tenth of the input rate. It is left
+out because cache state would make the evaluation's cost comparison depend on
+run order, and the answer writer's 180-token prompt is under a fifth of the
+minimum anyway.
 
 **AI tools used.** [Claude Code](https://claude.com/claude-code) wrote the
 implementation, the tests and these documents from tickets written for it, with

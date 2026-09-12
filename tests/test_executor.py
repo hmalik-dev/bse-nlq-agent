@@ -1,4 +1,4 @@
-"""The executor is the latch behind the guard: read-only, row-capped, timed out."""
+"""The executor is the latch behind the guard: read-only, bounded, timed out."""
 
 from __future__ import annotations
 
@@ -11,6 +11,7 @@ import pytest
 
 from nlq.agent.errors import DatabaseMissing, QueryFailed, QueryTimeout
 from nlq.agent.executor import Executor
+from nlq.agent.sql_guard import guard
 from nlq.db.seed import seed_database
 
 TODAY = date(2026, 9, 11)
@@ -53,11 +54,36 @@ def test_the_row_cap_truncates_and_says_so(db_path: Path) -> None:
     assert result.truncated
 
 
+def test_the_limit_the_guard_appends_actually_bounds_the_query(db_path: Path) -> None:
+    # The guard's text and the executor's cap have to agree, so this runs the
+    # guard's own output: an appended LIMIT that SQLite ignores would show up
+    # here as a full scan reported as truncated.
+    guarded = guard("SELECT ticket_id FROM tickets -- every one", max_rows=5)
+    result = Executor(db_path, max_rows=1000).run(guarded.sql)
+    assert result.row_count == 6
+    assert not result.truncated
+
+
 def test_a_runaway_query_is_stopped_at_the_deadline(db_path: Path) -> None:
     started = time.monotonic()
     with pytest.raises(QueryTimeout):
         Executor(db_path, timeout_ms=100).run(RUNAWAY_SQL)
     assert time.monotonic() - started < 1.0
+
+
+def test_a_broken_query_stays_repairable_even_past_the_deadline(db_path: Path) -> None:
+    # The deadline says whether it interrupted anything; the clock does not. A
+    # real SQL error must not be relabelled a timeout, or the repair loop gives
+    # up on a query it could have fixed.
+    with pytest.raises(QueryFailed) as error:
+        Executor(db_path, timeout_ms=0).run("SELECT nonexistent_column FROM tickets")
+    assert "nonexistent_column" in error.value.message
+
+
+def test_an_enormous_single_row_is_refused_rather_than_held_in_memory(db_path: Path) -> None:
+    with pytest.raises(QueryFailed) as error:
+        Executor(db_path, max_rows=5).run("SELECT hex(zeroblob(20000000)) FROM tickets")
+    assert "larger than" in error.value.message
 
 
 def test_a_write_handed_straight_to_the_executor_is_refused(db_path: Path) -> None:

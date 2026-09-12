@@ -13,6 +13,7 @@ from dataclasses import dataclass
 
 import sqlglot
 from sqlglot import exp
+from sqlglot.optimizer.scope import traverse_scope
 
 from nlq.agent.errors import InvalidSql, UnsafeSql
 from nlq.config import SCHEMA_PATH
@@ -34,7 +35,8 @@ WRITE_NODES = (
     exp.Detach,
     exp.Transaction,
 )
-READ_ROOTS = (exp.Select, exp.Union)
+# `SetOperation` is the base of UNION, EXCEPT and INTERSECT, which are all reads.
+READ_ROOTS = (exp.Select, exp.SetOperation)
 
 # SQLite functions that touch the filesystem or load code.
 BANNED_FUNCTIONS = frozenset({"load_extension", "readfile", "writefile", "edit", "fts3_tokenizer"})
@@ -80,7 +82,9 @@ def _parse_single_statement(sql: str) -> exp.Expression:
     """Parse `sql` and insist it is one statement with a read at its root."""
     try:
         statements = sqlglot.parse(sql, dialect=DIALECT)
-    except sqlglot.ParseError as error:
+    # SqlglotError, not ParseError: an unterminated comment or string fails in
+    # the tokenizer, and a TokenError is not a ParseError.
+    except sqlglot.errors.SqlglotError as error:
         raise InvalidSql(f"That SQL does not parse: {error}") from error
     if len(statements) != 1 or statements[0] is None:
         raise UnsafeSql("Only one statement may be run at a time.")
@@ -103,25 +107,26 @@ def _reject_writes(statement: exp.Expression) -> None:
 
 
 def _function_name(node: exp.Expression) -> str | None:
-    """The lowercased name of a function call, or None for anything else."""
+    """The lowercased name of a function call, or None for anything else.
+
+    `.name` rather than `str(node.this)`, so a quoted call - SQLite accepts
+    `"load_extension"(...)` - does not slip past the list with its quotes on.
+    """
     if isinstance(node, exp.Anonymous):
-        return str(node.this).lower()
+        return node.name.lower()
     if isinstance(node, exp.Func):
         return node.sql_name().lower()
     return None
 
 
 def _referenced_tables(statement: exp.Expression) -> list[str]:
-    """The real tables the statement reads, rejecting any the schema lacks.
-
-    CTE names look like tables to the parser, so they are subtracted first.
-    """
-    cte_names = {cte.alias_or_name.lower() for cte in statement.find_all(exp.CTE)}
+    """The real tables the statement reads, rejecting any the schema lacks."""
+    cte_references = _cte_reference_ids(statement)
     tables: set[str] = set()
     for table in statement.find_all(exp.Table):
-        name = table.name.lower()
-        if name in cte_names:
+        if id(table) in cte_references:
             continue
+        name = table.name.lower()
         if name not in ALLOWED_TABLES:
             raise InvalidSql(
                 f"There is no table named {table.name}. "
@@ -131,18 +136,44 @@ def _referenced_tables(statement: exp.Expression) -> list[str]:
     return sorted(tables)
 
 
+def _cte_reference_ids(statement: exp.Expression) -> set[int]:
+    """The table nodes that name a CTE visible in their own scope, not a real table.
+
+    A CTE name looks like a table to the parser, so those references have to be
+    exempt from the allowlist - but only where the CTE is actually in scope.
+    Subtracting every CTE name across the whole tree would let
+    `SELECT * FROM sqlite_master WHERE 1 IN (WITH sqlite_master AS (...) SELECT ...)`
+    exempt the outer read of a table the allowlist never permitted.
+
+    If sqlglot cannot resolve the scopes, nothing is exempted and every table is
+    checked, which errs towards refusing rather than allowing.
+    """
+    try:
+        scopes = traverse_scope(statement)
+    except Exception:
+        return set()
+    return {
+        id(table)
+        for scope in scopes
+        for table in scope.tables
+        if not isinstance(scope.sources.get(table.alias_or_name), exp.Table)
+        and table.alias_or_name in scope.sources
+    }
+
+
 def _apply_limit(sql: str, statement: exp.Expression, max_rows: int) -> str:
     """Bound the statement to `max_rows` + 1 rows.
 
     The extra row is how the executor tells a full result from a truncated one.
     When a limit has to be added, the model's own text is kept and the clause is
-    appended: the interface shows that text, and re-rendering it through sqlglot
-    would discard formatting the model chose deliberately.
+    appended on a new line: the interface shows that text, re-rendering it
+    through sqlglot would discard formatting the model chose deliberately, and a
+    statement ending in a `--` comment would swallow a clause appended inline.
     """
     cap = max_rows + 1
     limit = statement.args.get("limit")
     if limit is None:
-        return f"{sql.rstrip().removesuffix(';').rstrip()} LIMIT {cap}"
+        return f"{sql.rstrip().removesuffix(';').rstrip()}\nLIMIT {cap}"
     if _limit_rows(limit) <= cap:
         return sql
     limit.set("expression", exp.Literal.number(cap))

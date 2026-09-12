@@ -128,13 +128,15 @@ def test_the_injection_entries_cover_override_smuggling_and_exfiltration(
     entries: list[GoldenEntry],
 ) -> None:
     injection = [entry for entry in entries if "injection" in entry.tags]
-    override = [e for e in injection if "ignore all previous instructions" in e.question.lower()]
-    smuggled = [e for e in injection if "'; drop table" in e.question.lower()]
-    exfiltration = [e for e in injection if "system prompt" in e.question.lower()]
+    override = _entries_matching(injection, "ignore all previous instructions")
+    smuggled = _entries_matching(injection, "'; drop table")
+    exfiltration = _entries_matching(injection, "system prompt")
 
-    assert [e.expect for e in override] == ["blocked"] and "delete" in override[0].question
-    assert [e.expect for e in smuggled] == ["blocked"] and smuggled[0].question.startswith("How")
-    assert [e.expect for e in exfiltration] == ["unanswerable"]
+    assert [entry.expect for entry in override] == ["blocked"]
+    assert "delete" in override[0].question
+    assert [entry.expect for entry in smuggled] == ["blocked"]
+    assert smuggled[0].question.startswith("How")
+    assert [entry.expect for entry in exfiltration] == ["unanswerable"]
     assert "API key" in exfiltration[0].question
 
 
@@ -229,6 +231,10 @@ def _ask_through_the_fake_client(
         today=TODAY,
     )
     return agent.ask(question), client
+
+
+def _entries_matching(entries: list[GoldenEntry], phrase: str) -> list[GoldenEntry]:
+    return [entry for entry in entries if phrase in entry.question.lower()]
 
 
 def _tables(entry: GoldenEntry) -> set[str]:

@@ -193,6 +193,53 @@ in "what I would do next", not at seven tables.
 reading and returns its assumptions, which the UI shows next to the answer. There
 is no clarifying-question turn, because there is no conversation.
 
+**The row cap is applied as `LIMIT max_rows + 1`.** Asking for one row more than
+the interface will ever show is how truncation is detected: if the extra row comes
+back, the result was cut off and the answer says so. Rejected: a second `COUNT(*)`
+query to learn the true size (two round trips, and the count can disagree with the
+rows under concurrent writes), and trusting the model to add its own `LIMIT`.
+
+**The model's SQL text is preserved when a `LIMIT` is only appended.** The interface
+shows that text, and re-rendering the statement through sqlglot reformats
+whitespace, casing and aliases the model chose deliberately. Only the one case that
+genuinely rewrites the statement - lowering a `LIMIT` that exceeds the cap - goes
+back through sqlglot's renderer. The appended clause goes on its own line: inline,
+a statement ending in a `--` comment would swallow it and run unbounded.
+
+**The query deadline is a progress handler, not a statement timeout.** SQLite has
+no statement timeout: `sqlite3_busy_timeout` only covers lock contention, and a
+runaway recursive CTE holds no lock. `connection.set_progress_handler` runs a
+callback every thousand VM instructions, and returning non-zero interrupts the
+query from inside SQLite, which surfaces as "interrupted" and becomes a
+`QueryTimeout`. Rejected: running the query on a worker thread and abandoning it
+(the thread keeps burning CPU), and a `SIGALRM` alarm (signals only work on the
+main thread, and the API serves on worker threads).
+
+**The table allowlist is checked per scope, not per statement.** A CTE name looks
+like a table to the parser, so CTE references are exempt - but only where that CTE
+is actually in scope. Subtracting every CTE name found anywhere in the tree let
+`SELECT ... FROM sqlite_master WHERE 1 IN (WITH sqlite_master AS (...) SELECT ...)`
+exempt an outer read of a table the allowlist never permitted, because SQLite
+resolves the inner `WITH` only inside the subquery. Scopes come from sqlglot's
+`traverse_scope`, and if it cannot resolve them nothing is exempted, so the failure
+mode is refusing a valid query rather than allowing an invalid one.
+
+**The result is bounded in bytes as well as rows and time.** The row cap says how
+many rows come back, not how large one row is: `SELECT hex(zeroblob(20000000))`
+returns a handful of rows well inside the deadline and still costs gigabytes of
+memory, and the progress handler cannot help because few instructions allocate
+enormous cells. Rows are read one at a time against an 8MB budget and the query
+fails once it is spent. Rejected: trusting the row cap alone (one question can end
+the process), and a `LENGTH()` pre-check (a second round trip that the model can
+write around).
+
+**An unknown table is repairable, a write is not.** A parse error or a table the
+schema does not have means the model guessed; the error goes back to it and the
+repair loop tries again. Anything write-shaped is refused outright and never
+retried, because a retry of a `DROP` is still a `DROP`. The table allowlist is
+built by reading the `CREATE TABLE` names out of `schema.sql` at import rather
+than being listed in the guard, so the two cannot drift apart.
+
 **The answer is written from the returned rows only**, in a second call that never
 sees the database. Empty results are reported by code, not by the model, so there
 is nothing to hallucinate.

@@ -2,6 +2,7 @@
   "model": "claude-sonnet-5",
   "today": "2026-09-11",
   "database": "eval-2026-09-11.db",
+  "fake": false,
   "passes": 15,
   "accuracy": 1.0,
   "median_latency_ms": 4008,

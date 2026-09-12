@@ -125,9 +125,9 @@ def main(argv: list[str] | None = None) -> int:
         for model in args.models.split(",")
     ]
     for run in runs:
-        write_json(run, today, database)
+        write_json(run, today, database, fake=args.fake)
     decision = decide(runs)
-    write_report(Path(args.out), runs, decision, today, database)
+    write_report(Path(args.out), runs, decision, today, database, fake=args.fake)
     print(f"Total cost: ${sum(run.total_cost_usd for run in runs):.4f}")
     print(f"Decision: {decision.winner or 'no model qualifies'} - {decision.reason}")
     return EXIT_OK
@@ -218,10 +218,7 @@ def ask_one(agent: Agent, entry: GoldenEntry, expected: QueryResult | None) -> R
         return _failed_record(entry, type(error).__name__)
     verdict = judge(entry, result, expected)
     return Record(
-        id=entry.id,
-        question=entry.question,
-        tags=list(entry.tags),
-        expect=entry.expect,
+        **_entry_fields(entry),
         status=result.status,
         passed=verdict.passed,
         reason=verdict.reason,
@@ -235,12 +232,18 @@ def ask_one(agent: Agent, entry: GoldenEntry, expected: QueryResult | None) -> R
     )
 
 
+def _entry_fields(entry: GoldenEntry) -> dict[str, object]:
+    return {
+        "id": entry.id,
+        "question": entry.question,
+        "tags": list(entry.tags),
+        "expect": entry.expect,
+    }
+
+
 def _failed_record(entry: GoldenEntry, error: str) -> Record:
     return Record(
-        id=entry.id,
-        question=entry.question,
-        tags=list(entry.tags),
-        expect=entry.expect,
+        **_entry_fields(entry),
         status="error",
         passed=False,
         reason=f"the call raised {error}",
@@ -279,14 +282,18 @@ def decide(runs: list[ModelRun]) -> Decision:
     )
 
 
-def write_json(run: ModelRun, today: date, database: Path) -> Path:
-    """One file per model, so a failure's generated SQL can be read after the run."""
+def write_json(run: ModelRun, today: date, database: Path, *, fake: bool = False) -> Path:
+    """One file per model, so a failure's generated SQL can be read after the run.
+
+    `fake` is recorded so a scripted sweep can never be mistaken for a measured one.
+    """
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     path = RESULTS_DIR / f"{run.model}.json"
     payload = {
         "model": run.model,
         "today": today.isoformat(),
         "database": database.name,
+        "fake": fake,
         "passes": run.passes,
         "accuracy": round(run.accuracy, 4),
         "median_latency_ms": run.median_latency_ms,

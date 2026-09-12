@@ -58,6 +58,7 @@ def test_a_fake_sweep_writes_a_json_file_per_model_covering_every_status(
     for model in MODELS:
         payload = json.loads((harness / "results" / f"{model}.json").read_text(encoding="utf-8"))
         assert payload["model"] == model and payload["today"] == TODAY
+        assert payload["fake"] is True
         records = payload["records"]
         assert len(records) == ENTRY_COUNT
         assert {record["status"] for record in records} == EVERY_STATUS
@@ -77,6 +78,7 @@ def test_a_fake_sweep_writes_the_report_with_summary_matrix_and_decision(harness
     for model in MODELS:
         assert f"| `{model}` | {ENTRY_COUNT - 1}/{ENTRY_COUNT} | 93% |" in text
     assert "**Winner: `claude-haiku-4-5`**" in text
+    assert "**Not a measured run.**" in text and "`uv run python -m eval.run --fake`" in text
     assert (
         text.count("| answered |")
         + text.count("| empty |")

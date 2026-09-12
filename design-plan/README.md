@@ -19,13 +19,14 @@ implemented against. Do not import from it at runtime.
 |---|---|
 | `BSE Insights.dc.html` | The canvas. 17 frames across 4 artboards. Fetched whole (not truncated). |
 | `support.js` | Claude Design's `dc-runtime` bundle, loaded by the canvas as `./support.js`. Generated — never edit. |
-| `doc-page.js` | The `<doc-page>` paged-document web component. Belongs to the project's print variant, **not** to this canvas — imported because it was named in the selection, not because the canvas needs it. Generated starter — never edit. |
 | `brand/*.svg` | The four marks the canvas references. |
 
-`BSE Insights.dc.html` imports `./support.js` and
-`brand/{barclays-center,bse,liberty,nets}.svg`, and nothing else — `doc-page.js`
-is unreachable from it. The project also holds `BSE Insights-print.dc.html` and a
-duplicate `uploads/` copy of the marks, which were left behind.
+These are exactly the files the canvas needs: `BSE Insights.dc.html` imports
+`./support.js` and `brand/{barclays-center,bse,liberty,nets}.svg`, and nothing
+else. The project also holds `BSE Insights-print.dc.html`, `doc-page.js` (the
+paged-document component the print variant uses, unreachable from this canvas)
+and a duplicate `uploads/` copy of the marks. None are needed to render the
+design, so none were kept.
 
 ### About `brand/`
 

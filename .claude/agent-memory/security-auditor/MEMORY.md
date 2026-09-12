@@ -1,2 +1,3 @@
 - [SQL guard bypasses](sql-guard-bypasses.md) — four reproduced bypasses of the sqlglot guard/executor bounds, plus the attacks already proven harmless.
+- [API boundary audit](api-boundary-audit.md) — BSE-6 FastAPI surface: traversal/symlink probes that passed, and three accepted low notes not to re-flag.
 - [LLM boundary audit](llm-boundary-audit.md) — secret handling and SDK error mapping verified clean on BSE-4; the one judgement call recorded so it is not re-flagged.

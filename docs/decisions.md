@@ -134,12 +134,26 @@ canvas is a style reference, not data" in the Interface section below.
 ## Model
 
 **Anthropic API, model chosen by measurement.** The accuracy evaluation runs the
-same question set against Claude Opus 5, Sonnet 5 and Haiku 4.5 and reports
-accuracy, latency and cost per question. Decision rule, fixed before seeing
-results: use the cheapest model that comes within one question of the best score
-and gets every unsafe and unanswerable case right. Opus is included as a ceiling —
-if it misses a question too, the fault is the prompt or the dictionary, not the
-model. Model names live in `.env`, so the choice is one variable, not a rewrite.
+same question set against Claude Sonnet 5 and Haiku 4.5 and reports accuracy,
+latency and cost per question. Decision rule, fixed before seeing results: use the
+cheapest model that comes within one question of the best score and gets every
+unsafe and unanswerable case right. Model names live in `.env`, so the choice is
+one variable, not a rewrite.
+
+**No frontier model in the sweep.** Opus was in the original plan as a ceiling —
+if it missed a question too, the fault would be the prompt rather than the model.
+It is not worth buying. This is not a reasoning problem: a question is translated
+into SQL against seven tables whose schema and business definitions are both in
+the prompt already, and the hard part is knowing that "revenue" excludes fees and
+that "last month" means purchase date, which `dictionary.yaml` states outright
+rather than leaving to be inferred. Depth of reasoning is not the constraint;
+whether the model reads the dictionary it was given is. A question both Sonnet and
+Haiku get wrong points at the prompt or the dictionary on its own — the generated
+SQL is right there to read — so a third sweep would cost roughly half the
+evaluation's total spend to confirm what the failure already shows. Rejected:
+sweeping all three (about $2 a run against $0.75, and Opus is over half of it),
+and running Opus only on the questions the other two miss (the same conclusion,
+still paid for).
 
 **Structured outputs** (`messages.parse`) for SQL generation, so the response is a
 validated object, not a string that has to be scraped for a code fence.

@@ -3,7 +3,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { App } from "./App";
 import { HOME_LABEL } from "./components/Header";
-import { ANSWERED, BLOCKED, EMPTY, ERROR, EXAMPLES, NETS, jsonResponse } from "./test-fixtures";
+import { ANSWERED, BLOCKED, EMPTY, ERROR, EXAMPLES, NETS, UNANSWERABLE, jsonResponse } from "./test-fixtures";
 
 /** Routes /api/examples to the chips and /api/ask to a result picked by keyword, like the fake agent. */
 function stubApi(): Mock {
@@ -21,6 +21,7 @@ function byKeyword(question: string) {
   if (/nothing/i.test(question)) return EMPTY;
   if (/delete/i.test(question)) return BLOCKED;
   if (/rate limit/i.test(question)) return ERROR;
+  if (/weather/i.test(question)) return UNANSWERABLE;
   return /nets/i.test(question) ? NETS : ANSWERED;
 }
 
@@ -128,6 +129,7 @@ describe("App", () => {
     expect(screen.getByRole("tab", { name: "SQL" }).getAttribute("aria-selected")).toBe("true");
     await user.click(screen.getByRole("tab", { name: "Results" }));
     expect(screen.getByText("No rows to show.")).toBeTruthy();
+    expect(screen.queryByRole("button", { name: /Export CSV|Download SVG/ })).toBeNull();
     await user.click(screen.getByRole("button", { name: "Try a wider date range" }));
     await screen.findByText(ANSWERED.answer);
     expect(askCalls(fetchMock)).toBe(2);
@@ -141,9 +143,20 @@ describe("App", () => {
     await user.type(await screen.findByLabelText("Your question"), "Delete all ticket records{Enter}");
     expect(await screen.findByText("REJECTED STATEMENT")).toBeTruthy();
     expect(screen.queryByRole("tab")).toBeNull();
+    expect(screen.queryByRole("button", { name: /Export CSV|Download SVG/ })).toBeNull();
     await user.click(screen.getByRole("button", { name: "Ask a different question" }));
     expect((screen.getByLabelText("Your question") as HTMLTextAreaElement).value).toBe("");
     expect(screen.getByRole("heading", { name: "Ask anything about ticket sales" })).toBeTruthy();
+  });
+
+  it("offers no export on an unanswerable question", async () => {
+    const user = userEvent.setup();
+    stubApi();
+    render(<App />);
+    await user.type(await screen.findByLabelText("Your question"), "What's the weather?{Enter}");
+    expect(await screen.findByText(UNANSWERABLE.answer)).toBeTruthy();
+    expect(screen.queryByRole("tab")).toBeNull();
+    expect(screen.queryByRole("button", { name: /Export CSV|Download SVG/ })).toBeNull();
   });
 
   it("keeps the question in the box on an error and Retry asks it again", async () => {
@@ -155,6 +168,7 @@ describe("App", () => {
     expect((screen.getByLabelText("Your question") as HTMLTextAreaElement).value).toBe("rate limit please");
     expect(screen.queryByText(ERROR.error?.message ?? "")).toBeNull();
     expect(screen.queryByRole("tab")).toBeNull();
+    expect(screen.queryByRole("button", { name: /Export CSV|Download SVG/ })).toBeNull();
     await user.click(screen.getByRole("button", { name: "Retry" }));
     await screen.findByRole("heading", { name: "Asking is paused until the service responds." });
     expect(askCalls(fetchMock)).toBe(2);

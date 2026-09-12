@@ -727,6 +727,41 @@ is running it also does nothing, because the arriving answer would pull the
 reader straight back off the ask screen. Rejected: clearing the session (the
 lockup is navigation, not a reset of state).
 
+**Export CSV writes raw values, and defuses anything a spreadsheet would run.**
+The file is built in the browser from `columns` and `rows`, so the API gains
+nothing and the CSV holds exactly the rows the table shows; when the result was
+truncated, the button's title says so. Values are raw (`1234.5`, not
+`$1,234.50`) so a spreadsheet can do arithmetic on them, quoting follows RFC 4180,
+`null` is an empty field and lines end in CRLF. A string cell that starts with
+`=`, `+`, `-`, `@`, a tab or a CR gets a leading `'`, because the database holds
+customer-supplied text and a cell like `=HYPERLINK(...)` would otherwise run when
+opened; numbers are never touched, so `-12` stays a number. The file is named
+after a slug of the question. No byte-order mark: a tool that does not strip one
+reads it as part of the first column name, which costs more than the accented
+names older Excel builds misread without it. Rejected: formatted values (pretty,
+but text to a spreadsheet), a server-side export endpoint (a second path to the
+same rows), XLSX (a dependency for one button).
+
+**The chart is SVG, and Download SVG saves the element on screen.** The bar
+chart was divs; it is now one inline `<svg>` with the same geometry, colours
+and emphasis, every colour and font set as an attribute so nothing depends on a
+Tailwind class. Download clones it, declares the namespace, puts the `#16161A`
+panel behind it and serialises it, so the file is the chart as drawn with no
+canvas, no font embedding and no dependency, and the "no chart library" call
+stands. Fonts fall back to `Inter, system-ui, sans-serif`, so the file stays
+legible where the web fonts are not installed. SVG text does not wrap, so a
+label longer than the 180px label column breaks onto a second line and an
+overlong second line ends in an ellipsis; the bar's accessible name keeps the
+full label. Rejected: PNG through a canvas (more code, and web fonts do not
+reach a canvas reliably) and `html-to-image` (a dependency for one button).
+
+**One chart type, and no picker.** The canvas draws a Horizontal bars / Column /
+Line select on the Chart tab; it is not built. Every chart the agent offers is
+a category against a number, where a line implies a trend that is not there and
+columns only rotate the same bars, and `chart_for` already offers a chart only
+when bars suit the shape. Rejected: the three-way select (a control with one
+honest option).
+
 ## Ship
 
 **The no-Docker path is primary.** A reviewer cannot be assumed to have Docker,

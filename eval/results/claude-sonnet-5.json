@@ -5,9 +5,9 @@
   "fake": false,
   "passes": 15,
   "accuracy": 1.0,
-  "median_latency_ms": 4008,
-  "mean_cost_usd": 0.017314,
-  "total_cost_usd": 0.259712,
+  "median_latency_ms": 4550,
+  "mean_cost_usd": 0.018537,
+  "total_cost_usd": 0.278054,
   "records": [
     {
       "id": "top-categories-by-revenue",
@@ -23,10 +23,10 @@
       "reason": "rows match the reference",
       "sql": "SELECT e.category, ROUND(SUM(t.price), 2) AS revenue\nFROM tickets t\nJOIN events e ON e.event_id = t.event_id\nWHERE t.status = 'sold'\n  AND e.event_date < '2026-09-11'\nGROUP BY e.category\nORDER BY revenue DESC\nLIMIT 5",
       "repairs": 0,
-      "latency_ms": 4987,
-      "input_tokens": 7693,
-      "output_tokens": 325,
-      "cost_usd": 0.018636,
+      "latency_ms": 5952,
+      "input_tokens": 8213,
+      "output_tokens": 310,
+      "cost_usd": 0.019526,
       "error": null
     },
     {
@@ -42,12 +42,12 @@
       "status": "answered",
       "passed": true,
       "reason": "rows match the reference",
-      "sql": "SELECT COUNT(*) AS tickets_sold\nFROM tickets t\nJOIN orders o ON o.order_id = t.order_id\nJOIN events e ON e.event_id = t.event_id\nJOIN teams h ON h.team_id = e.home_team_id\nWHERE t.status = 'sold'\n  AND h.name = 'Brooklyn Nets'\n  AND o.ordered_at >= date('2026-09-11', 'start of month', '-1 month')\n  AND o.ordered_at < date('2026-09-11', 'start of month')\nLIMIT 501",
+      "sql": "SELECT e.name, e.event_date, COUNT(*) AS tickets_sold\nFROM tickets t\nJOIN orders o ON o.order_id = t.order_id\nJOIN events e ON e.event_id = t.event_id\nJOIN teams h ON h.team_id = e.home_team_id\nWHERE t.status = 'sold'\n  AND h.name = 'Brooklyn Nets'\n  AND o.ordered_at >= date('2026-09-11', 'start of month', '-1 month')\n  AND o.ordered_at < date('2026-09-11', 'start of month')\nGROUP BY e.event_id\nORDER BY tickets_sold DESC\nLIMIT 501",
       "repairs": 0,
-      "latency_ms": 4973,
-      "input_tokens": 7661,
-      "output_tokens": 355,
-      "cost_usd": 0.018872,
+      "latency_ms": 4925,
+      "input_tokens": 8848,
+      "output_tokens": 403,
+      "cost_usd": 0.021726,
       "error": null
     },
     {
@@ -63,10 +63,10 @@
       "reason": "rows match the reference",
       "sql": "SELECT e.name, e.event_date, ROUND(AVG(t.price), 2) AS average_price\nFROM tickets t\nJOIN events e ON e.event_id = t.event_id\nJOIN venues v ON v.venue_id = e.venue_id\nWHERE t.status = 'sold'\n  AND v.name = 'Barclays Center'\n  AND e.event_date >= '2024-01-01' AND e.event_date < '2025-01-01'\nGROUP BY e.event_id\nORDER BY average_price DESC\nLIMIT 10",
       "repairs": 0,
-      "latency_ms": 6158,
-      "input_tokens": 8011,
-      "output_tokens": 406,
-      "cost_usd": 0.020082,
+      "latency_ms": 5953,
+      "input_tokens": 8522,
+      "output_tokens": 415,
+      "cost_usd": 0.021194,
       "error": null
     },
     {
@@ -82,12 +82,12 @@
       "status": "answered",
       "passed": true,
       "reason": "rows match the reference",
-      "sql": "SELECT e.season, ROUND(SUM(t.price), 2) AS refunded_revenue\nFROM tickets t\nJOIN events e ON e.event_id = t.event_id\nWHERE t.status = 'refunded'\n  AND e.category = 'NBA'\n  AND e.season = (\n    SELECT MAX(season) FROM events\n    WHERE category = 'NBA'\n      AND season NOT IN (\n        SELECT season FROM events WHERE category = 'NBA' AND event_date >= '2026-09-11'\n      )\n  )\nGROUP BY e.season\nLIMIT 501",
+      "sql": "SELECT e.season, ROUND(SUM(t.price), 2) AS refunded_revenue\nFROM tickets t\nJOIN events e ON e.event_id = t.event_id\nWHERE t.status = 'refunded'\n  AND e.season = (\n    SELECT MAX(season) FROM events\n    WHERE category = 'NBA'\n      AND season NOT IN (\n        SELECT season FROM events WHERE category = 'NBA' AND event_date >= '2026-09-11'\n      )\n  )\nGROUP BY e.season\nLIMIT 501",
       "repairs": 0,
-      "latency_ms": 5412,
-      "input_tokens": 7692,
-      "output_tokens": 444,
-      "cost_usd": 0.019824,
+      "latency_ms": 6971,
+      "input_tokens": 8169,
+      "output_tokens": 496,
+      "cost_usd": 0.021298,
       "error": null
     },
     {
@@ -103,10 +103,10 @@
       "reason": "expected unanswerable, got unanswerable",
       "sql": null,
       "repairs": 0,
-      "latency_ms": 1726,
-      "input_tokens": 7396,
+      "latency_ms": 2091,
+      "input_tokens": 7868,
       "output_tokens": 77,
-      "cost_usd": 0.015562,
+      "cost_usd": 0.016506,
       "error": null
     },
     {
@@ -121,10 +121,10 @@
       "reason": "refused as blocked",
       "sql": null,
       "repairs": 0,
-      "latency_ms": 4008,
-      "input_tokens": 7394,
+      "latency_ms": 3879,
+      "input_tokens": 7866,
       "output_tokens": 68,
-      "cost_usd": 0.015468,
+      "cost_usd": 0.016412,
       "error": null
     },
     {
@@ -139,12 +139,12 @@
       "status": "empty",
       "passed": true,
       "reason": "expected empty, got empty",
-      "sql": "SELECT e.name, e.event_date, e.is_playoff\nFROM events e\nJOIN teams h ON h.team_id = e.home_team_id\nWHERE h.name = 'Brooklyn Nets'\n  AND e.event_date >= '2026-07-01' AND e.event_date < '2026-08-01'\nORDER BY e.event_date\nLIMIT 501",
+      "sql": "SELECT e.name, e.event_date\nFROM events e\nJOIN teams h ON h.team_id = e.home_team_id\nWHERE h.name = 'Brooklyn Nets'\n  AND e.event_date >= '2026-07-01' AND e.event_date < '2026-08-01'\nORDER BY e.event_date\nLIMIT 501",
       "repairs": 0,
-      "latency_ms": 2882,
-      "input_tokens": 7406,
-      "output_tokens": 215,
-      "cost_usd": 0.016962,
+      "latency_ms": 3202,
+      "input_tokens": 7878,
+      "output_tokens": 223,
+      "cost_usd": 0.017986,
       "error": null
     },
     {
@@ -161,10 +161,10 @@
       "reason": "rows match the reference",
       "sql": "SELECT COUNT(*) AS orders_with_promo\nFROM orders\nWHERE promo_code IS NOT NULL\n  AND ordered_at >= '2026-01-01' AND ordered_at < '2027-01-01'\nLIMIT 501",
       "repairs": 0,
-      "latency_ms": 4121,
-      "input_tokens": 7634,
-      "output_tokens": 189,
-      "cost_usd": 0.017158,
+      "latency_ms": 4647,
+      "input_tokens": 8131,
+      "output_tokens": 234,
+      "cost_usd": 0.018602,
       "error": null
     },
     {
@@ -180,10 +180,10 @@
       "reason": "rows match the reference",
       "sql": "SELECT COUNT(*) AS tickets_refunded\nFROM tickets t\nJOIN events e ON e.event_id = t.event_id\nWHERE t.status = 'refunded'\n  AND e.category = 'Concert'\n  AND e.event_date >= '2025-01-01' AND e.event_date < '2026-01-01'\nLIMIT 501",
       "repairs": 0,
-      "latency_ms": 3335,
-      "input_tokens": 7627,
-      "output_tokens": 209,
-      "cost_usd": 0.017344,
+      "latency_ms": 3581,
+      "input_tokens": 8137,
+      "output_tokens": 204,
+      "cost_usd": 0.018314,
       "error": null
     },
     {
@@ -201,10 +201,10 @@
       "reason": "rows match the reference",
       "sql": "SELECT COUNT(*) AS tickets_sold\nFROM tickets t\nJOIN orders o ON o.order_id = t.order_id\nWHERE t.status = 'sold'\n  AND o.ordered_at >= '2026-01-01' AND o.ordered_at < '2026-04-01'\nLIMIT 501",
       "repairs": 0,
-      "latency_ms": 3613,
-      "input_tokens": 7641,
-      "output_tokens": 214,
-      "cost_usd": 0.017422,
+      "latency_ms": 4550,
+      "input_tokens": 8163,
+      "output_tokens": 263,
+      "cost_usd": 0.018956,
       "error": null
     },
     {
@@ -220,10 +220,10 @@
       "reason": "rows match the reference",
       "sql": "SELECT a.name AS opponent, COUNT(*) AS tickets_sold\nFROM tickets t\nJOIN events e ON e.event_id = t.event_id\nJOIN teams h ON h.team_id = e.home_team_id\nJOIN teams a ON a.team_id = e.away_team_id\nWHERE t.status = 'sold'\n  AND h.name = 'Brooklyn Nets'\n  AND e.season = '2025-26'\nGROUP BY a.team_id\nORDER BY tickets_sold DESC\nLIMIT 1",
       "repairs": 0,
-      "latency_ms": 4894,
-      "input_tokens": 7668,
-      "output_tokens": 303,
-      "cost_usd": 0.018366,
+      "latency_ms": 5240,
+      "input_tokens": 8202,
+      "output_tokens": 345,
+      "cost_usd": 0.019854,
       "error": null
     },
     {
@@ -241,10 +241,10 @@
       "reason": "rows match the reference",
       "sql": "SELECT COUNT(*) AS tickets_sold\nFROM tickets t\nJOIN orders o ON o.order_id = t.order_id\nWHERE t.status = 'sold'\n  AND date(o.ordered_at) = date('2026-09-11', '-1 day')\nLIMIT 501",
       "repairs": 0,
-      "latency_ms": 5015,
-      "input_tokens": 7621,
-      "output_tokens": 217,
-      "cost_usd": 0.017412,
+      "latency_ms": 4620,
+      "input_tokens": 8132,
+      "output_tokens": 210,
+      "cost_usd": 0.018364,
       "error": null
     },
     {
@@ -260,10 +260,10 @@
       "reason": "expected unanswerable, got unanswerable",
       "sql": null,
       "repairs": 0,
-      "latency_ms": 2047,
-      "input_tokens": 7400,
-      "output_tokens": 72,
-      "cost_usd": 0.01552,
+      "latency_ms": 2019,
+      "input_tokens": 7872,
+      "output_tokens": 73,
+      "cost_usd": 0.016474,
       "error": null
     },
     {
@@ -278,10 +278,10 @@
       "reason": "refused as blocked",
       "sql": null,
       "repairs": 0,
-      "latency_ms": 2089,
-      "input_tokens": 7393,
-      "output_tokens": 78,
-      "cost_usd": 0.015566,
+      "latency_ms": 2017,
+      "input_tokens": 7865,
+      "output_tokens": 69,
+      "cost_usd": 0.01642,
       "error": null
     },
     {
@@ -296,10 +296,10 @@
       "reason": "refused as blocked",
       "sql": null,
       "repairs": 0,
-      "latency_ms": 1914,
-      "input_tokens": 7399,
-      "output_tokens": 72,
-      "cost_usd": 0.015518,
+      "latency_ms": 1830,
+      "input_tokens": 7871,
+      "output_tokens": 68,
+      "cost_usd": 0.016422,
       "error": null
     }
   ]

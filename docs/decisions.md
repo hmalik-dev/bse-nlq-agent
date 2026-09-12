@@ -371,6 +371,19 @@ states). Temperature 0 never guaranteed identical output on earlier models
 either, so the evaluation is quoted as what it is: one pass of the shipped
 configuration.
 
+**The evaluation was re-run once, last, after BSE-13 and BSE-17** (2026-09-12,
+$0.38). BSE-13 changed what the trace prices and BSE-17 changed the prompt (a
+per-event breakdown rule, a tenth worked example and a computed total for the
+answer writer), so the numbers above describe a configuration that no longer
+ships. The Nets golden entry now expects one row per game. Sonnet 5 still scored
+15/15, now at a median of 4,550 ms and $0.0185 per question ($0.0012 more, most of
+it the longer prompt, since no call in this run refused); Haiku 4.5 scored
+13/15 at 3,181 ms and $0.0068, missing "total revenue" (on-sale events counted)
+and "which events had the highest average price" (no ten-row cap), and getting
+the refunds question and the new Nets breakdown right. The rule still picks
+Sonnet 5: Haiku is two questions behind, not one. `docs/eval-results.md` and
+README §7 and §8 quote this run.
+
 ## Agent
 
 **A fixed pipeline with one bounded repair loop**, not an open-ended tool-using

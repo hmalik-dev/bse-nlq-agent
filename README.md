@@ -332,16 +332,16 @@ nullable promo code, and joins across three and four tables. Full results, per q
 
 | Model | Passed | Accuracy | Median latency | Mean cost / question | Total cost |
 |---|---|---|---|---|---|
-| `claude-sonnet-5` | 15/15 | 100% | 4,008 ms | $0.0173 | $0.2597 |
-| `claude-haiku-4-5` | 12/15 | 80% | 3,106 ms | $0.0063 | $0.0939 |
+| `claude-sonnet-5` | 15/15 | 100% | 4,550 ms | $0.0185 | $0.2781 |
+| `claude-haiku-4-5` | 13/15 | 87% | 3,181 ms | $0.0068 | $0.1021 |
 
 The decision rule was fixed before the run: use the cheapest model that comes
 within one question of the best score and gets every unsafe and unanswerable
-question right. Haiku is three questions behind, not one, so it is not
-eligible, and **Claude Sonnet 5** is the model in `.env.example`. Haiku's three
-misses are all about shape rather than arithmetic: it counted on-sale events in
-"total revenue", returned one row for a plural "which events", and changed the
-number of columns on the refunds question between runs.
+question right. Haiku is two questions behind, not one, so it is not eligible,
+and **Claude Sonnet 5** is the model in `.env.example`. Haiku's two misses are
+both about shape rather than arithmetic: it counted on-sale events in "total
+revenue", and left the ten-row cap off "which events had the highest average
+price", returning every 2024 event instead of the top ten.
 
 To rerun it, with a key in `.env`:
 
@@ -351,7 +351,7 @@ uv run python -m eval.run
 
 It seeds its own pinned database, asks each model the fifteen questions, writes
 one JSON file per model under `eval/results/`, rewrites `docs/eval-results.md`,
-and prints the total cost (about $0.35) and the decision. Add `--fake` to run
+and prints the total cost (about $0.38) and the decision. Add `--fake` to run
 the whole harness through a scripted client for nothing, or `--only <id>` for
 one question.
 
@@ -365,8 +365,8 @@ resolved rather than asked about: the model picks the most reasonable reading
 and states it, because a single-question tool has no conversation to ask in.
 SQLite over Postgres or DuckDB: nothing to install and a real read-only
 guarantee, at the price of a smaller SQL dialect. Sonnet over Haiku: almost
-three times the cost per question for three more right answers out of fifteen,
-which is the right trade when a wrong number costs more than three cents. The
+three times the cost per question for two more right answers out of fifteen,
+which is the right trade when a wrong number costs more than a cent. The
 reasoning behind every choice, including the ones rejected, is in
 `docs/decisions.md`.
 
@@ -391,5 +391,5 @@ implementation, the tests and these documents from tickets written for it, with
 every decision recorded in `docs/decisions.md`. Claude Design produced the
 interface mockups in `design-plan/`. Inside the application, Claude Sonnet 5
 turns the question into SQL and writes the answer, chosen by the evaluation
-above: 15 of 15 questions right at a median of 4.0 seconds and 1.7 cents per
+above: 15 of 15 questions right at a median of 4.6 seconds and 1.9 cents per
 question.

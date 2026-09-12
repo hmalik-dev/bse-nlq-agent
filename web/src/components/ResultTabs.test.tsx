@@ -44,6 +44,8 @@ describe("ResultTabs", () => {
     expect(bars[1]?.className).toContain("opacity-70");
     expect(screen.getByText("Revenue by category")).toBeTruthy();
     expect(screen.getByText("$118,400,215.50")).toBeTruthy();
+    expect(screen.getByText("$0")).toBeTruthy();
+    expect(screen.getByText("$118.4M")).toBeTruthy();
   });
 
   it("formats the table by column and badges Nets rows", () => {

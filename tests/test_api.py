@@ -228,6 +228,7 @@ def test_the_root_is_a_page_naming_the_three_ways_forward_when_there_is_no_build
     assert "npm ci &amp;&amp; npm run -w web build" in response.text
     assert 'uv run python -m nlq.ask "How many tickets did we sell last month?"' in response.text
     assert "docker run --env-file .env -p 127.0.0.1:8000:8000 bse-insights" in response.text
+    assert "pre { white-space: pre-wrap" in response.text  # commands wrap at phone width
     assert api.get("/anything").status_code == 404
 
 

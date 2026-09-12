@@ -37,6 +37,7 @@ UI_NOT_BUILT_PAGE = """<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>BSE Insights</title>
+<style>pre { white-space: pre-wrap; overflow-wrap: anywhere; }</style>
 <main style="max-width: 40rem; margin: 3rem auto; padding: 0 1rem;
              font-family: system-ui, sans-serif; line-height: 1.5">
 <h1>BSE Insights is running</h1>

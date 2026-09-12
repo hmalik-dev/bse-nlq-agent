@@ -156,21 +156,19 @@ and running Opus only on the questions the other two miss (the same conclusion,
 still paid for).
 
 **The evaluation is built offline and only then run for real.** A full two-model
-sweep costs under $1, so the harness is not worth much protection: two mechanisms,
-both enforced in `eval/run.py` rather than left to discipline. `--fake` drives the
-entire pipeline through the fake client, so the harness is debugged for nothing
-and a live run is the last step instead of the loop; `--max-spend` (default $3)
-stops the run the moment the running total would cross it, so a runaway loop is
-stopped by the runner and not by someone watching it. `--smoke` runs four
-questions spanning the outcome types, which is where a broken prompt reveals
-itself before the full set is paid for. Rejected: a disk cache of model responses
-keyed on the request (a replayed response has no latency, and the decision rule
-reads median latency, so a cached run would corrupt the number it was
-protecting); pricing the sweep with `count_tokens` before the first call (a gate
-that fires on every run of a sub-dollar sweep is a prompt that always gets
-answered yes); and a timing table for the reference queries (aggregates over the
-whole ticket table already return in under a second, and the golden test
-executes every one).
+sweep costs under $1, so the harness gets one protection, enforced in
+`eval/run.py`: `--fake` drives the entire pipeline through the fake client, so
+the harness is debugged for nothing and the live run is the last step instead
+of the loop. Rejected, because each would cost more to build than the sweep it
+protects: a disk cache of model responses (a replayed response has no latency,
+and the decision rule reads median latency, so a cached run would corrupt the
+number it was protecting); pricing the sweep with `count_tokens` before the
+first call (a gate that fires on every run of a sub-dollar sweep is a prompt
+that always gets answered yes); a spend ceiling (thirty sequential questions
+with a repair loop bounded at three calls cannot run away); a smoke subset
+(`--only` already runs one question); and a timing table for the reference
+queries (aggregates over the whole ticket table already return in under a
+second, and the golden test executes every one).
 
 **An empty result is a scored outcome in the evaluation.** The brief names the
 empty result set as a case to handle gracefully, so the golden set carries a

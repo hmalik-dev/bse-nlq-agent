@@ -11,3 +11,6 @@ dist/
 
 # Interview prep notes — not part of the submission.
 PRESENTATION_NOTES.md
+
+# Editor-local state.
+.vscode/

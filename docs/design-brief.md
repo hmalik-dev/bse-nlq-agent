@@ -171,10 +171,12 @@ chips.
 
 ## Breakpoints
 
-1440 reference · 1024 · 768 · 390 × 844 mobile. At 768 and below the answer card,
-chips and tabs stack; the results table scrolls inside its own container instead of
-widening the page; the drawer goes full-screen; the history rail collapses to a
-menu.
+The canvas draws 1440, 1024, 768 and 390 × 844. The app builds two layouts: the
+1440 reference at 1024 and above, and one narrow layout below 1024 where the
+answer card, chips and tabs stack, the results table scrolls inside its own
+container instead of widening the page, the drawer goes full width and the
+history rail moves behind a header button. Frames 12 to 17 are a reference for
+that narrow layout, not acceptance criteria; `docs/decisions.md` records why.
 
 ## Accessibility
 

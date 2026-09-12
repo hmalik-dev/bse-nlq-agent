@@ -18,12 +18,14 @@ PROJECT_ROOT = PACKAGE_DIR.parents[1]
 
 SCHEMA_PATH = PACKAGE_DIR / "db" / "schema.sql"
 DICTIONARY_PATH = PACKAGE_DIR / "db" / "dictionary.yaml"
+STATIC_DIR = PACKAGE_DIR / "static"  # the built web interface, when `npm run -w web build` has run
 
 DEFAULT_DATABASE_PATH = "data/tickets.db"
 DEFAULT_QUERY_TIMEOUT_MS = 5000
 DEFAULT_MAX_ROWS = 500
 DEFAULT_MODEL = "claude-sonnet-5"
 DEFAULT_LLM_TIMEOUT_S = 60
+DEFAULT_MAX_QUESTION_CHARS = 500
 
 
 def load_project_env() -> None:
@@ -78,6 +80,16 @@ def answer_model() -> str:
 def llm_timeout_s() -> int:
     """How long one model call may take before it is abandoned."""
     return _int_env("NLQ_LLM_TIMEOUT_S", DEFAULT_LLM_TIMEOUT_S)
+
+
+def max_question_chars() -> int:
+    """The longest question the API accepts; anything longer is refused before the agent."""
+    return _int_env("NLQ_MAX_QUESTION_CHARS", DEFAULT_MAX_QUESTION_CHARS)
+
+
+def fake_agent() -> bool:
+    """Whether the API answers from canned results instead of the model (NLQ_FAKE_AGENT=1)."""
+    return _str_env("NLQ_FAKE_AGENT", "0") == "1"
 
 
 def anthropic_api_key() -> str:

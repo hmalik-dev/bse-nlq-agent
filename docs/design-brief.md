@@ -154,8 +154,45 @@ Step names are `Reading schema`, `Writing SQL`, `Checking safety`, `Running quer
 and `Writing answer`, always in that order; a step that never ran is omitted, and
 a step a repair ran twice appears once with its times added together.
 
-`GET /api/schema` feeds the schema drawer. `GET /api/examples` feeds the starter
-chips.
+Every agent outcome is a 200 with one of those five statuses. The only HTTP
+error is a 422 for a malformed body: a missing, blank or over-long question
+(the cap is `NLQ_MAX_QUESTION_CHARS`, default 500), in FastAPI's standard
+`{"detail": [...]}` shape.
+
+`GET /api/schema` feeds the schema drawer:
+
+```jsonc
+{
+  "tables": [                               // six, in schema order
+    {
+      "name": "tickets",
+      "description": "One row per seat. The fact table for counts and revenue.",
+      "columns": [{"name": "price", "type": "REAL", "description": "Face value paid, excluding fee. 0 for comps."}]
+    }
+  ],
+  "definitions": ["Revenue is SUM(price) over tickets with status = 'sold'. …"]  // the business rules
+}
+```
+
+`GET /api/examples` feeds the starter chips, in the order of the table above:
+
+```jsonc
+[{"question": "How many tickets did we sell for Nets home games last month?", "badge": "nets"},
+ {"question": "Top 5 event categories by total revenue", "badge": null}]   // badge: "nets" | "liberty" | null
+```
+
+`GET /api/health` is what the smoke scripts wait on:
+
+```jsonc
+{"ok": true, "database": true, "fake": false}   // database: the file exists; fake: NLQ_FAKE_AGENT=1
+```
+
+With `NLQ_FAKE_AGENT=1` the API answers from canned results without a key or a
+database, one per screen above. A word in the question picks the screen:
+`delete`, `drop` or `update` → blocked; `weather` → unanswerable; `nothing` →
+empty; `rate limit`, `no key` or `no database` → that error; `slow` → a two
+second wait; `nets` → the eight-row results table; anything else → the
+five-category chart.
 
 ## Screens and states
 

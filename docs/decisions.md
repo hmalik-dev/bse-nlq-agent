@@ -441,6 +441,39 @@ Frames 12 to 17 stay in the canvas as a reference. Rejected: a tablet layout and
 an icon-collapsed rail with tooltips (hours of CSS nobody grading this will
 resize a window to see).
 
+**Every agent outcome is a 200 with a status field; only a malformed body gets
+an HTTP error.** `POST /api/ask` returns `AskResult` unchanged for answered,
+empty, unanswerable, blocked and error alike, so the interface renders one shape
+and never parses an error body. A missing, blank or over-long question (the cap
+is `NLQ_MAX_QUESTION_CHARS`, default 500, read per request like every other
+setting) is the one 422, and it is FastAPI's standard body. An exception the
+agent lets escape is logged with its traceback and answered as `error` /
+`internal` with the same fixed sentence the agent itself uses, so no response
+ever carries internal detail. Rejected: mapping statuses to HTTP codes (a
+blocked question is not a 403 and an empty result is not a 404; both are
+answers), and a middleware layer (there is nothing cross-cutting to do).
+
+**The fake agent is the interface's test double.** `NLQ_FAKE_AGENT=1` swaps
+`Agent.from_env()` for `FakeAgent`, which answers from canned results keyed on a
+word in the question — one per screen the design draws — with no key, no
+database and no latency, so the web tickets and their browser passes never
+touch the network. Its values are taken from the real schema (event names as
+the seed writes them, the six real categories, real column names, SQL that
+passes the guard), because the canvas is a style reference and a chip that
+showed made-up data would train the interface on the wrong shape. The agent is
+resolved on the first request rather than at import, so importing `nlq.api`
+needs nothing. Rejected: recording real responses to replay (a fixture that
+rots as the prompt changes, for the same six screens).
+
+**The built interface is served by the API, with an index fallback.** Any path
+outside `/api` that is not a file in the static directory returns `index.html`,
+so a client-side route survives a reload; files that are there (the brand marks
+from `web/public`, the hashed assets) are served as themselves. Without a build
+the root answers with a one-line JSON hint instead of a 404, so a reviewer who
+runs the API first knows what is missing. Rejected: a separate static host (two
+addresses for one app), and `StaticFiles(html=True)` alone (no fallback, so a
+deep link 404s).
+
 **No simulated progress while a question runs.** The API is one call, so the
 per-step times in the trace are only known when it returns. The waiting state
 lists the five step names with a spinner and fills in the real times on

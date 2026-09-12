@@ -25,6 +25,9 @@ and why; add to it whenever you make a new call. Then, for the work at hand:
 | Ask from the terminal | `uv run python -m nlq.ask "How many tickets did we sell last month?"` |
 | Run the API | `uv run uvicorn nlq.api:app --reload` |
 | Accuracy evaluation | `uv run python -m eval.run` |
+| Smoke test of the local path (fake agent without a key) | `scripts/smoke.sh` |
+| Build the container image | `docker build -t bse-insights .` |
+| Run the container (seeds on first start) | `docker run --env-file .env -p 127.0.0.1:8000:8000 bse-insights` |
 | Install the web toolchain | `npm ci` (at the root; it is an npm workspace) |
 | Web dev server, proxying `/api` to port 8000 | `npm run -w web dev` |
 | Web lint, typecheck, tests | `npm run -w web lint`, `typecheck`, `test` |

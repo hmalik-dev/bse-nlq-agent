@@ -341,6 +341,52 @@ than being listed in the guard, so the two cannot drift apart.
 sees the database. Empty results are reported by code, not by the model, so there
 is nothing to hallucinate.
 
+**The answer writer sees at most 50 rows.** The interface can show 500, but a
+two-sentence answer never needs them: the model is told how many rows there are
+and whether the query itself was truncated, and describes the first 50. Sending
+all 500 costs prompt tokens on every answered question for no better sentence.
+Rejected: sending everything (the default row cap is 500 rows of up to 8MB).
+
+**Blocked means "refused before anything ran"; unanswerable means "the data
+cannot say".** A request the model declines as destructive, or SQL the guard
+finds write-shaped, is `blocked`: the answer is one fixed sentence saying so and
+that the connection is read-only, and the rejected statement is shown when there
+is one. A question the data cannot answer is `unanswerable`, and the model's own
+sentence explaining why is the answer. The two look different on screen because
+they call for different next steps: rephrase, versus stop.
+
+**Suggestions come from code, never from the model.** An empty result carries two
+fixed rewordings; an unanswerable one carries the questions of the first three
+answerable worked examples. Neither state makes a model call, so neither can
+invent a question the data does not support.
+
+**A bar chart is offered only when the shape is unambiguous**: exactly two
+columns, text in the first, numbers (or NULL) in the second, and between 2 and 25
+rows. Anything else is a table. Rejected: asking the model to pick a chart (a
+third call for a hint the columns already give away).
+
+**One step per name in the trace, even after a repair.** The interface draws five
+fixed steps, so a repair adds its time to `Writing SQL` and `Checking safety`
+rather than appending a sixth and seventh row; `repairs` says how many times
+that happened. A step that never ran is omitted, and one that started and failed
+is kept with its time, because it did run.
+
+**Cost is priced by the model that was asked for, not the one the API echoes
+back.** The price table is keyed by the names in `.env`, and an unknown name is
+priced at Opus rates so a misconfiguration overstates rather than hides spend.
+Because the configured name is what gets priced, a run through the fake client
+still reports what those calls *would* have cost at the configured model's rates,
+which is the number the offline evaluation wants to see; a configured name
+containing "fake" is the way to price a run at zero. Rejected: pricing by the
+name the API echoes back (a dated ID such as `claude-haiku-4-5-20251001` would
+silently fall to Opus rates). There is no spend guard reading these numbers; the
+evaluation sums them and that is all.
+
+**`ask()` never raises.** A typed `NlqError` becomes an `error` result with its
+code; anything else becomes `internal` with a fixed message and one ERROR log
+line carrying the traceback. The API and the CLI can then treat the result as
+the whole contract.
+
 ## Interface
 
 **React + Vite + TypeScript + Tailwind on a FastAPI backend**, served as one app

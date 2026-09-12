@@ -140,11 +140,19 @@ Taken from the assets themselves, so the UI and the logos share one palette.
     "steps": [{"name": "Writing SQL", "ms": 1240}, {"name": "Running query", "ms": 18}],
     "repairs": 1,
     "model": "claude-sonnet-5",
-    "total_ms": 2160
+    "total_ms": 2160,
+    "input_tokens": 9800,                   // summed over every model call
+    "output_tokens": 310,
+    "cost_usd": 0.0227                      // priced from src/nlq/pricing.py
   },
-  "error": { "code": "rate_limited", "message": "…" } | null
+  "error": { "code": "rate_limited", "message": "…" } | null,
+  "suggestions": []                         // fixed rewordings for empty; example questions for unanswerable
 }
 ```
+
+Step names are `Reading schema`, `Writing SQL`, `Checking safety`, `Running query`
+and `Writing answer`, always in that order; a step that never ran is omitted, and
+a step a repair ran twice appears once with its times added together.
 
 `GET /api/schema` feeds the schema drawer. `GET /api/examples` feeds the starter
 chips.

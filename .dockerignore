@@ -1,0 +1,18 @@
+# Keep the build context to the source. The key in .env must never reach the image.
+.env*
+.venv
+node_modules
+data
+.git
+.github
+.claude
+design-plan
+docs
+eval/results
+src/nlq/static
+tests
+web/node_modules
+**/__pycache__
+**/.pytest_cache
+**/.ruff_cache
+*.md

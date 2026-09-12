@@ -440,11 +440,14 @@ Rejected: Streamlit (fast, but every Streamlit app looks the same and a custom
 design cannot be built faithfully), plain HTML (no build step, but hand-rolled
 state handling gets messy at this level of polish).
 
-**Reviewers run it locally**, with `docker run` and their own key, documented in
-the README. Hosting it was the original plan — a public link, the key held
-server-side under a spend cap and a per-visitor rate limit — and it is cancelled:
-it costs real money to leave running, and an exposed key is a liability the
-exercise does not need. The spend guard planned alongside it (a per-minute
+**Reviewers run it locally**, from the README's five commands or with `docker
+run`, using a `.env` file handed over with the submission. Hosting it was the
+original plan — a public link, the key held server-side under a spend cap and a
+per-visitor rate limit — and it was descoped on 2026-09-12: a working local path
+with clear instructions meets the brief, and hosting adds an account, a spend
+cap and a volume to manage for no grading benefit. The key is delivered to
+reviewers through a one-time secure link and never appears in the repository,
+the image or the README. The spend guard planned alongside hosting (a per-minute
 question limit and a daily dollar budget in a usage file) goes with it: the
 reviewer runs the app with their own key on their own machine, the repair limit
 and the row cap already bound what one question can cost, and a spend cap on the
@@ -524,6 +527,24 @@ arrival. Rejected: advancing the first steps on a timer and reconciling them
 with the trace (it displays times nothing measured, for forty extra lines).
 
 ## Ship
+
+**The no-Docker path is primary.** A reviewer cannot be assumed to have Docker,
+while uv and Node are each a one-line install and uv fetches Python itself.
+Rejected: committing the built UI to drop the Node requirement (build artefacts
+in a repository graded on code quality, plus a freshness check to maintain), and
+Docker-only (one more tool to install before anything works).
+
+**Seed at container start, not at image build.** The dataset is generated
+relative to today, so a fresh container always has "last month" data, and the
+644MB database stays out of the image. `docker/entrypoint.sh` seeds
+`NLQ_DATABASE_PATH` when the file is missing, `NLQ_RESEED=1` rebuilds it, and an
+optional volume on `/data` keeps it across restarts. Rejected: baking the
+database into the image (fast start, stale dates, huge image).
+
+**A plain image, no production hardening.** The audience is an interviewer and
+the author running it locally. A health check, a non-root user, memory limits
+and scheduled reseeds add nothing to a local demo; `.dockerignore` keeping
+`.env*` out of the build context is the one guard that matters.
 
 **One smoke script, for the local path**, and the container checked once by
 hand in the clean-clone check. The README calls Docker the alternative, so a

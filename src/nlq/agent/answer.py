@@ -14,7 +14,7 @@ import anthropic
 
 from nlq import config
 from nlq.agent.errors import ModelRefused
-from nlq.agent.llm import connect, map_api_error
+from nlq.agent.llm import connect, map_api_error, response_text, response_usage
 from nlq.agent.models import AnswerText
 
 MAX_TOKENS = 400
@@ -99,13 +99,13 @@ def _cell(value: object) -> str:
 
 
 def _result(response: Any, started: float) -> AnswerText:
-    text = "".join(block.text for block in response.content if block.type == "text").strip()
+    usage = response_usage(response)
+    text = response_text(response)
     if response.stop_reason == "refusal" or not text:
-        raise ModelRefused("The model did not write an answer.")
+        raise ModelRefused("The model did not write an answer.", **usage)
     return AnswerText(
         text=text,
         model=response.model,
-        input_tokens=response.usage.input_tokens,
-        output_tokens=response.usage.output_tokens,
         elapsed_ms=int((time.monotonic() - started) * 1000),
+        **usage,
     )

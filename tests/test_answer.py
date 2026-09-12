@@ -88,13 +88,11 @@ def test_the_user_turn_says_when_rows_were_capped_or_truncated() -> None:
         (api_timeout_error(), ModelTimeout, "model_timeout"),
         (refusal(), ModelRefused, "model_refused"),
         (
-            FakeResponse(
-                None, [FakeTextBlock("I cannot.")], FakeUsage(1, 2), stop_reason="refusal"
-            ),
+            FakeResponse([FakeTextBlock("I cannot.")], FakeUsage(1, 2), stop_reason="refusal"),
             ModelRefused,
             "model_refused",
         ),
-        (FakeResponse(None, [], FakeUsage(1, 0)), ModelRefused, "model_refused"),
+        (FakeResponse([], FakeUsage(1, 0)), ModelRefused, "model_refused"),
     ],
     ids=["rate-limit", "timeout", "refusal", "refusal-with-text", "no-text"],
 )
@@ -104,6 +102,13 @@ def test_each_api_failure_becomes_a_named_error(
     with pytest.raises(expected) as raised:
         _write(FakeAnthropic([scripted]))
     assert raised.value.code == code
+
+
+def test_a_refusal_carries_the_tokens_the_call_was_billed_for() -> None:
+    with pytest.raises(ModelRefused) as raised:
+        _write(FakeAnthropic([refusal()]))
+    assert raised.value.input_tokens == FAKE_INPUT_TOKENS
+    assert raised.value.output_tokens == 0
 
 
 def test_a_missing_key_is_refused_before_any_client_is_built(

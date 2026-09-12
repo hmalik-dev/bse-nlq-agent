@@ -32,9 +32,8 @@ class FakeTextBlock:
 
 @dataclass
 class FakeResponse:
-    """The fields the writers read from a real `Message` or `ParsedMessage`."""
+    """The fields the writers read from a real `Message`."""
 
-    parsed_output: SqlPlan | None
     content: list[FakeTextBlock]
     usage: FakeUsage
     stop_reason: str = "end_turn"
@@ -51,9 +50,6 @@ class FakeMessages:
     responses: list[Scripted]
     calls: list[dict] = field(default_factory=list)
 
-    def parse(self, **kwargs) -> FakeResponse:
-        return self._respond(kwargs)
-
     def create(self, **kwargs) -> FakeResponse:
         return self._respond(kwargs)
 
@@ -67,17 +63,16 @@ class FakeMessages:
         if isinstance(scripted, FakeResponse):
             return scripted
         usage = FakeUsage(FAKE_INPUT_TOKENS, FAKE_OUTPUT_TOKENS)
-        if isinstance(scripted, SqlPlan):
-            return FakeResponse(scripted, [FakeTextBlock(scripted.model_dump_json())], usage)
-        return FakeResponse(None, [FakeTextBlock(scripted)], usage)
+        text = scripted.model_dump_json() if isinstance(scripted, SqlPlan) else scripted
+        return FakeResponse([FakeTextBlock(text)], usage)
 
 
 class FakeAnthropic:
     """`FakeAnthropic([plan, "text", error])` answers three calls in that order.
 
-    A `SqlPlan` comes back as `parsed_output`, a `str` as a text content block,
-    an `Exception` is raised, and a `FakeResponse` is returned as scripted (for
-    a refusal, say).
+    A `SqlPlan` comes back as its JSON in a text content block, a `str` as the
+    text itself, an `Exception` is raised, and a `FakeResponse` is returned as
+    scripted (for a refusal, say).
     """
 
     def __init__(self, responses: list[Scripted]) -> None:
@@ -90,7 +85,7 @@ class FakeAnthropic:
 
 def refusal() -> FakeResponse:
     """A response the API stopped with `stop_reason == "refusal"` and no plan."""
-    return FakeResponse(None, [], FakeUsage(FAKE_INPUT_TOKENS, 0), stop_reason="refusal")
+    return FakeResponse([], FakeUsage(FAKE_INPUT_TOKENS, 0), stop_reason="refusal")
 
 
 def _response(status: int) -> httpx2.Response:

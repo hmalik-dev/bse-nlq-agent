@@ -56,8 +56,11 @@ def test_the_happy_path_sends_the_prompt_and_asks_for_a_plan(
     assert call["model"] == "claude-haiku-4-5"
     assert call["max_tokens"] == MAX_TOKENS
     assert call["system"] == context.system
-    assert call["output_format"] is SqlPlan
-    assert set(call) == {"model", "max_tokens", "system", "messages", "output_format"}
+    assert call["output_config"] == {
+        "format": {"type": "json_schema", "schema": anthropic.transform_schema(SqlPlan)}
+    }
+    assert "answerable" in call["output_config"]["format"]["schema"]["properties"]
+    assert set(call) == {"model", "max_tokens", "system", "messages", "output_config"}
 
 
 def test_the_examples_precede_the_question_as_alternating_turns(
@@ -122,6 +125,32 @@ def test_each_api_failure_becomes_a_named_error(
     with pytest.raises(expected) as raised:
         SqlWriter(FakeAnthropic([scripted])).write(QUESTION, context=context)
     assert raised.value.code == code
+
+
+@pytest.mark.parametrize(
+    ("scripted", "output_tokens"),
+    [
+        (refusal(), 0),
+        ("not a plan", FAKE_OUTPUT_TOKENS),
+        ('{"answerable": true, "sql": ""}', FAKE_OUTPUT_TOKENS),
+    ],
+    ids=["refusal", "not-json", "off-schema"],
+)
+def test_a_refusal_carries_the_tokens_the_call_was_billed_for(
+    context: PromptContext, scripted: object, output_tokens: int
+) -> None:
+    with pytest.raises(ModelRefused) as raised:
+        SqlWriter(FakeAnthropic([scripted])).write(QUESTION, context=context)
+    assert raised.value.input_tokens == FAKE_INPUT_TOKENS
+    assert raised.value.output_tokens == output_tokens
+
+
+def test_an_sdk_error_carries_no_tokens_because_nothing_came_back(
+    context: PromptContext,
+) -> None:
+    with pytest.raises(ModelRateLimited) as raised:
+        SqlWriter(FakeAnthropic([rate_limit_error()])).write(QUESTION, context=context)
+    assert not hasattr(raised.value, "input_tokens")
 
 
 def test_a_missing_key_is_refused_before_any_client_is_built(

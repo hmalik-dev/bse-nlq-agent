@@ -226,13 +226,13 @@ median latency per model, and batch timings do not measure the interactive path
 a user waits on. Written down because it looks like an obvious saving to anyone
 who meets this code later.
 
-**Structured outputs** (`messages.parse`) for SQL generation, so the response is a
-validated object, not a string that has to be scraped for a code fence. The
-SDK folds the schema's length limits (three assumptions, 120 characters each)
-into field descriptions the model reads, and pydantic still enforces them on
-the way back; a response that breaks them is reported as `model_refused`, the
-same code as a plan the model never produced, because in both cases there is
-no plan to run.
+**Structured outputs** (`output_config` carrying the `SqlPlan` JSON schema) for
+SQL generation, so the response is a validated object, not a string that has
+to be scraped for a code fence. The SDK folds the schema's length limits (three
+assumptions, 120 characters each) into field descriptions the model reads, and
+pydantic still enforces them on the way back; a response that breaks them is
+reported as `model_refused`, the same code as a plan the model never produced,
+because in both cases there is no plan to run.
 
 **No thinking, effort or temperature parameters.** The SQL call sends the model
 name, a token cap, the system prompt, the messages and the output schema, and
@@ -318,6 +318,37 @@ covered: a question with no rows behind it ("Nets home games in July"), two the
 data cannot answer, three writes, filters on `status` and on the nullable
 `promo_code`, and joins across three and four tables. Nothing in it needs a
 CTE, a window function or `HAVING`, so the worked examples stay at nine.
+
+**A refused or off-schema SQL call is still priced.** The first BSE-7 sweep
+traced one Sonnet call at zero tokens and zero dollars after the API had
+answered and billed it: the SDK's `messages.parse` validates the plan inside
+the call and raises pydantic's error before the `Message` is returned, so the
+usage was unreachable. The SQL writer now calls `messages.create` with the same
+schema under `output_config` (built with the SDK's own `transform_schema`, so
+the API sees exactly what `parse` would have sent) and validates the text
+itself, which keeps the response in hand on every path. `ModelRefused` carries
+the tokens the call was billed for, and the agent prices every model call in
+one place, `_priced`, whether it returned or refused; an SDK failure with no
+response still charges nothing. Rejected: returning usage next to a `None`
+plan (two return shapes for one call); reading the usage back through
+`with_raw_response` while keeping `parse` (ties the writer and the fakes to
+the SDK's response wrapper for a five-line validation it can do itself).
+
+**Temperature stays unpinned.** BSE-13 asked for `temperature=0` on both calls
+so the evaluation reads as a measurement of one fixed configuration. It cannot
+ship: the Anthropic SDK this project runs on (1.5.0) removed `temperature`,
+`top_p` and `top_k` from `messages.create` and `messages.parse` (passing one is
+a `TypeError`), and Sonnet 5, the model the decision rule chose, rejects any
+non-default sampling value with a 400; Opus 4.7 and later reject the parameter
+outright. Pinning it would take the default model down on every question. The
+existing tests already assert the exact argument set each call sends, which is
+the guard that no sampling parameter creeps in. Rejected: `extra_body=
+{"temperature": 0}` (slips past the SDK only to be refused by the API on the
+default model; it would work on Haiku 4.5 alone, turning a model swap into a
+code change, the rule "No thinking, effort or temperature parameters" already
+states). Temperature 0 never guaranteed identical output on earlier models
+either, so the evaluation is quoted as what it is: one pass of the shipped
+configuration.
 
 ## Agent
 

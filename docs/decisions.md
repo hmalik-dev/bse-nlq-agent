@@ -751,6 +751,21 @@ and the first screen says the brief's three example questions are in the golden
 set word for word. Nothing was shortened; the fix is order. Node moved to its
 own subsection because a working app no longer depends on it.
 
+**Superseded (BSE-18): the README leads with a short summary, then the run
+steps, then a feature list, then the design.** Tickets had each edited one
+section, and the result was 400 lines with a stale cost figure in one place and
+the current one in another, and a trace said to show cost that the interface
+never rendered. A reviewer who has just cloned needs numbered clone-to-browser
+steps with what success looks like, then a plain list of what the app can do;
+the headline result (15/15, $0.0185, the two safety layers) sits above both so
+the agent is still the first thing read. Content already in `docs/` (the data
+realism ranges, per-question results) is linked rather than repeated.
+`tests/test_readme.py` holds the README to the latest evaluation summary and to
+paths that exist, so the next re-run cannot leave a stale figure behind.
+Rejected: patching the one stale figure (the drift was document-wide), and
+keeping the agent design above the run steps (a reviewer's first job is to get
+it running, and the summary already names the design's headline points).
+
 ## Interface toolchain
 
 **Vite + React 19 + TypeScript, Tailwind v4 through `@tailwindcss/vite`.** One

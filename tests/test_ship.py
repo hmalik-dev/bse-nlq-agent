@@ -31,7 +31,7 @@ def test_env_files_and_secrets_are_kept_out_of_the_build_context() -> None:
 
 def test_the_container_runs_as_a_user_that_is_not_root() -> None:
     directives = [line.split() for line in DOCKERFILE.read_text(encoding="utf-8").splitlines()]
-    users = [words[1] for words in directives if words[:1] == ["USER"]]
+    users = [words[1] for words in directives if words and words[0] == "USER"]
     assert users, "the Dockerfile never switches away from root"
     assert users[-1] not in {"root", "0", "0:0"}
 

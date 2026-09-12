@@ -23,7 +23,9 @@ FAKE_KEY = "fake-key-for-the-leak-test-0123456789"
 TODAY = date(2026, 9, 11)
 
 
-def _anthropic_answering(status: int, seen_keys: list[str], monkeypatch: pytest.MonkeyPatch):
+def _anthropic_answering(
+    status: int, seen_keys: list[str], monkeypatch: pytest.MonkeyPatch
+) -> None:
     """Build the real SDK client, but over a transport that answers `status` with no network."""
     real_client = anthropic.Anthropic
 

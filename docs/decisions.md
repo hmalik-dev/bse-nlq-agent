@@ -672,6 +672,29 @@ lists the five step names with a spinner and fills in the real times on
 arrival. Rejected: advancing the first steps on a timer and reconciling them
 with the trace (it displays times nothing measured, for forty extra lines).
 
+**The schema drawer shows a short definition list of its own, not the prompt's rules.**
+`business_rules` in `dictionary.yaml` is copy for the SQL writer: twelve rules,
+some a paragraph long, naming columns and SQL. The drawer reads a separate
+`definitions` key in the same file, each entry a term and one sentence of at most
+90 characters, with `backticks` around literal values so the drawer can set them
+in seafoam mono as frame 10 draws them. The prompt never reads the key, so the
+golden prompt, and the accuracy measured against it, do not move. Rejected:
+shortening `business_rules` for both readers (a readability fix that changes SQL
+accuracy), and holding the list in `api.py` (the vocabulary split across two
+files). A foreign key's target is served as `references` beside the type, read
+from the `REFERENCES` clause sqlglot already parses, because it is what makes six
+tables read as one dataset. Search and row counts stay out, as declined under
+Product.
+
+**The lockup is a button back to the ask screen, and only from an answer.** There
+are no routes, so a link would need its navigation suppressed; a `<button>` named
+"BSE Insights — back to the start" says what it does. From an answer it calls the
+same `reset()` as "New question", keeping the session history. On the ask screen
+it does nothing, so a half-typed draft survives a stray click; while a question
+is running it also does nothing, because the arriving answer would pull the
+reader straight back off the ask screen. Rejected: clearing the session (the
+lockup is navigation, not a reset of state).
+
 ## Ship
 
 **The no-Docker path is primary.** A reviewer cannot be assumed to have Docker,

@@ -8,11 +8,13 @@ from datetime import date
 from pathlib import Path
 
 import pytest
+import yaml
 from fastapi.testclient import TestClient
 
 from nlq import config
 from nlq.agent.agent import INTERNAL_MESSAGE, Agent
 from nlq.agent.answer import AnswerWriter
+from nlq.agent.context import build_context
 from nlq.agent.executor import Executor
 from nlq.agent.fake import FakeAgent
 from nlq.agent.llm import SqlWriter
@@ -39,6 +41,9 @@ RESULT_KEYS = {
     "suggestions",
 }
 TABLE_NAMES = ["venues", "teams", "events", "customers", "orders", "tickets"]
+# The drawer's definitions are read at a glance: one line in a 480px panel.
+MAX_DEFINITION_CHARS = 90
+MAX_DEFINITIONS = 8
 QUESTION = "How many tickets did we sell last month?"
 
 
@@ -197,18 +202,60 @@ def test_schema_lists_six_tables_in_order_with_typed_columns_and_definitions(
     assert [table["name"] for table in body["tables"]] == TABLE_NAMES
     assert set(body) == {"tables", "definitions"}
     assert len(body["definitions"]) >= 3
-    assert any("Revenue" in rule for rule in body["definitions"])
+    assert any(definition["term"] == "Revenue" for definition in body["definitions"])
     tickets = body["tables"][5]
     assert tickets["description"].startswith("One row per seat")
     by_name = {column["name"]: column for column in tickets["columns"]}
     assert by_name["price"] == {
         "name": "price",
         "type": "REAL",
+        "references": None,
         "description": "Face value paid, excluding fee. 0 for comps.",
     }
     assert by_name["ticket_id"]["type"] == "INTEGER"
     assert by_name["status"]["type"] == "TEXT"
     assert len(by_name) == 8
+
+
+def test_schema_names_the_table_a_foreign_key_points_at(unbuilt: Path) -> None:
+    tables = client(StubAgent(), unbuilt).get("/api/schema").json()["tables"]
+    columns = {
+        f"{table['name']}.{column['name']}": column
+        for table in tables
+        for column in table["columns"]
+    }
+
+    assert columns["tickets.event_id"]["type"] == "INTEGER"
+    assert columns["tickets.event_id"]["references"] == "events"
+    assert columns["events.home_team_id"]["references"] == "teams"
+    assert columns["tickets.price"]["references"] is None
+    assert columns["tickets.ticket_id"]["references"] is None
+
+
+def test_schema_definitions_are_one_short_sentence_each_naming_their_term(unbuilt: Path) -> None:
+    definitions = client(StubAgent(), unbuilt).get("/api/schema").json()["definitions"]
+
+    assert 3 <= len(definitions) <= MAX_DEFINITIONS
+    for definition in definitions:
+        assert set(definition) == {"term", "text"}
+        sentence = f"{definition['term']} {definition['text']}"
+        assert len(sentence) <= MAX_DEFINITION_CHARS, sentence
+        assert sentence.endswith(".")
+        assert ". " not in sentence, sentence
+        assert definition["term"][0].isupper()
+
+
+def test_schema_definitions_are_separate_from_the_rules_the_sql_writer_reads(
+    unbuilt: Path,
+) -> None:
+    definitions = client(StubAgent(), unbuilt).get("/api/schema").json()["definitions"]
+    dictionary = yaml.safe_load(config.DICTIONARY_PATH.read_text(encoding="utf-8"))
+    prompt = build_context(date(2026, 9, 12)).system
+
+    assert all(rule.strip() in prompt for rule in dictionary["business_rules"])
+    assert len(dictionary["business_rules"]) > len(definitions)
+    for definition in definitions:
+        assert definition["text"] not in prompt
 
 
 def test_examples_are_the_six_chips_with_the_nets_and_liberty_badges(unbuilt: Path) -> None:

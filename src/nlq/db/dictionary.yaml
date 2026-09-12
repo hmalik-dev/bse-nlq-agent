@@ -40,6 +40,24 @@ business_rules:
     partial sales. Exclude them when a question is about past performance.
   - Attendance is not recorded. Tickets sold is the closest available measure.
 
+# The same vocabulary for people, shown in the "What's in the data?" drawer and
+# never sent to the model: business_rules above is what the SQL is measured
+# against. Each entry reads as one sentence, "<term> <text>"; `backticks` mark a
+# literal value as it appears in the data.
+definitions:
+  - term: Tickets sold
+    text: counts tickets with status `'sold'` only.
+  - term: Revenue
+    text: is face value of sold tickets, excluding fees, refunds and comps.
+  - term: Sell-through
+    text: is tickets sold divided by the event's `seating_capacity`.
+  - term: Home games
+    text: are Nets or Liberty games at Barclays Center.
+  - term: A season
+    text: includes its playoff games unless you say "regular season".
+  - term: Attendance
+    text: is not recorded, so tickets sold stands in for it.
+
 tables:
   venues:
     description: The one venue the operator runs, Barclays Center.

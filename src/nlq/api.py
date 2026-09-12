@@ -185,7 +185,11 @@ def _static_file(static_dir: Path, path: str) -> Path | None:
 
 @lru_cache(maxsize=1)
 def describe_schema() -> dict[str, Any]:
-    """Six tables in schema order, each column typed and described, plus the business rules."""
+    """Six tables in schema order, each column typed and described, plus the human definitions.
+
+    The definitions are the dictionary's short list for people, not the business
+    rules the SQL writer reads.
+    """
     dictionary = yaml.safe_load(config.DICTIONARY_PATH.read_text(encoding="utf-8"))
     statements = sqlglot.parse(config.SCHEMA_PATH.read_text(encoding="utf-8"), read=SQL_DIALECT)
     tables = [
@@ -193,10 +197,11 @@ def describe_schema() -> dict[str, Any]:
         for statement in statements
         if isinstance(statement, exp.Create) and statement.kind == "TABLE"
     ]
-    return {
-        "tables": tables,
-        "definitions": [rule.strip() for rule in dictionary["business_rules"]],
-    }
+    definitions = [
+        {"term": entry["term"].strip(), "text": entry["text"].strip()}
+        for entry in dictionary["definitions"]
+    ]
+    return {"tables": tables, "definitions": definitions}
 
 
 def _describe_table(schema: exp.Schema, described: dict[str, Any]) -> dict[str, Any]:
@@ -206,12 +211,21 @@ def _describe_table(schema: exp.Schema, described: dict[str, Any]) -> dict[str, 
         {
             "name": column.name,
             "type": column.args["kind"].sql(dialect=SQL_DIALECT),
+            "references": _referenced_table(column),
             "description": entry["columns"][column.name].strip(),
         }
         for column in schema.expressions
         if isinstance(column, exp.ColumnDef)
     ]
     return {"name": name, "description": entry["description"].strip(), "columns": columns}
+
+
+def _referenced_table(column: exp.ColumnDef) -> str | None:
+    """The table a `REFERENCES` clause points the column at, or None for a plain column."""
+    for constraint in column.constraints:
+        if isinstance(constraint.kind, exp.Reference):
+            return constraint.kind.this.this.name
+    return None
 
 
 app = create_app()

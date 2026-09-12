@@ -125,11 +125,14 @@ export const SCHEMA: Schema = {
     name,
     description: `One row per ${name.slice(0, -1)}.`,
     columns: [
-      { name: `${name.slice(0, -1)}_id`, type: "INTEGER", description: "Primary key." },
-      { name: "name", type: "TEXT", description: "Display name." },
+      { name: `${name.slice(0, -1)}_id`, type: "INTEGER", references: null, description: "Primary key." },
+      { name: "name", type: "TEXT", references: null, description: "Display name." },
     ],
   })),
-  definitions: ["Revenue is SUM(price) over tickets with status = 'sold'.", "\"Home games\" are events where the home club is a BSE club."],
+  definitions: [
+    { term: "Tickets sold", text: "counts tickets with status `'sold'` only." },
+    { term: "Home games", text: "are Nets or Liberty games at Barclays Center." },
+  ],
 };
 
 /** A Response the way fetch would hand it back. */

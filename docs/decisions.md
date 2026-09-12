@@ -227,7 +227,51 @@ a user waits on. Written down because it looks like an obvious saving to anyone
 who meets this code later.
 
 **Structured outputs** (`messages.parse`) for SQL generation, so the response is a
-validated object, not a string that has to be scraped for a code fence.
+validated object, not a string that has to be scraped for a code fence. The
+SDK folds the schema's length limits (three assumptions, 120 characters each)
+into field descriptions the model reads, and pydantic still enforces them on
+the way back; a response that breaks them is reported as `model_refused`, the
+same code as a plan the model never produced, because in both cases there is
+no plan to run.
+
+**No thinking, effort or temperature parameters.** The SQL call sends the model
+name, a token cap, the system prompt, the messages and the output schema, and
+nothing else, so one code path runs unchanged on Opus 5, Sonnet 5 and Haiku 4.5
+(Haiku 4.5 rejects `effort`). The evaluation compares models, and a parameter
+one of them refuses would turn a model swap into a code change. Rejected:
+extended thinking (the schema and the dictionary are in the prompt, so this is
+a reading task, not a reasoning one; see "No frontier model in the sweep").
+
+**Worked examples ride along as conversation turns, not as prompt text.** The
+nine examples in `src/nlq/agent/examples.yaml` become alternating user and
+assistant messages ahead of the real question, with each assistant turn being
+the `SqlPlan` JSON the model is asked to produce. The model sees the exact
+output shape nine times before it writes one, the system prompt stays a stable
+snapshot (`tests/golden/sql_prompt.txt`), and every example is proven against
+the schema by a test that runs its SQL through the guard and the executor.
+Dates inside the example SQL are written against a literal today so the model
+sees how to plug in the date the prompt supplies. Rejected: pasting examples
+into the system prompt as text (the SDK cannot validate them there, and every
+wording tweak would churn the golden file).
+
+**One model call, one retry, sixty seconds.** The client is built with
+`max_retries=1` and `timeout=NLQ_LLM_TIMEOUT_S` (default 60), and every SDK
+failure is mapped in one function to a named error the interface can show
+plainly: a bad or missing key, a rate limit, a timeout or connection failure, a
+refusal, and everything else. The mapping lives in `llm.py` so the answer writer
+reuses it rather than growing a second set of codes. Rejected: the SDK's default
+two retries with backoff (a user is waiting on this call, and the repair loop is
+already the retry that matters).
+
+**Model names and the API key are read from the environment at call time**, not
+frozen at import, through `config.sql_model()`, `config.answer_model()` and
+`config.anthropic_api_key()`. That is how the executor already reads its bounds,
+and it lets a test or the evaluation change the model with one environment
+variable. `python-dotenv` reads the project-root `.env` once at import with
+`override=False`, so `uv run uvicorn` and the CLI pick the key up from the file
+while a variable already set in the shell still wins. It is the one dependency
+added for this, because the alternative is telling every reviewer to export
+four variables by hand before the first question.
 
 **Bedrock** is a client swap away and is mentioned in the README, but is not built.
 The brief allows either and the direct API is one less moving part for a reviewer.

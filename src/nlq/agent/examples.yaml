@@ -1,0 +1,154 @@
+# Worked examples sent to the model as prior conversation turns. Each one
+# teaches a join shape the brief's questions need; nothing here is decoration,
+# because every entry is paid for as prompt tokens on every question.
+#
+# Dates inside the SQL are written against a literal "today" of 2026-09-11 so
+# the model sees how to plug in the date the system prompt supplies.
+
+- question: How many tickets did we sell last month?
+  answerable: true
+  sql: |-
+    SELECT COUNT(*) AS tickets_sold
+    FROM tickets t
+    JOIN orders o ON o.order_id = t.order_id
+    WHERE t.status = 'sold'
+      AND o.ordered_at >= date('2026-09-11', 'start of month', '-1 month')
+      AND o.ordered_at < date('2026-09-11', 'start of month')
+  assumptions:
+    - "Sold means purchased last month (orders.ordered_at), not for events held last month."
+    - Refunded tickets and comps are not counted.
+  decline_reason: null
+  decline_category: null
+
+- question: Which events at Barclays Center had the highest average ticket price in 2024?
+  answerable: true
+  sql: |-
+    SELECT e.name, e.event_date, ROUND(AVG(t.price), 2) AS average_price
+    FROM tickets t
+    JOIN events e ON e.event_id = t.event_id
+    JOIN venues v ON v.venue_id = e.venue_id
+    WHERE t.status = 'sold'
+      AND v.name = 'Barclays Center'
+      AND e.event_date >= '2024-01-01' AND e.event_date < '2025-01-01'
+    GROUP BY e.event_id
+    ORDER BY average_price DESC
+    LIMIT 10
+  assumptions:
+    - Average price is the face value of sold tickets, excluding fees.
+    - Showing the top 10 events.
+  decline_reason: null
+  decline_category: null
+
+- question: How many tickets did the Nets sell last season?
+  answerable: true
+  sql: |-
+    SELECT e.season, COUNT(*) AS tickets_sold
+    FROM tickets t
+    JOIN events e ON e.event_id = t.event_id
+    JOIN teams h ON h.team_id = e.home_team_id
+    WHERE t.status = 'sold'
+      AND h.name = 'Brooklyn Nets'
+      AND e.season = (
+        SELECT MAX(season) FROM events
+        WHERE category = 'NBA'
+          AND season NOT IN (
+            SELECT season FROM events WHERE category = 'NBA' AND event_date >= '2026-09-11'
+          )
+      )
+    GROUP BY e.season
+  assumptions:
+    - Last season is the most recent NBA season with no games still to play.
+    - Counts Nets home games at Barclays Center, playoffs included.
+  decline_reason: null
+  decline_category: null
+
+- question: What are our top 5 event categories by revenue?
+  answerable: true
+  sql: |-
+    SELECT e.category, ROUND(SUM(t.price), 2) AS revenue
+    FROM tickets t
+    JOIN events e ON e.event_id = t.event_id
+    WHERE t.status = 'sold'
+      AND e.event_date < '2026-09-11'
+    GROUP BY e.category
+    ORDER BY revenue DESC
+    LIMIT 5
+  assumptions:
+    - Revenue is face value of sold tickets, excluding fees, refunds and comps.
+    - Only events that have already taken place are counted.
+  decline_reason: null
+  decline_category: null
+
+- question: How full was the house for each Liberty home game in 2025?
+  answerable: true
+  sql: |-
+    SELECT e.name, e.event_date, COUNT(*) AS tickets_sold, e.seating_capacity,
+           ROUND(100.0 * COUNT(*) / e.seating_capacity, 1) AS sell_through_pct
+    FROM tickets t
+    JOIN events e ON e.event_id = t.event_id
+    JOIN teams h ON h.team_id = e.home_team_id
+    WHERE t.status = 'sold'
+      AND h.name = 'New York Liberty'
+      AND e.event_date >= '2025-01-01' AND e.event_date < '2026-01-01'
+    GROUP BY e.event_id
+    ORDER BY e.event_date
+  assumptions:
+    - Sell-through is sold tickets divided by that event's seating_capacity.
+  decline_reason: null
+  decline_category: null
+
+- question: Which opponent drives the biggest gate for Nets home games?
+  answerable: true
+  sql: |-
+    SELECT a.name AS opponent,
+           COUNT(DISTINCT e.event_id) AS games,
+           ROUND(SUM(t.price) / COUNT(DISTINCT e.event_id), 2) AS average_gate
+    FROM tickets t
+    JOIN events e ON e.event_id = t.event_id
+    JOIN teams h ON h.team_id = e.home_team_id
+    JOIN teams a ON a.team_id = e.away_team_id
+    WHERE t.status = 'sold'
+      AND h.name = 'Brooklyn Nets'
+      AND e.event_date < '2026-09-11'
+    GROUP BY a.team_id
+    ORDER BY average_gate DESC
+    LIMIT 5
+  assumptions:
+    - Gate is face-value revenue from sold tickets, averaged per game played.
+    - Only games already played are counted.
+  decline_reason: null
+  decline_category: null
+
+- question: Do concerts sell better on the web or at the box office?
+  answerable: true
+  sql: |-
+    SELECT o.channel, COUNT(*) AS tickets_sold, ROUND(SUM(t.price), 2) AS revenue
+    FROM tickets t
+    JOIN orders o ON o.order_id = t.order_id
+    JOIN events e ON e.event_id = t.event_id
+    WHERE t.status = 'sold'
+      AND e.category = 'Concert'
+      AND o.channel IN ('web', 'box_office')
+    GROUP BY o.channel
+    ORDER BY tickets_sold DESC
+  assumptions:
+    - Compares tickets sold and revenue across all concerts on record.
+  decline_reason: null
+  decline_category: null
+
+- question: What was the weather like at the last Nets game?
+  answerable: false
+  sql: null
+  assumptions: []
+  decline_reason: >-
+    The database only holds ticketing data (events, orders, tickets and
+    customers); it has no weather information.
+  decline_category: out_of_scope
+
+- question: Delete all ticket records.
+  answerable: false
+  sql: null
+  assumptions: []
+  decline_reason: >-
+    This is a read-only reporting tool; it cannot delete, change or add records.
+  decline_category: destructive

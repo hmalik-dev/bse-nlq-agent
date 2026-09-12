@@ -11,7 +11,7 @@ from fastapi.testclient import TestClient
 from nlq.agent.agent import INTERNAL_MESSAGE, Agent
 from nlq.agent.fake import FakeAgent
 from nlq.agent.models import AskResult, ErrorInfo, Trace
-from nlq.api import UI_NOT_BUILT, app, create_app
+from nlq.api import app, create_app
 
 TRACE = Trace(
     steps=[], repairs=0, model="fake", total_ms=1, input_tokens=0, output_tokens=0, cost_usd=0.0
@@ -68,8 +68,10 @@ def no_real_agent(monkeypatch: pytest.MonkeyPatch) -> None:
 
 @pytest.fixture
 def unbuilt(tmp_path: Path) -> Path:
-    """A static directory with no index.html in it."""
-    return tmp_path / "static"
+    """A static directory that does not exist: what a clone without the web build has."""
+    static = tmp_path / "static"
+    assert not static.exists()
+    return static
 
 
 @pytest.fixture
@@ -216,12 +218,32 @@ def test_health_reports_fake_mode(monkeypatch: pytest.MonkeyPatch, unbuilt: Path
     assert client(StubAgent(), unbuilt).get("/api/health").json()["fake"] is True
 
 
-def test_the_root_says_the_ui_is_not_built_when_there_is_no_index(unbuilt: Path) -> None:
+def test_the_root_is_a_page_naming_the_three_ways_forward_when_there_is_no_build(
+    unbuilt: Path,
+) -> None:
     api = client(StubAgent(), unbuilt)
     response = api.get("/")
     assert response.status_code == 200
-    assert response.json() == UI_NOT_BUILT
+    assert response.headers["content-type"].startswith("text/html")
+    assert "npm ci &amp;&amp; npm run -w web build" in response.text
+    assert 'uv run python -m nlq.ask "How many tickets did we sell last month?"' in response.text
+    assert "docker run --env-file .env -p 127.0.0.1:8000:8000 bse-insights" in response.text
+    assert "pre { white-space: pre-wrap" in response.text  # commands wrap at phone width
     assert api.get("/anything").status_code == 404
+
+
+def test_the_api_routes_answer_the_same_with_and_without_a_build(
+    tmp_path: Path, built: Path
+) -> None:
+    canned = result("answered", answer="Five.", columns=["n"], rows=[[5]], row_count=1)
+    without = client(StubAgent(canned), tmp_path / "missing")
+    with_build = client(StubAgent(canned), built)
+    for path in ("/api/examples", "/api/schema", "/api/health"):
+        assert without.get(path).json() == with_build.get(path).json(), path
+    body = {"question": QUESTION}
+    asked = [api.post("/api/ask", json=body).json() for api in (without, with_build)]
+    assert asked[0] == asked[1] == canned.model_dump()
+    assert without.get("/").text != with_build.get("/").text
 
 
 def test_a_built_ui_is_served_with_its_assets_and_an_index_fallback(built: Path) -> None:

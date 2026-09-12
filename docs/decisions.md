@@ -12,6 +12,27 @@ are not wanted, and every hour spent there is an hour not spent on the agent.
 **Audience.** A non-technical user is the primary reader of the answer; the SQL
 and the trace are there for a technical user to check the work.
 
+**Declined as over-engineering for this brief.** Each was considered and left
+out on purpose; the brief's Judgment criterion is as much about what is not
+built as what is.
+
+- A column-level PII policy: the customer table is synthetic and the agent
+  answers aggregates, so a policy would guard nothing real and add a layer the
+  prompt has to explain.
+- Search in the schema drawer: six tables and fifty-odd columns fit on one
+  screen; a search box for a list that short is a control with no job.
+- Row counts per table in the drawer: they change with `--scale` and with
+  today's date, so they would need a query per page load to stay honest, for a
+  number nobody asks the agent for.
+- More golden questions: fifteen already cover every status and every failure
+  shape; more of the same rows raise the run's cost without moving the decision.
+- A repair-rate column in the evaluation: the repair count is already in every
+  answer's trace, and the decision rule is about right answers, not how many
+  tries they took.
+- Repeated runs for variance: a rerun measures the provider's nondeterminism,
+  not the agent, and doubles the evaluation's cost for one more decimal place
+  on a decision that was not close.
+
 ## Data
 
 **Synthetic ticketing dataset, generated in `src/nlq/db/seed.py`**, over a public
@@ -471,7 +492,7 @@ Rejected: Streamlit (fast, but every Streamlit app looks the same and a custom
 design cannot be built faithfully), plain HTML (no build step, but hand-rolled
 state handling gets messy at this level of polish).
 
-**Reviewers run it locally**, from the README's five commands or with `docker
+**Reviewers run it locally**, from the README's quickstart or with `docker
 run`, using a `.env` file handed over with the submission. Hosting it was the
 original plan — a public link, the key held server-side under a spend cap and a
 per-visitor rate limit — and it was descoped on 2026-09-12: a working local path
@@ -587,6 +608,31 @@ script with a real-key phase.
 behaviour, error handling and the AI tools used; a reviewer reads the top and
 skims the rest. Rejected: thirteen sections that put the same content behind
 five more headings.
+
+**`GET /` without a build is a plain HTML page, not JSON or a redirect.** A
+reviewer who follows the README with only uv installed hits the address in a
+browser, so HTML is the honest answer: it names the build command, the terminal
+command and the container, and the API underneath is unchanged. Rejected: a JSON
+body (reads as a broken app), a redirect to the README on GitHub (leaves their
+machine for something they already have), and committing the built assets (a
+bundle that goes stale against its source).
+
+**The quickstart seeds at `--scale 0.2`; full scale stays the default.** The
+flag exposes what `seed_database()` already took. At 0.2 the seed is 1,015,708
+tickets in 128 MB and 5 seconds against 34 seconds and 644 MB at full scale,
+and all six chip questions answer sensibly against it (checked with the real
+agent before settling on the number). The default is unchanged so the
+documented dataset, the container and the evaluation are what they were.
+Rejected: a smaller default (the data section's figures and the container's
+"about a minute" would all need restating).
+
+**The README leads with the agent, not the install steps.** The brief's first
+three criteria are agent design, accuracy and code quality, and all three sat
+under 150 lines of setup. The pipeline diagram, the two safety layers, the
+"where to look" table and the statuses now form section 2, before "Run it",
+and the first screen says the brief's three example questions are in the golden
+set word for word. Nothing was shortened; the fix is order. Node moved to its
+own subsection because a working app no longer depends on it.
 
 ## Interface toolchain
 

@@ -16,7 +16,7 @@ from typing import Any, Protocol
 import sqlglot
 import yaml
 from fastapi import APIRouter, FastAPI, HTTPException, Request
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, field_validator
 from sqlglot import exp
@@ -30,7 +30,33 @@ from nlq.examples import EXAMPLE_QUESTIONS
 logger = logging.getLogger("nlq")
 
 API_PREFIX = "/api"
-UI_NOT_BUILT = {"message": "UI not built. Run npm run -w web build."}
+# What `GET /` serves when the interface has not been built: the API is up, and
+# these are the three ways forward. Plain HTML with no assets, so it needs nothing.
+UI_NOT_BUILT_PAGE = """<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BSE Insights</title>
+<style>pre { white-space: pre-wrap; overflow-wrap: anywhere; }</style>
+<main style="max-width: 40rem; margin: 3rem auto; padding: 0 1rem;
+             font-family: system-ui, sans-serif; line-height: 1.5">
+<h1>BSE Insights is running</h1>
+<p>The API is up, but the web interface has not been built, so there is nothing
+to show at this address yet. Three ways forward:</p>
+<ol>
+<li><strong>Build the interface</strong> (needs Node 24), then restart the server:
+<pre><code>npm ci &amp;&amp; npm run -w web build</code></pre></li>
+<li><strong>Ask from the terminal</strong>, no Node needed:
+<pre><code>uv run python -m nlq.ask "How many tickets did we sell last month?"</code></pre></li>
+<li><strong>Run the container</strong>, which builds the interface itself:
+<pre><code>docker build -t bse-insights .
+docker run --env-file .env -p 127.0.0.1:8000:8000 bse-insights</code></pre></li>
+</ol>
+<p>The API works either way: <a href="/api/health">/api/health</a>,
+<a href="/api/examples">/api/examples</a>, <a href="/api/schema">/api/schema</a>
+and <code>POST /api/ask</code>.</p>
+</main>
+"""
 SQL_DIALECT = "sqlite"
 
 
@@ -101,7 +127,7 @@ def create_app(agent: AgentLike | None = None, *, static_dir: Path = config.STAT
     if (static_dir / "index.html").is_file():
         _serve_ui(app, static_dir)
     else:
-        app.get("/")(lambda: UI_NOT_BUILT)
+        _serve_not_built_page(app)
     return app
 
 
@@ -125,6 +151,14 @@ def _internal_error(question: str) -> AskResult:
     )
     error = ErrorInfo(code="internal", message=INTERNAL_MESSAGE)
     return AskResult(status="error", question=question, trace=trace, error=error)
+
+
+def _serve_not_built_page(app: FastAPI) -> None:
+    """With no build present, the root is a plain page saying how to get one."""
+
+    @app.get("/", include_in_schema=False, response_class=HTMLResponse)
+    def not_built() -> str:
+        return UI_NOT_BUILT_PAGE
 
 
 def _serve_ui(app: FastAPI, static_dir: Path) -> None:

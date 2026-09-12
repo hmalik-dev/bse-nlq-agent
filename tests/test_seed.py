@@ -15,6 +15,7 @@ import pytest
 import yaml
 
 from nlq.config import DICTIONARY_PATH
+from nlq.db import seed
 from nlq.db.seed import seed_database, window_bounds
 
 TODAY = date(2026, 9, 11)
@@ -556,3 +557,46 @@ def test_seed_is_deterministic(tmp_path: Path) -> None:
         finally:
             conn.close()
     assert fingerprints[0] == fingerprints[1]
+
+
+def _record_seed(monkeypatch: pytest.MonkeyPatch) -> list[dict[str, object]]:
+    """Swap the generator for a recorder, so the command line is tested without a seed."""
+    calls: list[dict[str, object]] = []
+
+    def fake_seed(**kwargs: object) -> dict[str, int]:
+        calls.append(kwargs)
+        return {"venues": 1, "tickets": 1234}
+
+    monkeypatch.setattr(seed, "seed_database", fake_seed)
+    return calls
+
+
+def test_the_command_line_passes_scale_and_today_through_and_prints_the_scale(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    calls = _record_seed(monkeypatch)
+
+    seed.main(["--scale", "0.2", "--today", "2026-09-11"])
+
+    assert calls == [{"today": date(2026, 9, 11), "scale": 0.2}]
+    out = capsys.readouterr().out
+    assert "at scale 0.2" in out
+    assert "tickets" in out and "1,234" in out
+
+
+def test_the_command_line_defaults_to_full_scale_and_the_configured_today(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls = _record_seed(monkeypatch)
+    seed.main([])
+    assert calls == [{"today": None, "scale": 1.0}]
+
+
+@pytest.mark.parametrize("argv", [["--scale", "0"], ["--scale", "-1"], ["--today", "yesterday"]])
+def test_the_command_line_rejects_a_bad_scale_or_date(
+    monkeypatch: pytest.MonkeyPatch, argv: list[str]
+) -> None:
+    calls = _record_seed(monkeypatch)
+    with pytest.raises(SystemExit):
+        seed.main(argv)
+    assert calls == []

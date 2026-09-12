@@ -20,6 +20,7 @@ from nlq.agent.agent import (
 from nlq.agent.answer import AnswerWriter
 from nlq.agent.context import load_examples
 from nlq.agent.executor import Executor
+from nlq.agent.fake import FakeAgent
 from nlq.agent.llm import SqlWriter
 from nlq.agent.models import AnswerText, AskResult, SqlPlan
 from nlq.db.seed import seed_database
@@ -141,7 +142,7 @@ def test_answered_without_a_chart_when_there_are_three_columns(db_path: Path) ->
     assert result.chart is None
 
 
-def test_empty_carries_the_sql_the_columns_and_two_suggestions(db_path: Path) -> None:
+def test_empty_carries_the_sql_the_columns_and_three_example_questions(db_path: Path) -> None:
     agent, _, answer_client = make_agent(db_path, [plan(EMPTY_SQL)])
 
     result = agent.ask(QUESTION)
@@ -151,8 +152,33 @@ def test_empty_carries_the_sql_the_columns_and_two_suggestions(db_path: Path) ->
     assert result.sql is not None and result.sql.startswith(EMPTY_SQL)
     assert result.columns == ["name"]
     assert result.rows == [] and result.row_count == 0
-    assert result.suggestions == EMPTY_SUGGESTIONS
+    answerable = [example.question for example in load_examples() if example.plan.answerable]
+    assert result.suggestions == answerable[:3] == EMPTY_SUGGESTIONS
     assert answer_client.calls == []
+
+
+def test_every_empty_suggestion_asked_through_the_fake_client_is_answerable(
+    db_path: Path,
+) -> None:
+    empty_agent, _, _ = make_agent(db_path, [plan(EMPTY_SQL)])
+    suggestions = empty_agent.ask(QUESTION).suggestions
+    worked_plans = {example.question: example.plan for example in load_examples()}
+
+    statuses = {}
+    for suggestion in suggestions:
+        agent, _, _ = make_agent(db_path, [worked_plans[suggestion]])
+        statuses[suggestion] = agent.ask(suggestion).status
+
+    assert len(statuses) == 3
+    assert all(status in {"answered", "empty"} for status in statuses.values()), statuses
+
+
+def test_every_empty_suggestion_the_fake_agent_offers_is_answerable() -> None:
+    fake = FakeAgent()
+    suggestions = fake.ask("Show me nothing at all").suggestions
+    assert suggestions == EMPTY_SUGGESTIONS
+    assert len(suggestions) == 3
+    assert all(fake.ask(suggestion).status != "unanswerable" for suggestion in suggestions)
 
 
 def test_unanswerable_returns_the_reason_and_three_example_questions(db_path: Path) -> None:

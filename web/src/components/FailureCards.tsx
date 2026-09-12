@@ -5,7 +5,7 @@ import { AssumptionChips } from "./AnswerCard";
 import { formatSeconds } from "../format";
 
 const COVERED = ["events", "tickets", "orders", "customers", "revenue"];
-const EMPTY_EXPLANATION = "The query ran and returned no rows. Try one of these rewordings.";
+const EMPTY_EXPLANATION = "The query ran and returned no rows. Try one of these questions instead.";
 export const REFUSED_LINE = "Refused: INSERT, UPDATE, DELETE, DROP, ALTER, GRANT, multiple statements";
 const ALLOWED_LINE = "Allowed: a single SELECT statement";
 const CARD = "card flex flex-col gap-5 px-5 py-5 lg:px-8 lg:py-7";
@@ -20,7 +20,7 @@ interface Props {
   onPick: (question: string) => void;
 }
 
-/** No rows came back: the SQL ran, so the assumptions and tabs stay; two rewordings are offered. */
+/** No rows came back: the SQL ran, so the assumptions and tabs stay; example questions are offered. */
 export function EmptyCard({ result, onPick }: Props): JSX.Element {
   return (
     <Card>

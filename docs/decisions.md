@@ -450,9 +450,9 @@ is one. A question the data cannot answer is `unanswerable`, and the model's own
 sentence explaining why is the answer. The two look different on screen because
 they call for different next steps: rephrase, versus stop.
 
-**Suggestions come from code, never from the model.** An empty result carries two
-fixed rewordings; an unanswerable one carries the questions of the first three
-answerable worked examples. Neither state makes a model call, so neither can
+**Suggestions come from code, never from the model.** Both an empty result and an
+unanswerable one carry the questions of the first three answerable worked
+examples. Neither state makes a model call, so neither can
 invent a question the data does not support.
 
 **A bar chart is offered only when the shape is unambiguous**: exactly two
@@ -481,6 +481,17 @@ evaluation sums them and that is all.
 code; anything else becomes `internal` with a fixed message and one ERROR log
 line carrying the traceback. The API and the CLI can then treat the result as
 the whole contract.
+
+**An empty result suggests questions, not advice.** The interface turns each
+suggestion into a chip that submits it, so the old fixed rewordings ("Try a wider
+date range.") were asked literally and came back unanswerable: a dead end from the
+state meant for recovery. An empty result now offers the same three answerable
+worked examples the unanswerable path does, each one a question with a known
+plan behind it. Rejected: rewriting the empty question in code (widening a date
+or dropping a category means parsing the question or the SQL, and a wrong rewrite
+is another empty result), and a third model call to propose rewrites (it breaks
+"suggestions come from code" and spends tokens on a state that already has its
+SQL on screen to adjust).
 
 **Error messages are fixed sentences; the detail goes to the `nlq` log.** A
 missing database says how to seed it without naming the absolute path (logged

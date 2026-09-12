@@ -48,3 +48,33 @@ class DatabaseMissing(NlqError):
     """There is no database file to read. Run the seed."""
 
     code = "database_missing"
+
+
+class ApiKeyError(NlqError):
+    """No usable Anthropic API key: unset, empty, or rejected by the API."""
+
+    code = "missing_api_key"
+
+
+class ModelRateLimited(NlqError):
+    """The API refused the call because the account is over its rate limit."""
+
+    code = "rate_limited"
+
+
+class ModelTimeout(NlqError):
+    """The API did not answer in time, or could not be reached at all."""
+
+    code = "model_timeout"
+
+
+class ModelRefused(NlqError):
+    """The model stopped without producing a plan that fits the schema."""
+
+    code = "model_refused"
+
+
+class ModelError(NlqError):
+    """Any other failure the API reported."""
+
+    code = "model_error"

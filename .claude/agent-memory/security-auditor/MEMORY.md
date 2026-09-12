@@ -1,1 +1,2 @@
 - [SQL guard bypasses](sql-guard-bypasses.md) — four reproduced bypasses of the sqlglot guard/executor bounds, plus the attacks already proven harmless.
+- [LLM boundary audit](llm-boundary-audit.md) — secret handling and SDK error mapping verified clean on BSE-4; the one judgement call recorded so it is not re-flagged.

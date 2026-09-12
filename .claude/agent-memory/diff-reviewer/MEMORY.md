@@ -1,0 +1,1 @@
+- [Docs-consistency checklist row](review_checklist_docs.md) — decisions.md is append-only and goes stale; cross-read it whenever a diff changes scope

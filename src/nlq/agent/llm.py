@@ -26,6 +26,7 @@ from nlq.agent.errors import (
 from nlq.agent.models import Attempt, LlmResult, SqlPlan
 
 MAX_TOKENS = 2048
+OUTPUT_CONFIG = {"format": {"type": "json_schema", "schema": anthropic.transform_schema(SqlPlan)}}
 REPAIR_INSTRUCTION = (
     "Earlier queries for this question failed. Write a corrected query that avoids these errors:"
 )
@@ -52,17 +53,15 @@ class SqlWriter:
         client = self._get_client()
         started = time.monotonic()
         try:
-            response = client.messages.parse(
+            response = client.messages.create(
                 model=self.model,
                 max_tokens=MAX_TOKENS,
                 system=context.system,
                 messages=build_messages(question, context, attempts),
-                output_format=SqlPlan,
+                output_config=OUTPUT_CONFIG,
             )
         except anthropic.AnthropicError as error:
             raise map_api_error(error) from error
-        except pydantic.ValidationError as error:
-            raise ModelRefused(f"The model's plan did not fit the schema: {error}") from error
         return _result(response, started)
 
     def _get_client(self) -> Any:
@@ -100,16 +99,35 @@ def _final_turn(question: str, attempts: Sequence[Attempt]) -> str:
     return "\n".join(lines)
 
 
+def response_text(response: Any) -> str:
+    """The text blocks of a response joined together. Both writers read it."""
+    return "".join(block.text for block in response.content if block.type == "text").strip()
+
+
+def response_usage(response: Any) -> dict[str, int]:
+    """The tokens a response was billed for, keyed the way the results and errors take them."""
+    return {
+        "input_tokens": response.usage.input_tokens,
+        "output_tokens": response.usage.output_tokens,
+    }
+
+
 def _result(response: Any, started: float) -> LlmResult:
-    plan = response.parsed_output
-    if response.stop_reason == "refusal" or plan is None:
-        raise ModelRefused("The model declined to produce a plan for this question.")
+    """Validate the plan; a refusal or an off-schema plan still carries what it cost."""
+    usage = response_usage(response)
+    text = response_text(response)
+    if response.stop_reason == "refusal" or not text:
+        raise ModelRefused("The model declined to produce a plan for this question.", **usage)
+    try:
+        plan = SqlPlan.model_validate_json(text)
+    except pydantic.ValidationError as error:
+        message = f"The model's plan did not fit the schema: {error}"
+        raise ModelRefused(message, **usage) from error
     return LlmResult(
         plan=plan,
         model=response.model,
-        input_tokens=response.usage.input_tokens,
-        output_tokens=response.usage.output_tokens,
         elapsed_ms=int((time.monotonic() - started) * 1000),
+        **usage,
     )
 
 

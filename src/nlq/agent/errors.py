@@ -69,9 +69,18 @@ class ModelTimeout(NlqError):
 
 
 class ModelRefused(NlqError):
-    """The model stopped without producing a plan that fits the schema."""
+    """The model stopped without producing a plan that fits the schema.
+
+    The API still returned and billed a response, so the tokens it used ride
+    along for the trace; an SDK failure with no response has nothing to carry.
+    """
 
     code = "model_refused"
+
+    def __init__(self, message: str, *, input_tokens: int = 0, output_tokens: int = 0) -> None:
+        super().__init__(message)
+        self.input_tokens = input_tokens
+        self.output_tokens = output_tokens
 
 
 class ModelError(NlqError):

@@ -49,8 +49,16 @@ class _Messages:
     by_question: dict[str, GoldenEntry]
     calls: list[dict] = field(default_factory=list)
 
-    def parse(self, **kwargs) -> _Response:
+    def create(self, **kwargs) -> _Response:
         self.calls.append(kwargs)
+        if "output_config" in kwargs:
+            return self._plan(kwargs)
+        return _Response(
+            None, [_TextBlock(FAKE_ANSWER)], _Usage(*ANSWER_CALL_TOKENS), kwargs["model"]
+        )
+
+    def _plan(self, kwargs: dict) -> _Response:
+        """The SQL call: the one that asks for a structured plan."""
         question = kwargs["messages"][-1]["content"].splitlines()[0]
         entry = self.by_question[question]
         if entry.id == ERROR_ENTRY_ID:
@@ -58,12 +66,6 @@ class _Messages:
         plan = plan_for(entry)
         return _Response(
             plan, [_TextBlock(plan.model_dump_json())], _Usage(*SQL_CALL_TOKENS), kwargs["model"]
-        )
-
-    def create(self, **kwargs) -> _Response:
-        self.calls.append(kwargs)
-        return _Response(
-            None, [_TextBlock(FAKE_ANSWER)], _Usage(*ANSWER_CALL_TOKENS), kwargs["model"]
         )
 
 

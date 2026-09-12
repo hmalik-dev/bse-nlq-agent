@@ -10,7 +10,7 @@ from __future__ import annotations
 import logging
 import math
 import time
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from contextlib import contextmanager
 from datetime import date
 from typing import Any
@@ -18,10 +18,20 @@ from typing import Any
 from nlq import config
 from nlq.agent.answer import AnswerWriter
 from nlq.agent.context import PromptContext, build_context
-from nlq.agent.errors import NlqError, UnsafeSql
+from nlq.agent.errors import ModelRefused, NlqError, UnsafeSql
 from nlq.agent.executor import Executor, QueryResult
 from nlq.agent.llm import SqlWriter
-from nlq.agent.models import AskResult, Attempt, ChartSpec, ErrorInfo, SqlPlan, Step, Trace
+from nlq.agent.models import (
+    AnswerText,
+    AskResult,
+    Attempt,
+    ChartSpec,
+    ErrorInfo,
+    LlmResult,
+    SqlPlan,
+    Step,
+    Trace,
+)
 from nlq.agent.sql_guard import guard
 from nlq.pricing import DECIMALS, cost_usd
 
@@ -103,8 +113,11 @@ class Agent:
     ) -> SqlPlan:
         run.repairs = len(attempts)
         with run.step("Writing SQL"):
-            result = self.sql_writer.write(question, context=context, attempts=attempts)
-        run.charge(self.sql_writer.model, result.input_tokens, result.output_tokens)
+            result = _priced(
+                run,
+                self.sql_writer.model,
+                lambda: self.sql_writer.write(question, context=context, attempts=attempts),
+            )
         return result.plan
 
     def _guard_and_run(self, sql: str, run: _Run) -> QueryResult:
@@ -124,15 +137,18 @@ class Agent:
                 suggestions=EMPTY_SUGGESTIONS,
             )
         with run.step("Writing answer"):
-            answer = self.answer_writer.write(
-                question,
-                plan.assumptions,
-                query.columns,
-                query.rows[:ANSWER_ROW_CAP],
-                query.row_count,
-                query.truncated,
+            answer = _priced(
+                run,
+                self.answer_writer.model,
+                lambda: self.answer_writer.write(
+                    question,
+                    plan.assumptions,
+                    query.columns,
+                    query.rows[:ANSWER_ROW_CAP],
+                    query.row_count,
+                    query.truncated,
+                ),
             )
-        run.charge(self.answer_writer.model, answer.input_tokens, answer.output_tokens)
         return run.finish(
             "answered",
             answer=answer.text,
@@ -144,6 +160,23 @@ class Agent:
             truncated=query.truncated,
             chart=chart_for(query),
         )
+
+
+def _priced[Priced: (LlmResult, AnswerText)](
+    run: _Run, model: str, call: Callable[[], Priced]
+) -> Priced:
+    """Make one model call and bill it, whether the model answered or refused.
+
+    A refusal still cost the tokens it read, so it is charged before it is
+    re-raised; an SDK failure never returned a response and charges nothing.
+    """
+    try:
+        result = call()
+    except ModelRefused as refused:
+        run.charge(model, refused.input_tokens, refused.output_tokens)
+        raise
+    run.charge(model, result.input_tokens, result.output_tokens)
+    return result
 
 
 def _declined(run: _Run, plan: SqlPlan, context: PromptContext) -> AskResult:

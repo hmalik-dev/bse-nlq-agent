@@ -26,7 +26,7 @@ export function toCsv(columns: string[], rows: Cell[][]): string {
 export function exportFileName(question: string, extension: "csv" | "svg"): string {
   const slug = question
     .normalize("NFKD")
-    .replace(/[̀-ͯ]/g, "")
+    .replace(/[̀-ͯ]/g, "") // strip the combining accents NFKD split off
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .slice(0, SLUG_MAX)

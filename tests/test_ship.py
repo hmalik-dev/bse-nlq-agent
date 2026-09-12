@@ -49,6 +49,25 @@ def test_every_documented_docker_run_publishes_the_port_on_loopback_only() -> No
     assert "-p 127.0.0.1:8000:8000" in UI_NOT_BUILT_PAGE
 
 
+def test_the_entrypoint_explains_an_unwritable_data_directory_instead_of_seeding(
+    tmp_path: Path,
+) -> None:
+    data = tmp_path / "data"
+    data.mkdir()
+    data.chmod(0o555)
+    env = {"PATH": "/usr/bin:/bin", "NLQ_DATABASE_PATH": str(data / "tickets.db")}
+    try:
+        run = subprocess.run(
+            ["bash", str(SCRIPTS[0])], env=env, capture_output=True, text=True, timeout=10
+        )
+    finally:
+        data.chmod(0o755)
+    assert run.returncode == 1
+    assert f"Cannot write {data}" in run.stderr
+    assert "docker volume rm bse-data" in run.stderr
+    assert "Seeding" not in run.stdout
+
+
 def test_the_dockerfile_never_names_the_key() -> None:
     dockerfile = DOCKERFILE.read_text(encoding="utf-8")
     assert "ANTHROPIC_API_KEY" not in dockerfile

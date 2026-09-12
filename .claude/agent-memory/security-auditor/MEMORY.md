@@ -1,0 +1,1 @@
+- [SQL guard bypasses](sql-guard-bypasses.md) — four reproduced bypasses of the sqlglot guard/executor bounds, plus the attacks already proven harmless.

@@ -1,1 +1,2 @@
 - [Docs-consistency checklist row](review_checklist_docs.md) — decisions.md is append-only and goes stale; cross-read it whenever a diff changes scope
+- [SQL rewriting checklist rows](review_checklist_sql_rewriting.md) — trailing `--` comments, sqlglot class assumptions, quoted function names, clock-based error mapping

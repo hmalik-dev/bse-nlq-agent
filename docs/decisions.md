@@ -371,6 +371,19 @@ states). Temperature 0 never guaranteed identical output on earlier models
 either, so the evaluation is quoted as what it is: one pass of the shipped
 configuration.
 
+**The evaluation was re-run once, last, after BSE-13 and BSE-17** (2026-09-12,
+$0.38). BSE-13 changed what the trace prices and BSE-17 changed the prompt (a
+per-event breakdown rule, a tenth worked example and a computed total for the
+answer writer), so the numbers above describe a configuration that no longer
+ships. The Nets golden entry now expects one row per game. Sonnet 5 still scored
+15/15, now at a median of 4,550 ms and $0.0185 per question ($0.0012 more, most of
+it the longer prompt, since no call in this run refused); Haiku 4.5 scored
+13/15 at 3,181 ms and $0.0068, missing "total revenue" (on-sale events counted)
+and "which events had the highest average price" (no ten-row cap), and getting
+the refunds question and the new Nets breakdown right. The rule still picks
+Sonnet 5: Haiku is two questions behind, not one. `docs/eval-results.md` and
+README §7 and §8 quote this run.
+
 ## Agent
 
 **A fixed pipeline with one bounded repair loop**, not an open-ended tool-using
@@ -492,6 +505,36 @@ or dropping a category means parsing the question or the SQL, and a wrong rewrit
 is another empty result), and a third model call to propose rewrites (it breaks
 "suggestions come from code" and spends tokens on a state that already has its
 SQL on screen to adjust).
+
+**A count over a short run of events comes back one row per event, with the
+total in the sentence** (BSE-17). "How many tickets did we sell for Nets home
+games last month?" used to return a 1×1 table that repeated the answer. A prompt
+rule and a worked example (Liberty home games last month) now make a "how many /
+how much" question about one named club's home games or one named venue's
+events, sold or played within a month or less, return `name, event_date,
+measure` per event, largest first, with no LIMIT so the rows add up to the
+total. A question with no club or venue named (yesterday's sales), or one over a
+season, a year or a whole category, stays one row, so the promo-code, Q1,
+yesterday and concert-refund questions keep their scalar answers. The boundary
+is a named club or venue plus a time span rather than a row count, because the
+model cannot see row counts before it writes the query.
+
+The total is counted in code, not by the model. When every row is shown and the
+last column is whole numbers, `build_user_turn` appends `Total <column> across
+all N rows: <sum>`, and the writer is told to state that line first and never
+add rows up itself. Averages, percentages and money are floats and are never
+summed, and a capped or truncated result gets no total. Rejected: asking the
+answer model to add sixteen four-digit counts in its head (the sentence sits
+directly above the table, so one slip is visible, and the evaluation does not
+score the sentence).
+
+Three columns rather than two: a club plays the same
+opponent more than once, so the date is what tells two rows apart, at the cost
+of no bar chart for this shape. Rejected: re-querying a scalar result with a
+GROUP BY (two queries, and the SQL tab could disagree with the rows) and a
+client-side breakdown (it cannot invent rows the query never returned). The Nets
+golden entry now expects the breakdown, compared as a multiset so the model's
+choice of order does not decide the score.
 
 **Error messages are fixed sentences; the detail goes to the `nlq` log.** A
 missing database says how to seed it without naming the absolute path (logged

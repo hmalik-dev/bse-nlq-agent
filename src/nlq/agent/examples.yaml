@@ -97,6 +97,26 @@
   decline_reason: null
   decline_category: null
 
+- question: How many tickets did we sell for Liberty home games last month?
+  answerable: true
+  sql: |-
+    SELECT e.name, e.event_date, COUNT(*) AS tickets_sold
+    FROM tickets t
+    JOIN orders o ON o.order_id = t.order_id
+    JOIN events e ON e.event_id = t.event_id
+    JOIN teams h ON h.team_id = e.home_team_id
+    WHERE t.status = 'sold'
+      AND h.name = 'New York Liberty'
+      AND o.ordered_at >= date('2026-09-11', 'start of month', '-1 month')
+      AND o.ordered_at < date('2026-09-11', 'start of month')
+    GROUP BY e.event_id
+    ORDER BY tickets_sold DESC
+  assumptions:
+    - "Sold means purchased last month (orders.ordered_at), for any Liberty home game."
+    - One row per game, so the total can be checked against the games behind it.
+  decline_reason: null
+  decline_category: null
+
 - question: Which opponent drives the biggest gate for Nets home games?
   answerable: true
   sql: |-

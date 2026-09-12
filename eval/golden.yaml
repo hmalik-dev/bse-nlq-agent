@@ -25,7 +25,7 @@
   tags: [join, relative-date, filter, ambiguous]
   expect: answered
   sql: |-
-    SELECT COUNT(*) AS tickets_sold
+    SELECT e.name, e.event_date, COUNT(*) AS tickets_sold
     FROM tickets t
     JOIN orders o ON o.order_id = t.order_id
     JOIN events e ON e.event_id = t.event_id
@@ -34,6 +34,7 @@
       AND h.name = 'Brooklyn Nets'
       AND o.ordered_at >= '2026-08-01'
       AND o.ordered_at < '2026-09-01'
+    GROUP BY e.event_id
 
 - id: barclays-average-price-2024
   question: Which events at Barclays Center had the highest average ticket price in 2024?

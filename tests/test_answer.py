@@ -5,7 +5,7 @@ from __future__ import annotations
 import anthropic
 import pytest
 
-from nlq.agent.answer import MAX_TOKENS, AnswerWriter, build_user_turn
+from nlq.agent.answer import MAX_TOKENS, AnswerWriter, build_user_turn, count_total
 from nlq.agent.errors import ApiKeyError, ModelRateLimited, ModelRefused, ModelTimeout
 from nlq.agent.models import AnswerText
 from tests.fakes import (
@@ -49,7 +49,8 @@ def test_the_call_carries_the_system_prompt_and_one_user_turn() -> None:
     assert set(call) == {"model", "max_tokens", "system", "messages"}
     assert call["model"] == "claude-haiku-4-5"
     assert call["max_tokens"] == MAX_TOKENS
-    for rule in ("two sentences", "only the rows", "thousands", "dollar", "truncated"):
+    rules = ("two sentences", "only the rows", "thousands", "dollar", "truncated", "Total")
+    for rule in rules:
         assert rule in call["system"]
     assert len(call["messages"]) == 1 and call["messages"][0]["role"] == "user"
     assert result.text == "NBA leads with $201,512,122.83 in revenue."
@@ -79,6 +80,34 @@ def test_the_user_turn_says_when_rows_were_capped_or_truncated() -> None:
     turn = build_user_turn(QUESTION, [], COLUMNS, ROWS, len(ROWS), truncated=False)
     assert "3 rows" in turn
     assert "truncated" not in turn
+
+
+BREAKDOWN_COLUMNS = ["name", "event_date", "tickets_sold"]
+BREAKDOWN_ROWS = [["Nets vs. Bucks", "2026-12-22", 1204], ["Nets vs. Suns", "2026-11-26", 987]]
+
+
+def test_a_whole_breakdown_of_counts_ends_with_the_total_counted_in_code() -> None:
+    turn = build_user_turn(QUESTION, [], BREAKDOWN_COLUMNS, BREAKDOWN_ROWS, 2, truncated=False)
+    assert turn.endswith("\n\nTotal tickets_sold across all 2 rows: 2191")
+
+
+@pytest.mark.parametrize(
+    ("rows", "row_count", "truncated"),
+    [
+        (BREAKDOWN_ROWS[:1], 1, False),
+        (BREAKDOWN_ROWS, 60, False),
+        (BREAKDOWN_ROWS, 2, True),
+        ([["a", "2026-01-01", 1.5], ["b", "2026-01-02", 2.5]], 2, False),
+        ([["a", "2026-01-01", 1], ["b", "2026-01-02", None]], 2, False),
+    ],
+    ids=["one-row", "rows-capped", "truncated", "floats", "null"],
+)
+def test_no_total_is_given_when_the_rows_cannot_be_summed_honestly(
+    rows: list[list[object]], row_count: int, truncated: bool
+) -> None:
+    assert count_total(BREAKDOWN_COLUMNS, rows, row_count, truncated) is None
+    turn = build_user_turn(QUESTION, [], BREAKDOWN_COLUMNS, rows, row_count, truncated)
+    assert "Total" not in turn
 
 
 @pytest.mark.parametrize(

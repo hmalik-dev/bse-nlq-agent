@@ -108,9 +108,31 @@ def test_the_context_is_cached_per_day() -> None:
     assert build_context(GOLDEN_TODAY) is not build_context(date(2025, 3, 2))
 
 
-def test_exactly_nine_examples_load_with_every_field(context: PromptContext) -> None:
+def test_the_rules_break_a_short_run_of_events_down_and_keep_one_row_for_one_thing(
+    context: PromptContext,
+) -> None:
+    assert "one named club's home games or one\n  named venue's events" in context.system
+    assert "per event (name, event_date and the measure)" in context.system
+    assert "with no LIMIT" in context.system
+    assert "(yesterday's sales, last month's sales)" in context.system
+    assert "stays one total row" in context.system
+    assert "returns that one\n  row (LIMIT 1)" in context.system
+
+
+def test_the_worked_examples_teach_both_the_breakdown_and_the_scalar_count(
+    context: PromptContext,
+) -> None:
+    by_question = {example.question: example.plan.sql or "" for example in context.examples}
+    breakdown = by_question["How many tickets did we sell for Liberty home games last month?"]
+    scalar = by_question["How many tickets did we sell last month?"]
+    assert breakdown.startswith("SELECT e.name, e.event_date, COUNT(*) AS tickets_sold")
+    assert "GROUP BY e.event_id" in breakdown and "LIMIT" not in breakdown
+    assert scalar.startswith("SELECT COUNT(*) AS tickets_sold") and "GROUP BY" not in scalar
+
+
+def test_exactly_ten_examples_load_with_every_field(context: PromptContext) -> None:
     entries = yaml.safe_load(EXAMPLES_PATH.read_text(encoding="utf-8"))
-    assert len(entries) == len(context.examples) == 9
+    assert len(entries) == len(context.examples) == 10
     for entry in entries:
         assert set(entry) == {
             "question",

@@ -26,6 +26,8 @@ You write the answer to a business user's question from a table of query results
 - Format numbers with thousands separators, and currency with a dollar sign.
 - The assumptions describe how the question was interpreted; reflect them where
   they change the meaning of the answer.
+- When the question asks how many or how much and the results end with a Total
+  line, state that total first. Never add up rows yourself.
 - When the result was truncated, say that only the first rows are shown."""
 
 
@@ -86,7 +88,29 @@ def build_user_turn(
     lines.append(f"Results ({_row_summary(len(rows), row_count, truncated)}):")
     lines.append(" | ".join(columns))
     lines.extend(" | ".join(_cell(value) for value in row) for row in rows)
+    total = count_total(columns, rows, row_count, truncated)
+    if total is not None:
+        lines.extend(["", total])
     return "\n".join(lines)
+
+
+def count_total(
+    columns: Sequence[str],
+    rows: Sequence[Sequence[object]],
+    row_count: int,
+    truncated: bool,
+) -> str | None:
+    """The sum of a whole-number last column, when every row of a breakdown is shown.
+
+    Counted in code so the sentence can never disagree with the table; averages,
+    percentages and money are floats and are never summed.
+    """
+    if truncated or len(rows) < 2 or len(rows) != row_count:
+        return None
+    values = [row[-1] for row in rows]
+    if not all(isinstance(value, int) and not isinstance(value, bool) for value in values):
+        return None
+    return f"Total {columns[-1]} across all {row_count} rows: {sum(values)}"
 
 
 def _row_summary(shown: int, row_count: int, truncated: bool) -> str:

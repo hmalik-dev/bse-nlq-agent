@@ -41,6 +41,9 @@ query, or decline it. Rules:
   choice as a short assumption. There is no follow-up conversation.
 - When "sold" or "bought" wording is ambiguous, filter on orders.ordered_at
   (when the purchase happened) rather than events.event_date, and say so.
+- A question about one most, least, highest or lowest thing returns that one
+  row (LIMIT 1). Return a ranked list only when the question asks for several,
+  and cap it at 10 rows unless the question gives a number.
 - Decline a question the data cannot answer, and decline any request to
   change data."""
 

@@ -276,6 +276,49 @@ four variables by hand before the first question.
 **Bedrock** is a client swap away and is mentioned in the README, but is not built.
 The brief allows either and the direct API is one less moving part for a reviewer.
 
+**Claude Sonnet 5 is the default, by the rule above.** The sweep in
+`docs/eval-results.md` (15 questions, one pass each, today pinned to
+2026-09-11) scored Sonnet 5 at 15/15 with a median latency of 4,008 ms and
+$0.0173 per question, and Haiku 4.5 at 12/15, 3,106 ms and $0.0063. Haiku is
+three questions behind, not one, so it is not eligible and Sonnet is the only
+candidate left; `.env.example` names it for both the SQL and the answer call.
+Haiku's three misses are all shape rather than arithmetic: it counted on-sale
+events in "total revenue", returned one row for a plural "which events", and
+flipped between one and two columns on the refunds question across two runs.
+
+**What the first run revealed.** The first sweep ($0.33) scored Sonnet 13/15
+and Haiku 11/15, and two questions failed on both models, which the ticket
+treats as a prompt defect rather than a model one. "How much revenue did we
+lose to refunds last season?" — Sonnet's plan failed schema validation
+(`model_refused`) and Haiku got the right figure with the season label as a
+second column, the shape the worked example for "last season" teaches. The
+dictionary now defines "last season" (the most recent NBA season with no games
+left, filtered on `events.season`) and states that a club season includes its
+playoff games, and the reference query carries the season column like the
+example. "Which opponent sold the most tickets…" — Sonnet returned five rows,
+copying the worked example's `LIMIT 5`, and Haiku silently dropped the
+playoffs. The prompt now has one rule for superlatives (a singular most or
+highest returns one row; a ranked list is capped at 10 unless a number is
+given) and that example returns one row so it agrees with the rule. The second
+sweep ($0.35, $0.68 in total) is the one reported. Rejected: a third run to
+chase Haiku's remaining misses (they are the measurement, not a defect in it).
+
+**The runner wires the agent itself rather than calling `Agent.from_env()`.**
+`from_env` reads the database path once at import, so the per-date file the
+runner seeds (`data/eval-<today>.db`) would never reach it. The runner builds
+the same three components with the candidate model on both writers, and
+`--fake` swaps in a scripted client that answers each golden question with its
+own reference query or decline and raises on one of them, so a fake sweep
+walks the runner through answered, empty, unanswerable, blocked and error with
+no key and no network. Rejected: patching the frozen path from the runner.
+
+**The golden set is fifteen questions and no more.** The six from the
+presentation, word for word, plus nine chosen so every tag the ticket names is
+covered: a question with no rows behind it ("Nets home games in July"), two the
+data cannot answer, three writes, filters on `status` and on the nullable
+`promo_code`, and joins across three and four tables. Nothing in it needs a
+CTE, a window function or `HAVING`, so the worked examples stay at nine.
+
 ## Agent
 
 **A fixed pipeline with one bounded repair loop**, not an open-ended tool-using

@@ -9,6 +9,9 @@ query, or decline it. Rules:
   choice as a short assumption. There is no follow-up conversation.
 - When "sold" or "bought" wording is ambiguous, filter on orders.ordered_at
   (when the purchase happened) rather than events.event_date, and say so.
+- A question about one most, least, highest or lowest thing returns that one
+  row (LIMIT 1). Return a ranked list only when the question asks for several,
+  and cap it at 10 rows unless the question gives a number.
 - Decline a question the data cannot answer, and decline any request to
   change data.
 
@@ -118,6 +121,8 @@ Synthetic ticketing data for a sports and entertainment operator that runs one v
 - "Home games" are events where home_team_id points at a club with is_home_club = 1.
 - Date wording about when a game or show happened filters events.event_date. Date wording about when a purchase happened filters orders.ordered_at. If the question is ambiguous, prefer orders.ordered_at for "sold"/"bought" wording and say so in the assumptions.
 - An order with is_season_package = 1 is a season-ticket package: one pre-season purchase covering the same seats at every regular-season home game of one club season (playoff games are not included). Its tickets therefore span many events, and it is dated months before the first of them. Every other order is a single-game purchase and covers tickets to one event only.
+- A club season (events.season) covers that season's regular-season and playoff home games. Include playoff games unless the question says "regular season".
+- "Last season" with no club named means the most recent NBA season with no games left to play, e.g. '2025-26' on a date in September 2026. Filter on events.season, not on dates.
 - Events dated in the future are on sale but not yet played, so they have partial sales. Exclude them when a question is about past performance.
 - Attendance is not recorded. Tickets sold is the closest available measure.
 

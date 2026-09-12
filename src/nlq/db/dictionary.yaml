@@ -28,6 +28,14 @@ business_rules:
     season (playoff games are not included). Its tickets therefore span many
     events, and it is dated months before the first of them. Every other order is
     a single-game purchase and covers tickets to one event only.
+  - >-
+    A club season (events.season) covers that season's regular-season and
+    playoff home games. Include playoff games unless the question says
+    "regular season".
+  - >-
+    "Last season" with no club named means the most recent NBA season with no
+    games left to play, e.g. '2025-26' on a date in September 2026. Filter on
+    events.season, not on dates.
   - Events dated in the future are on sale but not yet played, so they have
     partial sales. Exclude them when a question is about past performance.
   - Attendance is not recorded. Tickets sold is the closest available measure.

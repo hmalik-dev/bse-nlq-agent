@@ -100,7 +100,7 @@ style preference; it is what the assets require.
 
 Taken from the assets themselves, so the UI and the logos share one palette.
 
-- **Canvas** `#0B0B0D` · **panels** `#16161A` · **raised** `#1E1E23` · **hairline
+- **Canvas** `#08080A` · **panels** `#16161A` · **raised** `#1E1E23` · **hairline
   borders** `#26262B`
 - **Text** `#FFFFFF` primary · `#A1A1AA` secondary · `#71717A` tertiary
 - **Primary accent** Barclays cyan `#00AEEF` — primary button (with black text),

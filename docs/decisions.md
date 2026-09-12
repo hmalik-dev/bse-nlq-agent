@@ -155,18 +155,27 @@ sweeping all three (about $2 a run against $0.75, and Opus is over half of it),
 and running Opus only on the questions the other two miss (the same conclusion,
 still paid for).
 
-**The evaluation is built offline and only then run for real.** A full sweep is
-about $2; the money at risk is running it repeatedly while a prompt is still
-wrong, which is how an evaluation quietly costs twenty times its own price. Four
-mechanisms, all enforced in `eval/run.py` rather than left to discipline:
-`--fake` drives the entire pipeline through the fake client so the harness is
-debugged for nothing and a live run is the last step instead of the loop;
-responses cache to disk keyed on model and request payload, so a rerun that
-changed only the scorer or the report replays at no cost; `--smoke` runs five
+**The evaluation is built offline and only then run for real.** A full two-model
+sweep costs under $1, so the harness is not worth much protection: two mechanisms,
+both enforced in `eval/run.py` rather than left to discipline. `--fake` drives the
+entire pipeline through the fake client, so the harness is debugged for nothing
+and a live run is the last step instead of the loop; `--max-spend` (default $3)
+stops the run the moment the running total would cross it, so a runaway loop is
+stopped by the runner and not by someone watching it. `--smoke` runs four
 questions spanning the outcome types, which is where a broken prompt reveals
-itself; and `--max-spend` (default $3) aborts the run mid-flight, so a runaway
-loop is stopped by the runner and not by someone watching it. The sweep is also
-priced with `count_tokens`, which is free, before the first paid call.
+itself before the full set is paid for. Rejected: a disk cache of model responses
+keyed on the request (a replayed response has no latency, and the decision rule
+reads median latency, so a cached run would corrupt the number it was
+protecting); pricing the sweep with `count_tokens` before the first call (a gate
+that fires on every run of a sub-dollar sweep is a prompt that always gets
+answered yes); and a timing table for the reference queries (aggregates over the
+whole ticket table already return in under a second, and the golden test
+executes every one).
+
+**An empty result is a scored outcome in the evaluation.** The brief names the
+empty result set as a case to handle gracefully, so the golden set carries a
+question that legitimately has no rows behind it and the scorer expects `empty`
+for it, alongside the answered, unanswerable and blocked cases.
 
 **The Batch API is not used, despite being half price.** The decision rule reads
 median latency per model, and batch timings do not measure the interactive path

@@ -155,6 +155,24 @@ sweeping all three (about $2 a run against $0.75, and Opus is over half of it),
 and running Opus only on the questions the other two miss (the same conclusion,
 still paid for).
 
+**The evaluation is built offline and only then run for real.** A full sweep is
+about $2; the money at risk is running it repeatedly while a prompt is still
+wrong, which is how an evaluation quietly costs twenty times its own price. Four
+mechanisms, all enforced in `eval/run.py` rather than left to discipline:
+`--fake` drives the entire pipeline through the fake client so the harness is
+debugged for nothing and a live run is the last step instead of the loop;
+responses cache to disk keyed on model and request payload, so a rerun that
+changed only the scorer or the report replays at no cost; `--smoke` runs five
+questions spanning the outcome types, which is where a broken prompt reveals
+itself; and `--max-spend` (default $3) aborts the run mid-flight, so a runaway
+loop is stopped by the runner and not by someone watching it. The sweep is also
+priced with `count_tokens`, which is free, before the first paid call.
+
+**The Batch API is not used, despite being half price.** The decision rule reads
+median latency per model, and batch timings do not measure the interactive path
+a user waits on. Written down because it looks like an obvious saving to anyone
+who meets this code later.
+
 **Structured outputs** (`messages.parse`) for SQL generation, so the response is a
 validated object, not a string that has to be scraped for a code fence.
 

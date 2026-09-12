@@ -426,8 +426,12 @@ it the longer prompt, since no call in this run refused); Haiku 4.5 scored
 13/15 at 3,181 ms and $0.0068, missing "total revenue" (on-sale events counted)
 and "which events had the highest average price" (no ten-row cap), and getting
 the refunds question and the new Nets breakdown right. The rule still picks
-Sonnet 5: Haiku is two questions behind, not one. `docs/eval-results.md` and
-the README's evaluation section quote this run.
+Sonnet 5: Haiku is two questions behind, not one. BSE-21's eighteen-question
+run (above, under the golden set) has since replaced this one in
+`docs/eval-results.md` and the README: Sonnet 5 18/18 at 4,570 ms and $0.0189
+per question, Haiku 4.5 16/18 at 2,720 ms and $0.0071, missing the same two
+questions ("total revenue" still counts on-sale events; the average-price
+question now stops at one event instead of ten). The rule still picks Sonnet 5.
 
 ## Agent
 

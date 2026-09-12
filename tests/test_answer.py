@@ -5,7 +5,15 @@ from __future__ import annotations
 import anthropic
 import pytest
 
-from nlq.agent.answer import MAX_TOKENS, AnswerWriter, build_user_turn, count_total
+from nlq.agent.answer import (
+    LIST_EVERY_ROW_LIMIT,
+    MAX_TOKENS,
+    SYSTEM_PROMPT,
+    TOP_ROWS_PAST_LIMIT,
+    AnswerWriter,
+    build_user_turn,
+    count_total,
+)
 from nlq.agent.errors import ApiKeyError, ModelRateLimited, ModelRefused, ModelTimeout
 from nlq.agent.models import AnswerText
 from tests.fakes import (
@@ -52,6 +60,7 @@ def test_the_call_carries_the_system_prompt_and_one_user_turn() -> None:
     rules = ("two sentences", "only the rows", "thousands", "dollar", "truncated", "Total")
     for rule in rules:
         assert rule in call["system"]
+    assert "Never add up rows yourself" in call["system"]
     assert len(call["messages"]) == 1 and call["messages"][0]["role"] == "user"
     assert result.text == "NBA leads with $201,512,122.83 in revenue."
     assert (result.model, result.input_tokens, result.output_tokens) == (
@@ -59,6 +68,80 @@ def test_the_call_carries_the_system_prompt_and_one_user_turn() -> None:
         FAKE_INPUT_TOKENS,
         FAKE_OUTPUT_TOKENS,
     )
+
+
+@pytest.mark.parametrize(
+    "rule",
+    [
+        # compact money: multi-row only, from $10K, K/M/B with one decimal, counts exact
+        "When the result has more than one row, write money of $10K or more",
+        "with one decimal and K, M or B: $203.1M, $57.5M, $48.3K, $1.2B",
+        "Money under $10K stays exact ($84.50)",
+        "Counts are never compacted (48,210 tickets)",
+        # single row stays exact
+        "When the result has one row, state every figure exactly ($1,284,310.42)",
+        # one ranking sentence
+        "then the rest in order with their figures in parentheses, in one sentence",
+        # long results: limit, top 3, pointer, and the no-count fallback
+        f"Up to {LIST_EVERY_ROW_LIMIT} rows, name every row",
+        f"name only the top {TOP_ROWS_PAST_LIMIT}",
+        '"and N more in the results below"',
+        '"see the results below", never a count of rows you cannot see',
+        # the answer shape line computed in code
+        "Follow the Answer shape line",
+        # worked examples: a short ranking and a long breakdown with its total
+        "NBA leads event revenue at $203.1M, followed by WNBA ($137.5M), Concert ($57.5M), "
+        "Family Show ($10.8M) and Boxing ($10.3M).",
+        "and 13 more in the results below.",
+    ],
+)
+def test_the_system_prompt_states_each_formatting_rule(rule: str) -> None:
+    assert rule in " ".join(SYSTEM_PROMPT.split())
+
+
+@pytest.mark.parametrize(
+    ("shown", "row_count", "truncated", "expected"),
+    [
+        (1, 1, False, "Answer shape: one row, so state every figure exactly."),
+        (2, 2, False, "Answer shape: 2 rows, so name every row."),
+        (5, 5, False, "Answer shape: 5 rows, so name every row."),
+        (
+            6,
+            6,
+            False,
+            "Answer shape: 6 rows, so name the top 3 "
+            'and end with "and 3 more in the results below".',
+        ),
+        (
+            16,
+            16,
+            False,
+            "Answer shape: 16 rows, so name the top 3 "
+            'and end with "and 13 more in the results below".',
+        ),
+        (
+            3,
+            3,
+            True,
+            "Answer shape: only the first rows are shown, so name the top 3, say that only the "
+            'first rows are shown, and end with "see the results below".',
+        ),
+        (
+            50,
+            60,
+            False,
+            "Answer shape: only the first rows are shown, so name the top 3, say that only the "
+            'first rows are shown, and end with "see the results below".',
+        ),
+    ],
+    ids=["one-row", "two-rows", "at-limit", "past-limit", "sixteen", "truncated", "capped"],
+)
+def test_the_user_turn_states_the_answer_shape_counted_in_code(
+    shown: int, row_count: int, truncated: bool, expected: str
+) -> None:
+    rows = [[f"row {index}", index] for index in range(shown)]
+    turn = build_user_turn(QUESTION, [], ["name", "revenue"], rows, row_count, truncated)
+    assert expected in turn.splitlines()
 
 
 def test_the_user_turn_holds_the_question_assumptions_columns_and_rows() -> None:

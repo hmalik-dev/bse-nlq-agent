@@ -576,6 +576,35 @@ malformed request is a real fault), and matching on the body's error type alone
 (the credit message arrives as a plain `invalid_request_error`). The fake agent
 shows it for a question containing "out of credit".
 
+**A multi-row answer is one sentence with compact money and a capped list**
+(BSE-19). The sentence sits directly above a table and a chart that carry every
+exact value, so eleven-digit figures there repeat the chart at a size nobody
+reads. With more than one row, money of $10K or more is written with one decimal
+and K, M or B ($203.1M); under $10K it stays exact ($84.50), because rounding
+$84.50 to "$84.5" saves nothing and loses the cents, and counts are never
+compacted. A ranking is the leader with its figure, then the rest in order with
+figures in parentheses. Up to 5 rows every row is named, which covers "top 5"
+and two-row comparisons without wrapping past two lines; past 5 the sentence
+gives the total (or the leader), the top 3, and "and N more in the results
+below". **A single-row answer stays exact**: there is no table beside it to
+carry the precision, so the sentence is the answer.
+
+The row counting is done in code, not by the model: `build_user_turn` adds an
+`Answer shape:` line naming the rule for this result and, past the limit, the
+exact "and N more" count. When the rows handed to the writer are truncated or
+capped, the line asks for "see the results below" instead, so the sentence never
+states a count of rows it cannot see. Rounding stays with the model: formatting
+in code would mean guessing which columns are money from their names, and
+rounding a displayed figure is not adding rows up, so it does not cut against
+the total counted in code (BSE-17).
+
+Rejected: a takeaway-only sentence (users want the full answer in the text, and
+read the table and chart for the visual); always naming every row (a 12-month or
+16-event answer turns back into a paragraph); a large lead sentence plus a
+smaller detail line (it changes the API shape and the UI for what a prompt rule
+solves); a limit of 6 or 8 (6+ rows wrap past two lines at display size); naming
+the top 5 past the limit (a long answer grows to two lines).
+
 ## Interface
 
 **React + Vite + TypeScript + Tailwind on a FastAPI backend**, served as one app

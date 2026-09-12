@@ -95,6 +95,12 @@ def test_nets_is_an_eight_row_table_of_real_fixtures_repaired_once(agent: FakeAg
     assert result.chart is None
     assert result.trace.repairs == 1
     assert result.sql == NETS_SQL
+    assert result.answer == (
+        "Nets home games sold 137,237 tickets in August 2026, all for upcoming 2026-27 "
+        "fixtures, led by Brooklyn Nets vs. New York Knicks (17,732), Brooklyn Nets vs. "
+        "Boston Celtics (17,732) and Brooklyn Nets vs. Los Angeles Lakers (17,732), "
+        "and 5 more in the results below."
+    )
 
 
 def test_the_default_is_a_five_category_bar_chart_with_a_twelve_line_query(
@@ -110,6 +116,10 @@ def test_the_default_is_a_five_category_bar_chart_with_a_twelve_line_query(
     assert result.chart is not None
     assert result.chart.model_dump() == {"type": "bar", "x": "category", "y": "revenue"}
     assert result.sql == CATEGORY_SQL
+    assert result.answer == (
+        "NBA leads event revenue at $118.4M, followed by Concert ($61.2M), WNBA ($12.9M), "
+        "Family Show ($9.8M) and Comedy ($4.3M)."
+    )
     assert len(CATEGORY_SQL.splitlines()) == 12
     assert "JOIN" in CATEGORY_SQL and "GROUP BY" in CATEGORY_SQL
 

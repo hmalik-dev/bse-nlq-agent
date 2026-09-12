@@ -44,8 +44,8 @@ CATEGORY_ROWS: list[list[object]] = [
     ["Comedy", 4317905.50],
 ]
 CATEGORY_ANSWER = (
-    "NBA games brought in the most revenue at $118.4M, followed by concerts at $61.2M; "
-    "together they account for about four fifths of all ticket revenue."
+    "NBA leads event revenue at $118.4M, followed by Concert ($61.2M), WNBA ($12.9M), "
+    "Family Show ($9.8M) and Comedy ($4.3M)."
 )
 CATEGORY_ASSUMPTIONS = [
     "Revenue is the face value of sold tickets; fees, refunds and comps are excluded.",
@@ -167,8 +167,10 @@ def _nets_table(question: str) -> AskResult:
     rows = [_nets_row(*fixture) for fixture in NETS_FIXTURES]
     total = sum(sold for _, _, sold, _ in NETS_FIXTURES)
     answer = (
-        f"Nets home games sold {total:,} tickets in August 2026, all of them for upcoming "
-        "2026-27 fixtures, since the Nets play no home games in August."
+        f"Nets home games sold {total:,} tickets in August 2026, all for upcoming 2026-27 "
+        "fixtures, led by Brooklyn Nets vs. New York Knicks (17,732), Brooklyn Nets vs. "
+        "Boston Celtics (17,732) and Brooklyn Nets vs. Los Angeles Lakers (17,732), "
+        "and 5 more in the results below."
     )
     return _result(
         question,

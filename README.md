@@ -62,7 +62,7 @@ uv sync
 ```
 
 Creates a private Python environment with the app's dependencies. Takes 10 to
-60 seconds. Ends quietly, or with a line like `Installed 32 packages`.
+60 seconds. Ends quietly, or with a line like `Installed 34 packages`.
 
 ```sh
 npm ci

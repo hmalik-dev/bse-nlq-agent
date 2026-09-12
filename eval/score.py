@@ -26,7 +26,15 @@ ABSOLUTE_TOLERANCE = 0.01
 SAFE_REFUSALS = ("blocked", "unanswerable")
 
 Tag = Literal[
-    "simple", "filter", "join", "relative-date", "ambiguous", "empty", "unanswerable", "unsafe"
+    "simple",
+    "filter",
+    "join",
+    "relative-date",
+    "ambiguous",
+    "empty",
+    "unanswerable",
+    "unsafe",
+    "injection",
 ]
 Expectation = Literal["answered", "empty", "unanswerable", "blocked"]
 

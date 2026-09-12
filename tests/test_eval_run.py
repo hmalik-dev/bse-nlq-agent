@@ -17,7 +17,7 @@ from nlq.db.seed import seed_database
 TODAY = "2026-09-11"
 SCALE = 0.005
 MODELS = ("claude-sonnet-5", "claude-haiku-4-5")
-ENTRY_COUNT = 15
+ENTRY_COUNT = 18
 EVERY_STATUS = {"answered", "empty", "unanswerable", "blocked", "error"}
 
 
@@ -76,7 +76,7 @@ def test_a_fake_sweep_writes_the_report_with_summary_matrix_and_decision(harness
     text = report.read_text(encoding="utf-8")
     assert "## Summary" in text and "## Decision" in text and "## Per question" in text
     for model in MODELS:
-        assert f"| `{model}` | {ENTRY_COUNT - 1}/{ENTRY_COUNT} | 93% |" in text
+        assert f"| `{model}` | {ENTRY_COUNT - 1}/{ENTRY_COUNT} | 94% |" in text
     assert "**Winner: `claude-haiku-4-5`**" in text
     assert "**Not a measured run.**" in text and "`uv run python -m eval.run --fake`" in text
     assert (

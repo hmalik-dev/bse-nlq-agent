@@ -341,3 +341,31 @@ taken from the logos themselves — Barclays cyan `#00AEEF` for actions, Liberty
 seafoam `#87D5B5` for data — so the UI and the brand share one set of colours
 instead of an invented one. Measurements and per-logo usage rules are in
 `docs/design-brief.md`.
+
+**Two layouts, not four.** The canvas draws the ask and answer screens at 1440,
+1024, 768 and 390 wide. The app builds the 1440 layout and one narrow layout
+below 1024: single column, the history rail behind a header button, the drawer
+full width, tables scrolling inside their own container. A take-home is reviewed
+on a laptop; one narrow layout proves the page does not break on a phone.
+Frames 12 to 17 stay in the canvas as a reference. Rejected: a tablet layout and
+an icon-collapsed rail with tooltips (hours of CSS nobody grading this will
+resize a window to see).
+
+**No simulated progress while a question runs.** The API is one call, so the
+per-step times in the trace are only known when it returns. The waiting state
+lists the five step names with a spinner and fills in the real times on
+arrival. Rejected: advancing the first steps on a timer and reconciling them
+with the trace (it displays times nothing measured, for forty extra lines).
+
+## Ship
+
+**One smoke script, for the local path**, and the container checked once by
+hand in the clean-clone check. The README calls Docker the alternative, so a
+second two-phase script asserting the same three things against a container
+would be scaffolding for the path fewer reviewers take. Rejected: a Docker smoke
+script with a real-key phase.
+
+**Eight README sections.** The brief asks for the dataset and schema, the agent's
+behaviour, error handling and the AI tools used; a reviewer reads the top and
+skims the rest. Rejected: thirteen sections that put the same content behind
+five more headings.

@@ -12,7 +12,7 @@ answer from the rows that come back.
 - **Accuracy:** 15 of 15 golden questions with Claude Sonnet 5, including the
   brief's example questions word for word, a delete that must be refused and a
   question the data cannot answer ([evaluation](#evaluation)).
-- **Cost:** $0.0185 and a median of 4.6 seconds per question.
+- **Cost:** $0.0185 per question on average, with a median latency of 4,550 ms.
 - **Safety:** a SQL guard in front of a read-only connection; nothing the model
   writes can change the data.
 
@@ -107,8 +107,8 @@ takes two to three minutes and ends with `SMOKE PASSED`.
   query, writing the answer.
 - **Read the answer.** A two-sentence answer in plain language, with the
   assumptions it made listed underneath, such as "sold means purchase date". A
-  question that asks for a total gets a per-event breakdown, with the total in
-  the sentence.
+  count for one club's or venue's events over a month or less comes back one
+  row per event, with the total in the sentence.
 - **Check the numbers.** Switch between the Results table, the SQL that
   produced it (syntax highlighted, with a Copy button) and, when the result is
   one label and one number over a few rows, a bar chart. Arrow keys move
@@ -116,9 +116,9 @@ takes two to three minutes and ends with `SMOKE PASSED`.
 - **See how it got there.** A trace strip under the results names the model
   and shows the total time, the time each step took, how many repairs the SQL
   needed, and when the rows were capped.
-- **Look up the data.** The schema drawer lists every table and column and the
-  business definitions the agent works from (revenue, "last month", seasons).
-  Escape closes it.
+- **Look up the data.** The "What's in the data?" drawer lists every table and
+  column, and defines the terms in plain language: tickets sold, revenue,
+  sell-through, home games, a season, attendance. Escape closes it.
 - **Go back.** The session rail keeps every question asked this session; click
   one to see its answer again, or start a New question.
 - **Get a straight answer when there isn't one.** A question with no matching
@@ -145,7 +145,7 @@ takes two to three minutes and ends with `SMOKE PASSED`.
 | How many tickets did we sell for Nets home games last month? | The assumptions say "sold" means purchase date; the SQL joins `events` to `teams` to find home games. |
 | Top 5 event categories by total revenue | A bar chart; revenue excludes fees, refunds and comps. |
 | Which 2024 events had the highest average ticket price? | A ranked table capped at ten rows. |
-| Delete all ticket records | Refused before anything runs; the SQL tab shows the rejected statement if the model wrote one. |
+| Delete all ticket records | Refused before anything runs; the card shows the rejected statement if the model wrote one. |
 | What's the weather for the next home game? | Marked unanswerable, with a one-line reason and three questions that work. |
 
 ## How it works
@@ -264,10 +264,10 @@ data, and seeded, so the same date gives the same database on any machine.
 | `orders` | purchase | Purchase time, channel, promo code, and whether it is a season package. |
 | `tickets` | seat | Price, fee and status (`sold`, `refunded`, `comp`). One row per seat keeps "how many tickets" a plain `COUNT`. |
 
-The business definitions the agent works from (revenue excludes fees, refunds
-and comps; "sold last month" means purchase date; a season includes its
-playoffs) live in `src/nlq/db/dictionary.yaml` and appear in the app's schema
-drawer.
+The business rules the SQL is written against (revenue excludes fees, refunds
+and comps; "sold" wording filters on purchase date; a season includes its
+playoffs) live in `src/nlq/db/dictionary.yaml`, alongside the plain-language
+definitions the app's data drawer shows.
 
 The figures are anchored to published real-world numbers: 41 Nets and 20
 Liberty home games a year plus playoffs, 125 to 150 events a year in all,

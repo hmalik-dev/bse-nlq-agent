@@ -403,7 +403,7 @@ it the longer prompt, since no call in this run refused); Haiku 4.5 scored
 and "which events had the highest average price" (no ten-row cap), and getting
 the refunds question and the new Nets breakdown right. The rule still picks
 Sonnet 5: Haiku is two questions behind, not one. `docs/eval-results.md` and
-README §7 and §8 quote this run.
+the README's evaluation section quote this run.
 
 ## Agent
 
@@ -743,7 +743,8 @@ documented dataset, the container and the evaluation are what they were.
 Rejected: a smaller default (the data section's figures and the container's
 "about a minute" would all need restating).
 
-**The README leads with the agent, not the install steps.** The brief's first
+**Superseded by BSE-18, above: the README leads with the agent, not the install
+steps.** The brief's first
 three criteria are agent design, accuracy and code quality, and all three sat
 under 150 lines of setup. The pipeline diagram, the two safety layers, the
 "where to look" table and the statuses now form section 2, before "Run it",
@@ -751,8 +752,8 @@ and the first screen says the brief's three example questions are in the golden
 set word for word. Nothing was shortened; the fix is order. Node moved to its
 own subsection because a working app no longer depends on it.
 
-**Superseded (BSE-18): the README leads with a short summary, then the run
-steps, then a feature list, then the design.** Tickets had each edited one
+**The README leads with a short summary, then the run steps, then a feature
+list, then the design** (BSE-18; supersedes the agent-first order below). Tickets had each edited one
 section, and the result was 400 lines with a stale cost figure in one place and
 the current one in another, and a trace said to show cost that the interface
 never rendered. A reviewer who has just cloned needs numbered clone-to-browser

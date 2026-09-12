@@ -13,11 +13,11 @@ export function TraceStrip({ result }: { result: AskResult }): JSX.Element {
 
   return (
     <footer className="flex flex-col gap-2 border-t border-hairline bg-sql px-5 py-3 font-mono text-xs text-ink-3">
-      <div className="flex items-center gap-2.5">
+      <div className="flex flex-wrap items-center gap-2.5">
         <ClockIcon />
         <span className="tabular-nums">{parts.join(" · ")}</span>
         <span className="flex-1" />
-        <ul aria-label="Step times" className="flex gap-3.5 tabular-nums">
+        <ul aria-label="Step times" className="flex flex-wrap gap-3.5 tabular-nums">
           {trace.steps.map((step) => (
             <li key={step.name}>
               {step.name} <span className="text-ink-2">{formatSeconds(step.ms, 2)}</span>

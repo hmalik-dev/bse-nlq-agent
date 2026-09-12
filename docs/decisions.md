@@ -783,6 +783,16 @@ overlong second line ends in an ellipsis; the bar's accessible name keeps the
 full label. Rejected: PNG through a canvas (more code, and web fonts do not
 reach a canvas reliably) and `html-to-image` (a dependency for one button).
 
+**Below 560px the chart narrows its geometry rather than scrolling** (BSE-26).
+The sides drop to 16px and the label column to 96px (13 characters before a
+wrap); the longest bar still takes 78% of the room beside the labels, capped so
+its value, measured at 8px a monospace character, ends inside the chart; and
+the axis keeps four tick labels only when each step clears the longest label,
+otherwise it draws the two ends, and below that the end alone. At desktop widths nothing changes, so
+frame 04 still holds. Rejected: a horizontal scroll (the value is the point of
+the bar) and measuring text with `getBBox` (not available in jsdom, and a
+second render pass for a width the character count already bounds).
+
 **One chart type, and no picker.** The canvas draws a Horizontal bars / Column /
 Line select on the Chart tab; it is not built. Every chart the agent offers is
 a category against a number, where a line implies a trend that is not there and

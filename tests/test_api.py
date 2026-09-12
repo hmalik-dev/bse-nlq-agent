@@ -3,15 +3,22 @@
 from __future__ import annotations
 
 import logging
+import os
+from datetime import date
 from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
 
+from nlq import config
 from nlq.agent.agent import INTERNAL_MESSAGE, Agent
+from nlq.agent.answer import AnswerWriter
+from nlq.agent.executor import Executor
 from nlq.agent.fake import FakeAgent
-from nlq.agent.models import AskResult, ErrorInfo, Trace
+from nlq.agent.llm import SqlWriter
+from nlq.agent.models import AskResult, ErrorInfo, SqlPlan, Trace
 from nlq.api import app, create_app
+from tests.fakes import FakeAnthropic
 
 TRACE = Trace(
     steps=[], repairs=0, model="fake", total_ms=1, input_tokens=0, output_tokens=0, cost_usd=0.0
@@ -159,6 +166,27 @@ def test_an_agent_that_raises_becomes_an_internal_error_without_the_detail(
     assert "secret detail" not in response.text and "Traceback" not in response.text
     logged = [record for record in caplog.records if record.name == "nlq"]
     assert len(logged) == 1 and "secret detail" in logged[0].exc_text
+
+
+def test_a_missing_database_reaches_the_client_without_the_server_path(
+    monkeypatch: pytest.MonkeyPatch, unbuilt: Path
+) -> None:
+    monkeypatch.setenv("NLQ_DATABASE_PATH", "data/absent-for-this-test.db")
+    missing = config.database_path()
+    assert not missing.exists()
+    sql_writer = SqlWriter(FakeAnthropic([SqlPlan(answerable=True, sql="SELECT 1")]))
+    agent = Agent(
+        sql_writer, Executor(missing), AnswerWriter(FakeAnthropic([])), today=date.today()
+    )
+
+    response = client(agent, unbuilt).post("/api/ask", json={"question": "How many tickets?"})
+
+    assert response.json()["error"] == {
+        "code": "database_missing",
+        "message": "No database found. Create it with: uv run python -m nlq.db.seed",
+    }
+    assert str(missing) not in response.text
+    assert os.sep + "Users" not in response.text
 
 
 def test_schema_lists_six_tables_in_order_with_typed_columns_and_definitions(

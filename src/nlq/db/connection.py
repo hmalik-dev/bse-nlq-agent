@@ -2,10 +2,16 @@
 
 from __future__ import annotations
 
+import logging
 import sqlite3
 from pathlib import Path
 
 from nlq.agent.errors import DatabaseMissing
+
+# The caller sees this sentence; the path it was looking at goes to the log only.
+MISSING_MESSAGE = "No database found. Create it with: uv run python -m nlq.db.seed"
+
+logger = logging.getLogger("nlq")
 
 
 def open_read_only(path: Path) -> sqlite3.Connection:
@@ -18,9 +24,8 @@ def open_read_only(path: Path) -> sqlite3.Connection:
     file is reported here instead.
     """
     if not path.is_file():
-        raise DatabaseMissing(
-            f"No database at {path}. Create it with: uv run python -m nlq.db.seed"
-        )
+        logger.warning("No database file at %s", path)
+        raise DatabaseMissing(MISSING_MESSAGE)
     connection = sqlite3.connect(f"file:{path}?mode=ro", uri=True)
     connection.execute("PRAGMA query_only = 1")
     return connection

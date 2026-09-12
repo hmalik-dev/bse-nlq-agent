@@ -7,6 +7,7 @@ const COPY: Record<string, string> = {
   query_timeout: "That question took too long to run. Try narrowing it.",
   repairs_exhausted: "The generated query kept failing. Try rewording.",
   database_missing: "The database has not been generated yet. Run `uv run python -m nlq.db.seed`, then try again.",
+  usage_exhausted: "This demo has used up its usage allowance. Nothing is broken; asking works again once it is topped up.",
 };
 export const GENERIC_ERROR = "Something went wrong.";
 

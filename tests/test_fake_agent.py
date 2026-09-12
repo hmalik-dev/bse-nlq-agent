@@ -26,6 +26,7 @@ KEYWORD_OUTCOMES = {
     "Trigger a rate limit": ("error", "rate_limited"),
     "Pretend there is no key": ("error", "missing_api_key"),
     "Pretend there is no database": ("error", "database_missing"),
+    "Pretend the key is out of credit": ("error", "usage_exhausted"),
     "How many tickets for Nets home games last month?": ("answered", None),
     "Top 5 event categories by total revenue": ("answered", None),
 }

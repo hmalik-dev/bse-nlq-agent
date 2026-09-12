@@ -31,11 +31,11 @@ export function ResultsTable({ columns, rows }: Props): JSX.Element {
         </thead>
         <tbody>
           {rows.map((row, rowIndex) => (
-            <tr key={rowIndex}>
+            <tr key={rowIndex} className="border-b border-hairline last:border-b-0">
               {row.map((cell, index) => (
                 <td
                   key={index}
-                  className={`whitespace-nowrap border-b border-hairline px-5 py-3.5 text-sm last:border-b-0 ${align(index)} ${numeric[index] ? "" : "text-ink-2"}`}
+                  className={`whitespace-nowrap px-5 py-3.5 text-sm ${align(index)} ${numeric[index] ? "" : "text-ink-2"}`}
                 >
                   {index === 0 ? <FirstCell value={cell} column={columns[0] ?? ""} /> : formatCell(cell, columns[index] ?? "")}
                 </td>

@@ -68,10 +68,15 @@ class SqlWriter:
     def _get_client(self) -> Any:
         """Build the real client on first use; refuse before that without a key."""
         if self._client is None:
-            if not config.anthropic_api_key():
-                raise ApiKeyError("ANTHROPIC_API_KEY is not set. Add it to .env.")
-            self._client = anthropic.Anthropic(timeout=self.timeout_s, max_retries=1)
+            self._client = connect(self.timeout_s)
         return self._client
+
+
+def connect(timeout_s: float) -> anthropic.Anthropic:
+    """The real client, built only when a call is about to be made. Both writers use it."""
+    if not config.anthropic_api_key():
+        raise ApiKeyError("ANTHROPIC_API_KEY is not set. Add it to .env.")
+    return anthropic.Anthropic(timeout=timeout_s, max_retries=1)
 
 
 def build_messages(

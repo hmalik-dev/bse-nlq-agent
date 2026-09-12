@@ -22,6 +22,7 @@ and why; add to it whenever you make a new call. Then, for the work at hand:
 | Seed the database | `uv run python -m nlq.db.seed` |
 | Tests | `uv run pytest -q` |
 | Lint | `uv run ruff check src tests` |
+| Ask from the terminal | `uv run python -m nlq.ask "How many tickets did we sell last month?"` |
 | Run the API | `uv run uvicorn nlq.api:app --reload` |
 | Accuracy evaluation | `uv run python -m eval.run` |
 
@@ -32,6 +33,8 @@ src/nlq/
   config.py      paths, NLQ_TODAY, model names from env
   db/            schema.sql · dictionary.yaml · seed.py · connection.py (read-only)
   agent/         context.py · llm.py · sql_guard.py · executor.py · answer.py · agent.py
+  pricing.py     dollars per million tokens; cost_usd() for the trace and the evaluation
+  ask.py         CLI: one question in, AskResult JSON out
   api.py         FastAPI: POST /api/ask, GET /api/schema, GET /api/examples
 web/             React + Vite + TypeScript + Tailwind, built into src/nlq/static
 eval/            golden.yaml · run.py

@@ -46,3 +46,68 @@ class LlmResult(BaseModel):
     input_tokens: int
     output_tokens: int
     elapsed_ms: int
+
+
+class AnswerText(BaseModel):
+    """The written answer plus what the call cost, for the trace."""
+
+    text: str
+    model: str
+    input_tokens: int
+    output_tokens: int
+    elapsed_ms: int
+
+
+Status = Literal["answered", "empty", "unanswerable", "blocked", "error"]
+
+
+class ChartSpec(BaseModel):
+    """A hint that the result fits one bar chart: a label column and a value column."""
+
+    type: Literal["bar"] = "bar"
+    x: str
+    y: str
+
+
+class Step(BaseModel):
+    """One stage of the pipeline and how long it took."""
+
+    name: str
+    ms: int
+
+
+class Trace(BaseModel):
+    """What the ask cost in time, tokens and dollars, and how many repairs it took."""
+
+    steps: list[Step]
+    repairs: int
+    model: str
+    total_ms: int
+    input_tokens: int
+    output_tokens: int
+    cost_usd: float
+
+
+class ErrorInfo(BaseModel):
+    """A failure the interface can show: a stable code and a plain sentence."""
+
+    code: str
+    message: str
+
+
+class AskResult(BaseModel):
+    """Everything `Agent.ask` returns; the API serialises it unchanged."""
+
+    status: Status
+    question: str
+    answer: str = ""
+    assumptions: list[str] = Field(default_factory=list)
+    sql: str | None = None
+    columns: list[str] = Field(default_factory=list)
+    rows: list[list] = Field(default_factory=list)
+    row_count: int = 0
+    truncated: bool = False
+    chart: ChartSpec | None = None
+    trace: Trace
+    error: ErrorInfo | None = None
+    suggestions: list[str] = Field(default_factory=list)

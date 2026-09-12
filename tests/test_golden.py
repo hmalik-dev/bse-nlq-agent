@@ -162,8 +162,11 @@ def test_the_nets_question_comes_back_as_one_row_per_game_with_the_total_to_stat
     assert result.row_count > 1
     assert len({row[0] + row[1] for row in result.rows}) == result.row_count
     answer_turn = client.calls[-1]
-    assert "state the total across all the rows" in answer_turn["system"]
-    assert f"Results ({result.row_count} rows):" in answer_turn["messages"][0]["content"]
+    total = sum(row[2] for row in result.rows)
+    assert "state that total first" in answer_turn["system"]
+    assert answer_turn["messages"][0]["content"].endswith(
+        f"Total tickets_sold across all {result.row_count} rows: {total}"
+    )
 
 
 def test_the_promo_question_with_nothing_to_group_by_stays_one_scalar_row(

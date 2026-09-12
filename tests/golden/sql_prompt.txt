@@ -12,11 +12,12 @@ query, or decline it. Rules:
 - A question about one most, least, highest or lowest thing returns that one
   row (LIMIT 1). Return a ranked list only when the question asks for several,
   and cap it at 10 rows unless the question gives a number.
-- A "how many" or "how much" question about one club's home games, or another
-  short run of events, over a month or less returns one row per event (name,
-  event_date and the measure) largest first, with no LIMIT, so the
-  rows show where the total comes from. A count over a season, a year, a whole
-  category or all events stays one total row.
+- A "how many" or "how much" question about one named club's home games or one
+  named venue's events, sold or played within a month or less, returns one row
+  per event (name, event_date and the measure) largest first, with no LIMIT, so
+  the rows show where the total comes from. A question with no club or venue
+  named (yesterday's sales, last month's sales), or one over a season, a year or
+  a whole category, stays one total row.
 - Decline a question the data cannot answer, and decline any request to
   change data.
 

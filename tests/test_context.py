@@ -111,8 +111,10 @@ def test_the_context_is_cached_per_day() -> None:
 def test_the_rules_break_a_short_run_of_events_down_and_keep_one_row_for_one_thing(
     context: PromptContext,
 ) -> None:
-    assert "returns one row per event (name,\n  event_date and the measure)" in context.system
+    assert "one named club's home games or one\n  named venue's events" in context.system
+    assert "per event (name, event_date and the measure)" in context.system
     assert "with no LIMIT" in context.system
+    assert "(yesterday's sales, last month's sales)" in context.system
     assert "stays one total row" in context.system
     assert "returns that one\n  row (LIMIT 1)" in context.system
 

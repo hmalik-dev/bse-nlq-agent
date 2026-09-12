@@ -535,3 +535,64 @@ script with a real-key phase.
 behaviour, error handling and the AI tools used; a reviewer reads the top and
 skims the rest. Rejected: thirteen sections that put the same content behind
 five more headings.
+
+## Interface toolchain
+
+**Vite + React 19 + TypeScript, Tailwind v4 through `@tailwindcss/vite`.** One
+`web/` package, built straight into `src/nlq/static` so the API serves the UI
+from the same address. Tailwind v4 needs no PostCSS config and takes its tokens
+from one `@theme` block in `web/src/index.css`, so the canvas palette is declared
+once and every class reads it. Rejected: Tailwind v3 (a config file and a PostCSS
+step for the same result), CSS modules (tokens would be repeated per file).
+
+**The root `package.json` is a one-line npm workspace, `"workspaces": ["./*"]`.**
+The verify script discovers workspace packages by scanning the glob's parent
+directory for `package.json` files, so this exact glob is what makes it lint,
+type-check, test and build `web/`; `["web"]` would have left the frontend
+unverified. npm 11 accepts it and finds the one package. Rejected: no root
+package (`npm ci` at the root is what CI and the verify script run).
+
+**Every dependency, and why:**
+
+- `react`, `react-dom` — the component model the design was drawn for.
+- `vite`, `@vitejs/plugin-react` — dev server with an `/api` proxy, and the build.
+- `typescript`, `@types/react`, `@types/react-dom` — strict types; the two
+  `@types` packages are what makes `typescript` useful on React code.
+- `tailwindcss`, `@tailwindcss/vite` — the token system, above.
+- `vitest`, `jsdom`, `@testing-library/react`, `@testing-library/user-event` —
+  tests that render components and drive them the way a person would.
+- `eslint`, `typescript-eslint`, `eslint-plugin-react-hooks`,
+  `eslint-plugin-jsx-a11y` — the rules the code standards ask for: typed
+  boundaries, hook discipline, accessible markup.
+
+No chart library, no syntax-highlighting library, no state library, no router:
+the chart is a few divs, the highlighter is a 40-line tokenizer, the state is
+three `useState` calls and the app has one screen.
+
+**The real per-step times land in the trace strip.** The API is one call, so
+the thinking screen shows a spinner per step and nothing else (see "No
+simulated progress" under Interface). When the answer arrives, each step's
+measured time is listed on the right of the trace strip at the foot of the
+results panel, where the canvas's trace line sits, and a step that never ran is
+simply absent. Rejected: a second steps card on the answer screen (a fourth
+card the canvas does not draw).
+
+**The session rail appears whenever the session has a question in it**, on the
+ask screen as well as the answer screen, except while a question is in flight.
+Frames 01 and 02 draw a fresh session and still match; "New question" would
+otherwise strand the history behind a screen with no way back to it. Rejected:
+rail on the answer screen only (the canvas never draws a rail with an empty ask
+screen, so nothing rules on it).
+
+**The question box leaves the page during flight** rather than being disabled:
+the thinking screen pins the question in a card, as the canvas draws it, so
+there is no input to type into until the answer arrives. Ask is disabled while
+the box is empty.
+
+**Rows carry a club badge when their first cell names the club.** "Brooklyn
+Nets" and "New York Liberty" are the names the seed writes into `events.name`,
+and the badge is drawn from the text of the rendered cell, so it works for any
+query that returns the event name first and never for one that does not.
+
+**The canvas token `#08080A` replaces the brief's `#0B0B0D`** for the page
+background. The canvas is the drawn artefact and parity is measured against it.

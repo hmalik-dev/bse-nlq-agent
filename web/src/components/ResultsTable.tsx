@@ -1,0 +1,59 @@
+import type { JSX } from "react";
+import type { Cell } from "../types";
+import { formatCell, isNumericColumn } from "../format";
+import { Badge, badgeFor } from "./Badge";
+
+interface Props {
+  columns: string[];
+  rows: Cell[][];
+}
+
+/** A real table. Numbers are right-aligned tabular mono; wide results scroll inside the panel. */
+export function ResultsTable({ columns, rows }: Props): JSX.Element {
+  const numeric = columns.map((_, index) => isNumericColumn(rows, index));
+  const align = (index: number): string => (numeric[index] ? "num" : "text-left");
+  return (
+    <div role="region" aria-label="Results table" tabIndex={0} className="overflow-x-auto">
+      <table className="w-full min-w-max border-collapse">
+        <thead>
+          <tr className="bg-sql">
+            {columns.map((column, index) => (
+              <th
+                key={column}
+                scope="col"
+                className={`border-b border-hairline px-5 py-3 font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-ink-3 ${align(index)}`}
+              >
+                {column.replace(/_/g, " ")}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row, rowIndex) => (
+            <tr key={rowIndex}>
+              {row.map((cell, index) => (
+                <td
+                  key={index}
+                  className={`whitespace-nowrap border-b border-hairline px-5 py-3.5 text-sm last:border-b-0 ${align(index)} ${numeric[index] ? "" : "text-ink-2"}`}
+                >
+                  {index === 0 ? <FirstCell value={cell} column={columns[0] ?? ""} /> : formatCell(cell, columns[index] ?? "")}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function FirstCell({ value, column }: { value: Cell; column: string }): JSX.Element {
+  const text = formatCell(value, column);
+  const badge = badgeFor(text);
+  return (
+    <span className="inline-flex items-center gap-2.5 text-ink">
+      {badge && <Badge name={badge} />}
+      {text}
+    </span>
+  );
+}

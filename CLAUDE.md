@@ -25,6 +25,10 @@ and why; add to it whenever you make a new call. Then, for the work at hand:
 | Ask from the terminal | `uv run python -m nlq.ask "How many tickets did we sell last month?"` |
 | Run the API | `uv run uvicorn nlq.api:app --reload` |
 | Accuracy evaluation | `uv run python -m eval.run` |
+| Install the web toolchain | `npm ci` (at the root; it is an npm workspace) |
+| Web dev server, proxying `/api` to port 8000 | `npm run -w web dev` |
+| Web lint, typecheck, tests | `npm run -w web lint`, `typecheck`, `test` |
+| Build the UI into `src/nlq/static` | `npm run -w web build` |
 
 ## Shape
 

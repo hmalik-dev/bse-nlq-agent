@@ -5,11 +5,18 @@
 Ask a question about ticket sales in plain English and get an answer, the SQL
 that produced it, and the assumptions the agent made along the way. Behind it is
 a synthetic ticketing database for Barclays Center, the Brooklyn Nets and the
-New York Liberty: five million tickets across three years of games, concerts and
-shows. The agent turns the question into one read-only query, checks that query
-before it runs, runs it, and writes a two-sentence answer from the rows that
-come back. It was built for a hiring exercise and is meant to be run on your own
-machine; there is no hosted version.
+New York Liberty: five million tickets across three years of games, concerts
+and shows at full scale, or a fifth of that in five seconds for a first run. The
+agent turns the question into one read-only query, checks that query before it
+runs, runs it, and writes a two-sentence answer from the rows that come back. It
+was built for a hiring exercise and is meant to be run on your own machine;
+there is no hosted version.
+
+The brief's three example questions (the top five categories by revenue, Nets
+tickets sold last month, and the highest average price in 2024) are in
+`eval/golden.yaml` word for word, and all three pass. Section 7 has the full
+evaluation; section 2 is the agent design, which is where a reviewer should
+start.
 
 **How the key arrives.** The app calls Claude, which needs an API key. A
 ready-made `.env` file is delivered through a one-time secure link alongside
@@ -21,158 +28,7 @@ or the image. (The delivered file is `.env.example` with the key filled in and
 the models set to the evaluation's winner, so copying `.env.example` to `.env`
 and adding a key is always enough.)
 
-## 2. Run it
-
-You need two tools. Each is a one-line install, and each line is followed by a
-command that checks it worked.
-
-**uv** manages the Python side and downloads Python 3.12 itself, so there is
-nothing else to install. Install it from [astral.sh/uv](https://docs.astral.sh/uv/):
-
-```sh
-curl -LsSf https://astral.sh/uv/install.sh | sh
-uv --version
-```
-
-You should see a version line such as `uv 0.12.13`. Open a new terminal window
-if the command is not found.
-
-**Node 24** with npm builds the web interface. Use the installer from
-[nodejs.org](https://nodejs.org) or, if you have nvm, `nvm install 24`. Then:
-
-```sh
-node --version
-```
-
-You should see `v24` followed by a minor version.
-
-Get the code, if you have not already, and step into it:
-
-```sh
-git clone https://github.com/hmalik-dev/bse-nlq-agent.git
-cd bse-nlq-agent
-```
-
-Save the delivered `.env` file in this folder. Then run these five commands in
-order. The first three take a minute or two the first time and are instant
-afterwards.
-
-```sh
-uv sync
-```
-
-Creates a private Python environment with the app's dependencies. Takes 10 to
-60 seconds. Ends quietly, or with a line like `Installed 34 packages`.
-
-```sh
-npm ci
-```
-
-Installs the web interface's build tools. Takes 15 to 60 seconds. Ends with
-`added ... packages`; warnings about funding are normal.
-
-```sh
-npm run -w web build
-```
-
-Builds the interface into the Python package. Takes about ten seconds and ends
-with `✓ built in` and a short list of files.
-
-```sh
-uv run python -m nlq.db.seed
-```
-
-Generates the database, about 5 million ticket rows, into `data/tickets.db`.
-Takes about a minute, then prints `Seeded ...` and the row count for each table.
-
-```sh
-uv run uvicorn nlq.api:app
-```
-
-Starts the app. Within a few seconds it prints
-`Uvicorn running on http://127.0.0.1:8000`. Leave it running.
-
-Open **<http://localhost:8000>** in a browser. You should see the ask screen
-with six example questions. Press `Ctrl+C` in the terminal to stop the server.
-
-If the key is not to hand, `NLQ_FAKE_AGENT=1 uv run uvicorn nlq.api:app` shows
-the same interface with canned answers. `scripts/smoke.sh` runs the whole path
-above in one go against a temporary database, takes two to three minutes, and
-ends with the answer to one question and `SMOKE PASSED`.
-
-### Developing
-
-| Task | Command |
-|---|---|
-| Web dev server with hot reload (the API on port 8000 is proxied under `/api`) | `npm run -w web dev` |
-| Ask one question from the terminal and print the result as JSON | `uv run python -m nlq.ask "How many tickets did we sell last month?"` |
-| Python tests, lint and format check | `uv run pytest -q`, `uv run ruff check src tests`, `uv run ruff format --check src tests` |
-| Web lint, typecheck and tests | `npm run -w web lint`, `npm run -w web typecheck`, `npm run -w web test` |
-
-Every setting is an environment variable, read from `.env` or the shell. Only
-the key is required.
-
-| Variable | Default | What it does |
-|---|---|---|
-| `ANTHROPIC_API_KEY` | none | The key the agent calls Claude with. |
-| `NLQ_SQL_MODEL` | `claude-sonnet-5` | The model that turns a question into SQL. |
-| `NLQ_ANSWER_MODEL` | `claude-sonnet-5` | The model that writes the answer from the rows. |
-| `NLQ_TODAY` | the real date | Pins "today" (`YYYY-MM-DD`) so "last month" is reproducible. Drives the seed as well as the agent. |
-| `NLQ_DATABASE_PATH` | `data/tickets.db` | Where the database lives, absolute or relative to the repository. |
-| `NLQ_FAKE_AGENT` | `0` | `1` answers from canned results with no key and no database. |
-| `NLQ_MAX_QUESTION_CHARS` | `500` | Longest question the API accepts. |
-| `NLQ_MAX_ROWS` | `500` | Most rows one query may return; more than this is reported as truncated. |
-| `NLQ_QUERY_TIMEOUT_MS` | `5000` | How long one query may run before it is interrupted. |
-| `NLQ_LLM_TIMEOUT_S` | `60` | How long one model call may take before it is abandoned. |
-
-## 3. Run it with Docker
-
-An alternative for anyone who already has Docker installed and running. The
-image builds the interface and installs the Python side itself, so uv and Node
-are not needed on your machine.
-
-```sh
-docker build -t bse-insights .
-```
-
-Builds the image. Takes two to four minutes the first time.
-
-```sh
-docker run --env-file .env -p 127.0.0.1:8000:8000 bse-insights
-```
-
-Starts the container with your `.env`. On first start it generates the database
-inside the container, which takes about a minute: the log reads
-`Seeding the database at /data/tickets.db (about a minute) ...`, then the row
-counts, then `Seed finished. Starting the server.` and finally
-`Uvicorn running on http://0.0.0.0:8000`. Then open **<http://localhost:8000>**.
-
-Add `-e NLQ_FAKE_AGENT=1` to see the interface with canned answers and no key.
-Add `-v bse-data:/data` to keep the database across restarts, so the seed runs
-only once.
-
-## 4. Questions to try
-
-The six example chips on the ask screen:
-
-| Question | What to look for |
-|---|---|
-| How many tickets did we sell for Nets home games last month? | The assumptions say "sold" was read as purchase date, not game date; the SQL joins `events` to `teams` to find home games. |
-| Top 5 event categories by total revenue | A bar chart; the assumptions say revenue excludes fees, refunds and comps. |
-| Which 2024 events had the highest average ticket price? | A ranked table capped at ten rows, Nets and Liberty rows carrying a club badge. |
-| Which Liberty home games sold the most tickets this season? | The SQL filters on `events.season`, not on dates. |
-| How much revenue did refunds cost us last season? | The SQL sums refunded tickets for the most recent finished NBA season and names the season. |
-| Compare web and box office sales for concerts | Two rows, one per channel, from `orders.channel`. |
-
-Three more that show how the agent behaves at the edges:
-
-| Question | What to look for |
-|---|---|
-| How many tickets were sold for Nets home games last month? | Same answer as the first chip; the wording is different and the assumptions still state the reading it picked. |
-| Delete all ticket records | Refused before anything runs. The card says the connection is read-only and the SQL tab shows the rejected statement, if the model wrote one. |
-| What's the weather for the next home game? | Marked as something the data cannot answer, with a one-line reason and three questions it can. |
-
-## 5. How it works
+## 2. How it works
 
 ```mermaid
 flowchart LR
@@ -207,6 +63,19 @@ read-only with `PRAGMA query_only`, so even a statement that fooled the guard
 cannot write. The executor also stops a query at a time limit and at a byte
 budget, so a runaway query cannot hang the server or exhaust memory.
 
+**Where to look**, for a reviewer with ten minutes:
+
+| File | What it does | Covered by |
+|---|---|---|
+| `src/nlq/agent/agent.py` | The pipeline: context, SQL, guard, execute, repair, answer. Never raises. | `tests/test_agent.py` |
+| `src/nlq/agent/sql_guard.py` | The first safety layer: one bounded read over known tables, or a refusal. | `tests/test_sql_guard.py` |
+| `src/nlq/agent/executor.py` | The second layer: read-only SQLite with row, byte and time caps. | `tests/test_executor.py` |
+| `src/nlq/agent/context.py`, `examples.yaml`, `src/nlq/db/dictionary.yaml` | The prompt: schema, business definitions, nine worked examples, today's date. | `tests/test_context.py` (snapshot in `tests/golden/sql_prompt.txt`) |
+| `src/nlq/agent/llm.py`, `answer.py` | The two model calls, structured output, and one map from SDK failures to error codes. | `tests/test_llm.py`, `tests/test_answer.py` |
+| `src/nlq/db/seed.py` | The generated dataset, written per event so it seeds in 52 MB of memory. | `tests/test_seed.py` (realism ranges) |
+| `eval/run.py`, `eval/golden.yaml` | Fifteen golden questions, two models, the decision rule. | `tests/test_golden.py`, `tests/test_eval_run.py`, `tests/test_eval_score.py` |
+| `src/nlq/api.py` | Four routes and the built interface from one address, or a page saying how to build it. | `tests/test_api.py` |
+
 **Five statuses.** Every question ends in one of them, always as an HTTP 200
 with a `status` field, so the interface renders one shape:
 
@@ -235,18 +104,161 @@ dollars. Every answer shows its own cost in the trace. The right place to bound
 a whole session is a spend cap on the key in the Anthropic console, which is
 where the delivered key is capped.
 
-**Where to look**, for a reviewer with ten minutes:
+## 3. Run it
 
-| File | What it does | Covered by |
+You need **uv**, which manages the Python side and downloads Python 3.12 itself,
+so there is nothing else to install. Install it from
+[astral.sh/uv](https://docs.astral.sh/uv/):
+
+```sh
+curl -LsSf https://astral.sh/uv/install.sh | sh
+uv --version
+```
+
+You should see a version line such as `uv 0.12.13`. Open a new terminal window
+if the command is not found.
+
+Get the code, if you have not already, and step into it:
+
+```sh
+git clone https://github.com/hmalik-dev/bse-nlq-agent.git
+cd bse-nlq-agent
+```
+
+Save the delivered `.env` file in this folder. Then run these three commands in
+order.
+
+```sh
+uv sync
+```
+
+Creates a private Python environment with the app's dependencies. Takes 10 to
+60 seconds. Ends quietly, or with a line like `Installed 34 packages`.
+
+```sh
+uv run python -m nlq.db.seed --scale 0.2
+```
+
+Generates the database into `data/tickets.db`: about a million ticket rows in
+five seconds, which is enough for every example question. Prints `Seeded ... at
+scale 0.2` and the row count for each table. Leave off `--scale` for the full
+five-million-row dataset described in section 6; it takes about a minute.
+
+```sh
+uv run uvicorn nlq.api:app
+```
+
+Starts the app. Within a few seconds it prints
+`Uvicorn running on http://127.0.0.1:8000`. Leave it running.
+
+Open **<http://localhost:8000>** in a browser. Without the web interface built
+you see a plain page saying so, with the three ways forward; the API underneath
+is complete either way, and this asks a question from the terminal:
+
+```sh
+uv run python -m nlq.ask "How many tickets did we sell last month?"
+```
+
+Press `Ctrl+C` in the terminal to stop the server.
+
+### The web interface
+
+The interface is built with **Node 24** and npm. Use the installer from
+[nodejs.org](https://nodejs.org) or, if you have nvm, `nvm install 24`, then
+check it with `node --version`; you should see `v24` followed by a minor
+version. Then, in the repository folder:
+
+```sh
+npm ci
+```
+
+Installs the web interface's build tools. Takes 15 to 60 seconds. Ends with
+`added ... packages`; warnings about funding are normal.
+
+```sh
+npm run -w web build
+```
+
+Builds the interface into the Python package. Takes about ten seconds and ends
+with `✓ built in` and a short list of files. Restart the server, and
+**<http://localhost:8000>** now shows the ask screen with six example questions.
+
+If the key is not to hand, `NLQ_FAKE_AGENT=1 uv run uvicorn nlq.api:app` shows
+the same interface with canned answers. `scripts/smoke.sh` runs the whole path
+above in one go against a temporary full-scale database, takes two to three
+minutes, and ends with the answer to one question and `SMOKE PASSED`.
+
+### Developing
+
+| Task | Command |
+|---|---|
+| Web dev server with hot reload (the API on port 8000 is proxied under `/api`) | `npm run -w web dev` |
+| Ask one question from the terminal and print the result as JSON | `uv run python -m nlq.ask "How many tickets did we sell last month?"` |
+| Python tests, lint and format check | `uv run pytest -q`, `uv run ruff check src tests`, `uv run ruff format --check src tests` |
+| Web lint, typecheck and tests | `npm run -w web lint`, `npm run -w web typecheck`, `npm run -w web test` |
+
+Every setting is an environment variable, read from `.env` or the shell. Only
+the key is required.
+
+| Variable | Default | What it does |
 |---|---|---|
-| `src/nlq/agent/agent.py` | The pipeline: context, SQL, guard, execute, repair, answer. Never raises. | `tests/test_agent.py` |
-| `src/nlq/agent/sql_guard.py` | The first safety layer: one bounded read over known tables, or a refusal. | `tests/test_sql_guard.py` |
-| `src/nlq/agent/executor.py` | The second layer: read-only SQLite with row, byte and time caps. | `tests/test_executor.py` |
-| `src/nlq/agent/context.py`, `examples.yaml`, `src/nlq/db/dictionary.yaml` | The prompt: schema, business definitions, nine worked examples, today's date. | `tests/test_context.py` (snapshot in `tests/golden/sql_prompt.txt`) |
-| `src/nlq/agent/llm.py`, `answer.py` | The two model calls, structured output, and one map from SDK failures to error codes. | `tests/test_llm.py`, `tests/test_answer.py` |
-| `src/nlq/db/seed.py` | The generated dataset, written per event so it seeds in 52 MB of memory. | `tests/test_seed.py` (realism ranges) |
-| `eval/run.py`, `eval/golden.yaml` | Fifteen golden questions, two models, the decision rule. | `tests/test_golden.py`, `tests/test_eval_run.py`, `tests/test_eval_score.py` |
-| `src/nlq/api.py` | Four routes and the built interface from one address. | `tests/test_api.py` |
+| `ANTHROPIC_API_KEY` | none | The key the agent calls Claude with. |
+| `NLQ_SQL_MODEL` | `claude-sonnet-5` | The model that turns a question into SQL. |
+| `NLQ_ANSWER_MODEL` | `claude-sonnet-5` | The model that writes the answer from the rows. |
+| `NLQ_TODAY` | the real date | Pins "today" (`YYYY-MM-DD`) so "last month" is reproducible. Drives the seed as well as the agent. |
+| `NLQ_DATABASE_PATH` | `data/tickets.db` | Where the database lives, absolute or relative to the repository. |
+| `NLQ_FAKE_AGENT` | `0` | `1` answers from canned results with no key and no database. |
+| `NLQ_MAX_QUESTION_CHARS` | `500` | Longest question the API accepts. |
+| `NLQ_MAX_ROWS` | `500` | Most rows one query may return; more than this is reported as truncated. |
+| `NLQ_QUERY_TIMEOUT_MS` | `5000` | How long one query may run before it is interrupted. |
+| `NLQ_LLM_TIMEOUT_S` | `60` | How long one model call may take before it is abandoned. |
+
+## 4. Run it with Docker
+
+An alternative for anyone who already has Docker installed and running. The
+image builds the interface and installs the Python side itself, so uv and Node
+are not needed on your machine.
+
+```sh
+docker build -t bse-insights .
+```
+
+Builds the image. Takes two to four minutes the first time.
+
+```sh
+docker run --env-file .env -p 127.0.0.1:8000:8000 bse-insights
+```
+
+Starts the container with your `.env`. On first start it generates the database
+inside the container, which takes about a minute: the log reads
+`Seeding the database at /data/tickets.db (about a minute) ...`, then the row
+counts, then `Seed finished. Starting the server.` and finally
+`Uvicorn running on http://0.0.0.0:8000`. Then open **<http://localhost:8000>**.
+
+Add `-e NLQ_FAKE_AGENT=1` to see the interface with canned answers and no key.
+Add `-v bse-data:/data` to keep the database across restarts, so the seed runs
+only once.
+
+## 5. Questions to try
+
+The six example chips on the ask screen:
+
+| Question | What to look for |
+|---|---|
+| How many tickets did we sell for Nets home games last month? | The assumptions say "sold" was read as purchase date, not game date; the SQL joins `events` to `teams` to find home games. |
+| Top 5 event categories by total revenue | A bar chart; the assumptions say revenue excludes fees, refunds and comps. |
+| Which 2024 events had the highest average ticket price? | A ranked table capped at ten rows, Nets and Liberty rows carrying a club badge. |
+| Which Liberty home games sold the most tickets this season? | The SQL filters on `events.season`, not on dates. |
+| How much revenue did refunds cost us last season? | The SQL sums refunded tickets for the most recent finished NBA season and names the season. |
+| Compare web and box office sales for concerts | Two rows, one per channel, from `orders.channel`. |
+
+Three more that show how the agent behaves at the edges:
+
+| Question | What to look for |
+|---|---|
+| How many tickets were sold for Nets home games last month? | Same answer as the first chip; the wording is different and the assumptions still state the reading it picked. |
+| Delete all ticket records | Refused before anything runs. The card says the connection is read-only and the SQL tab shows the rejected statement, if the model wrote one. |
+| What's the weather for the next home game? | Marked as something the data cannot answer, with a one-line reason and three questions it can. |
 
 ## 6. The data
 
@@ -304,6 +316,10 @@ Size, measured on 2026-09-12 at full scale:
 | Seed time | 34 s |
 | On disk | 644 MB |
 
+`--scale 0.2`, the quickstart's setting, keeps the same calendar and shrinks the
+seats sold per event and the customer base to a fifth: 1,015,708 tickets in
+128 MB, seeded in 5 seconds.
+
 ## 7. Model choice and evaluation
 
 Fifteen golden questions were run once each against two models, with today
@@ -353,6 +369,16 @@ three times the cost per question for three more right answers out of fifteen,
 which is the right trade when a wrong number costs more than three cents. The
 reasoning behind every choice, including the ones rejected, is in
 `docs/decisions.md`.
+
+**What I would do differently.** Write the golden questions before the prompt,
+not after it: the evaluation was built once the worked examples were already
+tuned by hand, so it confirmed the prompt rather than shaping it, and the misses
+it did find are all about the shape of an answer, which a set written first
+would have specified up front. Seed small by default from the first commit: the
+five-million-row dataset was a realism decision that became a first-run cost
+every reviewer paid, and the `--scale` flag arrived last when it should have
+been the default. And build the interface thinner and later: it took more
+tickets than the agent did, and the brief grades it least.
 
 **With more time.** Tool-using retrieval for large schemas, so the model can
 look up the tables it needs rather than reading all of them. Attendance and scan

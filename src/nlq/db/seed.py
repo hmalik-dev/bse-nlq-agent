@@ -8,11 +8,12 @@ the same database.
 Rows are written per event rather than accumulated, so a full-scale seed holds
 one event's orders and tickets in memory at a time instead of five million.
 
-Run with: python -m nlq.db.seed
+Run with: python -m nlq.db.seed [--scale 0.2] [--today 2026-09-11]
 """
 
 from __future__ import annotations
 
+import argparse
 import itertools
 import random
 import sqlite3
@@ -911,8 +912,30 @@ def seed_database(
     }
 
 
-if __name__ == "__main__":
-    counts = seed_database()
-    print(f"Seeded {DATABASE_PATH}")
+def main(argv: list[str] | None = None) -> None:
+    """The command line: `--scale` and `--today` in, the scale and the row counts out."""
+    parser = argparse.ArgumentParser(description="Generate the synthetic ticketing database.")
+    parser.add_argument(
+        "--scale",
+        type=float,
+        default=1.0,
+        help="fraction of the full dataset to generate (default 1.0, about 5 million tickets)",
+    )
+    parser.add_argument(
+        "--today",
+        type=date.fromisoformat,
+        default=None,
+        help="the date the calendar is generated around, YYYY-MM-DD "
+        "(default: NLQ_TODAY, else the real date)",
+    )
+    args = parser.parse_args(argv)
+    if args.scale <= 0:
+        parser.error("--scale must be greater than 0")
+    counts = seed_database(today=args.today, scale=args.scale)
+    print(f"Seeded {DATABASE_PATH} at scale {args.scale:g}")
     for table, number in counts.items():
         print(f"  {table:<10} {number:>9,}")
+
+
+if __name__ == "__main__":
+    main()

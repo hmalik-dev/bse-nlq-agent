@@ -88,13 +88,11 @@ def test_the_user_turn_says_when_rows_were_capped_or_truncated() -> None:
         (api_timeout_error(), ModelTimeout, "model_timeout"),
         (refusal(), ModelRefused, "model_refused"),
         (
-            FakeResponse(
-                None, [FakeTextBlock("I cannot.")], FakeUsage(1, 2), stop_reason="refusal"
-            ),
+            FakeResponse([FakeTextBlock("I cannot.")], FakeUsage(1, 2), stop_reason="refusal"),
             ModelRefused,
             "model_refused",
         ),
-        (FakeResponse(None, [], FakeUsage(1, 0)), ModelRefused, "model_refused"),
+        (FakeResponse([], FakeUsage(1, 0)), ModelRefused, "model_refused"),
     ],
     ids=["rate-limit", "timeout", "refusal", "refusal-with-text", "no-text"],
 )

@@ -683,8 +683,8 @@ shortening `business_rules` for both readers (a readability fix that changes SQL
 accuracy), and holding the list in `api.py` (the vocabulary split across two
 files). A foreign key's target is served as `references` beside the type, read
 from the `REFERENCES` clause sqlglot already parses, because it is what makes six
-tables read as one dataset. Frame 10's search field and row counts are not built:
-six tables fit in a scroll, and a row count needs a query path to render a label.
+tables read as one dataset. Search and row counts stay out, as declined under
+Product.
 
 **The lockup is a button back to the ask screen, and only from an answer.** There
 are no routes, so a link would need its navigation suppressed; a `<button>` named

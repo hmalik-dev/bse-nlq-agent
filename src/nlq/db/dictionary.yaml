@@ -2,9 +2,10 @@
 # the one place where "revenue" and friends are defined.
 
 dataset: >-
-  Synthetic ticketing data for a sports and entertainment operator that runs three
-  venues and owns two clubs (Brooklyn Nets, New York Liberty). Every customer,
-  order and ticket in it is generated; no real sales data is used.
+  Synthetic ticketing data for a sports and entertainment operator that runs one
+  venue, Barclays Center in Brooklyn, and owns two clubs (Brooklyn Nets, New York
+  Liberty). Every customer, order and ticket in it is generated; no real sales
+  data is used.
 
 business_rules:
   - A ticket is one seat. "Tickets sold" is COUNT(*) over tickets with status = 'sold'.
@@ -12,24 +13,34 @@ business_rules:
     column, excludes refunded tickets, and excludes comps (which have price 0).
   - Use fee only when the question asks about fees or "total paid" / "all-in" cost.
   - Average ticket price means AVG(price) over tickets with status = 'sold'.
-  - "Home games" are events where home_team_id points at a club with is_home_club = 1.
+  - >-
+    Sell-through, or "how full was the house", is tickets sold divided by
+    events.seating_capacity for that event. Use seating_capacity, not
+    venues.capacity, because the arena is reconfigured per event.
+  - '"Home games" are events where home_team_id points at a club with is_home_club = 1.'
   - Date wording about when a game or show happened filters events.event_date.
     Date wording about when a purchase happened filters orders.ordered_at.
     If the question is ambiguous, prefer orders.ordered_at for "sold"/"bought"
     wording and say so in the assumptions.
+  - >-
+    An order with is_season_package = 1 is a season-ticket package: one pre-season
+    purchase covering the same seats at every regular-season home game of one club
+    season (playoff games are not included). Its tickets therefore span many
+    events, and it is dated months before the first of them. Every other order is
+    a single-game purchase and covers tickets to one event only.
   - Events dated in the future are on sale but not yet played, so they have
     partial sales. Exclude them when a question is about past performance.
   - Attendance is not recorded. Tickets sold is the closest available measure.
 
 tables:
   venues:
-    description: The three venues the operator runs.
+    description: The one venue the operator runs, Barclays Center.
     columns:
       venue_id: Primary key.
-      name: "Barclays Center, Nassau Coliseum or Gowanus Pavilion."
+      name: "Barclays Center."
       city: City the venue is in.
       state: Two-letter state code.
-      capacity: Maximum seats for a full-house configuration.
+      capacity: Largest full-house configuration the building holds.
   teams:
     description: Clubs, both the operator's own and visiting opponents.
     columns:
@@ -49,6 +60,10 @@ tables:
       event_date: Date the event takes or took place (ISO date).
       season: "NBA seasons read '2025-26'; WNBA seasons read '2026'; NULL for non-sport events."
       is_playoff: 1 for postseason games.
+      seating_capacity: >-
+        Seats this event's house was configured for: 17732 for basketball, 19000
+        for an end-stage concert or a fight, 8000 for a curtained house. The
+        denominator for sell-through.
       announced_date: Date tickets went on sale.
   customers:
     description: Ticket buyers. Names and emails are generated.
@@ -58,16 +73,18 @@ tables:
       email: Generated address, not a real inbox.
       city: Buyer city.
       state: Two-letter state code.
-      is_season_member: 1 if the buyer holds a season membership.
+      is_season_member: 1 if the buyer holds a season-ticket package.
       created_at: Date the account was opened (ISO date).
   orders:
-    description: One purchase, covering one or more tickets to the same event.
+    description: One purchase. A single-game order covers tickets to one event; a
+      season package covers a whole regular season.
     columns:
       order_id: Primary key.
       customer_id: Buyer.
       ordered_at: Timestamp of the purchase (ISO, to the second).
       channel: web, mobile_app, box_office, resale or group_sales.
       promo_code: Promotion applied, NULL when none.
+      is_season_package: 1 for a pre-season season-ticket package, 0 for a single-game order.
   tickets:
     description: One row per seat. The fact table for counts and revenue.
     columns:

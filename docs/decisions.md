@@ -27,11 +27,10 @@ another dependency and no safety gain here).
 
 **One row per seat in `tickets`.** "How many tickets were sold" becomes a plain
 `COUNT(*)`, which is the shape the model handles most reliably. The cost is size:
-about 5M ticket rows and 2M orders once the data pass lands, roughly 650MB on
-disk and a 40-second seed, with the measured figures recorded in
-`docs/data-spec.md`. Aggregates over the whole ticket table still return in under
-a second, and the container seeds at startup rather than baking that file into
-the image. Rejected:
+measured at full scale on 2026-09-12, 5,082,400 ticket rows and 1,717,269 orders,
+644MB on disk and a 34-second seed. Aggregates over the whole ticket table still
+return in under a second, and the container seeds at startup rather than baking
+that file into the image. Rejected:
 an order-line table with a quantity column, which needs `SUM(quantity)` and invites
 off-by-one errors in generated SQL.
 
@@ -41,37 +40,84 @@ behind it, not the tail of one season. A test enforces that every recent year ha
 club home games and non-sport events in it. This means the NBA season before the
 window also contributes its January-to-April home games.
 
+**Which NBA seasons exist is decided by the horizon, not by the season in
+progress.** The obvious rule — generate up to the season that has tipped off, so
+`today.month >= 9` — disagrees with the 120-day on-sale horizon for the ten weeks
+from 24 June, when the horizon already reaches the 22 October opener. A seed pinned
+to `NLQ_TODAY=2026-07-01` had no Nets games on sale at all, which is both wrong and
+the single worst question for this dataset to fail. The bound is now "whichever
+season has opened by the horizon", matching what the WNBA and non-sport generators
+already did.
+
 **Scope: Barclays Center, the Brooklyn Nets and the New York Liberty**, matching
 BSE's actual portfolio. The invented second and third venues are gone. `venues`
 stays as a one-row table, because a real ticketing system has one and "at Barclays
 Center" should still resolve through a join.
 
-**Seating capacity moves onto the event**, not the venue. Barclays runs about
-17,732 seats for basketball, about 19,000 end-stage for concerts, and a curtained
-house near 8,000 for smaller shows. Per-event capacity is what a real ticketing
-manifest looks like, and it makes sell-through a question the agent can answer.
+**Seating capacity moves onto the event**, not the venue, and it is exact rather
+than jittered: 17,732 for basketball, 19,000 for an end-stage concert or a fight,
+8,000 for a curtained house. Per-event capacity is what a real ticketing manifest
+looks like, it makes sell-through a question the agent can answer, and exact numbers
+make that answer reproducible. Rejected: jittering each event's capacity — more
+realistic, but it puts noise into every range the tests assert.
 
 **Realism is a measured target, not a vibe.** Generated figures have to land inside
-published real-world ranges, and a test asserts it per category: Nets around 16,500
-tickets a game at roughly 93% sell-through and a $140-190 average price; Liberty
-around 13,000 at a $55-90 average; arena concerts around 12,000 at $110-150; family
-shows near $45-70. The first pass got Nets attendance 30% low and priced Liberty
-like an NBA game, which is exactly the kind of error a reviewer would spot.
+published real-world ranges, and a test asserts four of them per category: tickets
+sold, sell-through, average price and gate. The first pass got Nets attendance 30%
+low and priced Liberty like an NBA game, which is exactly the kind of error a
+reviewer would spot.
 
-**Season-ticket packages are modelled.** A third of Nets and Liberty seats sell as
-one pre-season order covering the whole season, which puts a real spike in the
-purchase-date distribution and makes "tickets sold last month" a more interesting
-question than a flat random spread would.
+**Where the target table contradicted itself, tickets sold won.** Sell-through is
+defined as tickets sold ÷ `seating_capacity`, so the two columns are one fact, and
+the drafted pairs did not agree once capacity became exact — 80–92% sell-through for
+a concert means 15,200–17,480 tickets against a 19,000 house, far above the same
+row's 10,500–13,500. Tickets sold is the column a BSE reviewer recognises on sight,
+so the sell-through band was recomputed from it (concerts 55–71%, boxing 47–69%).
+Rejected: keeping both bands and widening capacity per event, which would have made
+sell-through unreproducible to save a number nobody reads first.
 
-**About 400,000 customers.** The first pass had 30,000 buyers holding 1.1M orders —
-36 purchases each, which no ticketing database looks like. Most buyers now appear
-once or twice; season members and resellers appear often.
+**Season packages are a flag on the order, not an inference.**
+`orders.is_season_package = 1` marks one pre-season purchase holding 1–4 seats in
+one tier and section at every regular-season home game of a club season. A third of
+the Nets house and a quarter of the Liberty house sells this way, which is 28–38% of
+each club's sold regular-season tickets — the Liberty share of the *house* is lower
+only because their sell-through is, and the share of *sold* seats is what the test
+asserts. It puts a real spike in the purchase-date distribution and makes "tickets
+sold last month" a more interesting question than a flat random spread would.
+Rejected: inferring packages from order size, which makes the question unanswerable
+in SQL and the test approximate.
 
-**Cost of that realism: about 5M ticket rows, roughly 650MB, a 40-second seed.**
-Accepted, because the file is generated locally and seeded at container start, so it
-costs disk rather than deploy weight, and aggregates still return in under a second.
-The full specification, including what is deliberately not modelled, is in
-`docs/data-spec.md`.
+**`is_season_member` marks exactly the package holders**, about 1.1% of customers.
+The brief sketch said 8%, but the arithmetic does not allow it: a third of a 17,732
+house at 2.35 seats an account is roughly 2,500 Nets accounts, and no allocation of
+5,900 seats reaches 32,000 people. A flag that does not correspond to a package
+would make every season-member question wrong, so the flag follows the packages and
+the share is whatever that comes to. Rejected: an independent 8% coin flip.
+
+**400,000 customers, with a 3% block placing a quarter of the single-game orders.**
+The first pass had 30,000 buyers holding 1.1M orders — 36 purchases each, which no
+ticketing database looks like. The median buyer now places 3 orders and the 90th
+percentile places 6, while season members and resellers appear often, and a test
+asserts that shape rather than the customer count alone.
+
+**`scale` shrinks seats per event and the customer base together**, never the
+calendar. Per-customer behaviour then stays realistic in the fixture — the median
+buyer places 3 orders at scale 0.02 exactly as at scale 1 — and the per-year event
+counts can still be asserted. Rejected: shrinking the calendar, which would break
+every per-year assertion.
+
+**A calendar year holds 125–150 events, not 150–170.** The earlier figure did not
+add up from its own table (41 + 4 + 22 + 30 + 21 + 12 + 4 = 134), and a calendar year
+is not a season: it straddles two NBA regular seasons plus a playoff run, so it
+carries about 41 Nets home games rather than 41 per season landing neatly in one
+year. Barclays' "200+ events a year" marketing figure counts private hires and
+college games this dataset does not model.
+
+**Rows are written per event, not accumulated.** Building the whole dataset in
+lists first measured 834MB peak RSS at 2.6M tickets, so 5M would have needed about
+1.6GB. Inserting each event's orders and tickets as they are generated holds peak
+RSS at 52MB for the full 5M-row seed. The full specification, including what is
+deliberately not modelled, is in `docs/data-spec.md`.
 
 ## Process
 

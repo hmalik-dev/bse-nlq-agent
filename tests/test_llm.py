@@ -18,7 +18,7 @@ from nlq.agent.errors import (
     ModelTimeout,
     ModelUsageExhausted,
 )
-from nlq.agent.llm import MAX_TOKENS, SqlWriter
+from nlq.agent.llm import MAX_TOKENS, SqlWriter, is_usage_exhausted
 from nlq.agent.models import Attempt, SqlPlan
 from tests.fakes import (
     FAKE_INPUT_TOKENS,
@@ -194,6 +194,10 @@ def test_a_spent_allowance_gets_its_own_code_not_model_error(
 
     assert raised.value.code == "usage_exhausted"
     assert raised.value.message == "The API key has used up its credit or its spend cap."
+
+
+def test_a_failure_with_no_http_status_is_never_read_as_spent_usage() -> None:
+    assert not is_usage_exhausted(api_connection_error())
 
 
 def test_an_unrelated_bad_request_is_still_a_model_error(context: PromptContext) -> None:

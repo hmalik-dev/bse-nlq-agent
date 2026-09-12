@@ -7,6 +7,13 @@ set -euo pipefail
 export NLQ_DATABASE_PATH="${NLQ_DATABASE_PATH:-/data/tickets.db}"
 
 if [[ ! -f "$NLQ_DATABASE_PATH" || "${NLQ_RESEED:-0}" == "1" ]]; then
+  data_dir="$(dirname "$NLQ_DATABASE_PATH")"
+  if [[ ! -w "$data_dir" ]]; then
+    # A volume created by an older image, which ran as root, stays root-owned.
+    echo "Cannot write $data_dir as $(id -un). If it is a volume from an older image," >&2
+    echo "remove it (docker volume rm bse-data) and start again." >&2
+    exit 1
+  fi
   echo "Seeding the database at $NLQ_DATABASE_PATH (about a minute) ..."
   python -m nlq.db.seed
   echo "Seed finished. Starting the server."

@@ -1,5 +1,6 @@
-- [SQL guard bypasses](sql-guard-bypasses.md) — four reproduced bypasses of the sqlglot guard/executor bounds, plus the attacks already proven harmless.
-- [API boundary audit](api-boundary-audit.md) — BSE-6 FastAPI surface: traversal/symlink probes that passed, and three accepted low notes not to re-flag.
-- [Ship/container audit](ship-container-audit.md) — BSE-10 image and key boundary: what is proven clean, plus the `-p 8000:8000` LAN-exposure finding.
-- [Client export audit](client-export-audit.md) — BSE-20 CSV/SVG download: SVG/filename/object URL clean; one low semicolon-locale CSV note.
-- [LLM boundary audit](llm-boundary-audit.md) — secret handling and SDK error mapping verified clean on BSE-4; the one judgement call recorded so it is not re-flagged.
+- [SQL guard bypasses](sql-guard-bypasses.md) — BSE-3 bypasses (fixed) plus BSE-23 open: alias-collision allowlist bypass, wide-row memory/deadline bypass.
+- [API boundary audit](api-boundary-audit.md) — traversal/symlink probes that pass, fixes since BSE-6, accepted low notes, Host-header rebinding note.
+- [Ship/container audit](ship-container-audit.md) — image/key boundary clean, git history clean, port and non-root fixed.
+- [Client export audit](client-export-audit.md) — BSE-20 CSV/SVG download clean; semicolon now quoted.
+- [LLM boundary audit](llm-boundary-audit.md) — secret handling clean; SDK text now fixed sentence + log (BSE-23).
+- Whole-app audits: the caller may edit the worktree concurrently — re-Read a file before citing a line, and state the snapshot.

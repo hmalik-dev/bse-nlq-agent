@@ -1,29 +1,28 @@
 ---
 name: sql-guard-bypasses
-description: Confirmed bypass classes for the sqlglot-based SQL guard in src/nlq/agent/sql_guard.py and the executor's bounds — recheck these whenever the guard changes
+description: Confirmed bypass classes for the sqlglot SQL guard (src/nlq/agent/sql_guard.py) and executor bounds, which are fixed and which were open at the BSE-23 whole-app audit — retest after any guard/executor edit
 metadata:
   type: project
 ---
 
-Confirmed on 2026-09-12 against `src/nlq/agent/sql_guard.py` + `executor.py` (branch worktree-BSE-3).
-These four bypasses were all reproduced with a seeded database; retest each after any guard edit.
+BSE-3 (2026-09-12) found four; all FIXED by BSE-23 time and re-verified: global CTE-name
+subtraction (now scope-based), TokenError escaping (now SqlglotError), inline LIMIT swallowed
+by `--` (now appended on a new line), no byte budget (now MAX_RESULT_BYTES in `_fetch`).
 
-1. **CTE names are collected globally, not per scope.** `find_all(exp.CTE)` subtracts a CTE
-   name from the allowlist check everywhere in the tree, so a CTE declared in an inner
-   subquery whitelists a same-named real table in the outer query
-   (`SELECT name, sql FROM sqlite_master WHERE 1 IN (WITH sqlite_master AS (SELECT 1 c) SELECT c FROM sqlite_master)`
-   returned all 11 `sqlite_master` rows). Correct fix is `sqlglot.optimizer.scope.traverse_scope`.
-2. **`sqlglot.errors.TokenError` is not a `ParseError`.** Catching only `ParseError` lets an
-   unterminated `/*` comment escape `guard()` as an uncaught exception. Catch `SqlglotError`.
-3. **Appending ` LIMIT n` to the model's raw text is comment-swallowable.** SQL ending in a
-   `--` comment silently loses the appended clause; only `fetchmany` still caps the rows.
-4. **No byte budget on results.** `SELECT hex(zeroblob(20000000)) FROM tickets` stays inside
-   the 500-row cap and the 5 s deadline yet grew RSS by 1.8 GB in 2.7 s. Row count and wall
-   clock are not sufficient bounds; total result bytes must be bounded too.
+OPEN at BSE-23 audit (2026-09-12), reproduced on a `--scale 0.1` seed:
+5. **Alias collision defeats the scope exemption.** `_cte_reference_ids` looks tables up by
+   `alias_or_name` in `scope.sources`, so aliasing a real table to the same name as a derived
+   table or CTE exempts it: `SELECT sql FROM (SELECT 1 AS a) AS x, sqlite_master AS x` returns
+   all schema rows; `... pragma_database_list() AS x` returns the absolute DB path. Fix:
+   exempt only `not t.args.get("db") and t.name in scope.cte_sources` (verified: still allows
+   plain and recursive CTEs, rejects all three collision shapes).
+6. **Byte budget is checked after the row is materialised, and one opcode can outlast the
+   deadline.** 3 x `hex(zeroblob(1e8))` hit 1.9 GB RSS before refusal; 24 x
+   `length(hex(zeroblob(2e8)))` ran 5.6 s past a 5 s deadline at 4.5 GB RSS returning a tiny
+   row (progress handler never fires). Fix: `connection.setlimit(SQLITE_LIMIT_LENGTH, ~1e6)`
+   (+ `SQLITE_LIMIT_COLUMN`) in `open_read_only`; verified it fails in 0 ms.
 
-Non-issues (verified, do not relitigate): table-valued functions (`pragma_database_list()`,
-`json_each(...)`) parse to a `Table` with an empty `.name` and are already rejected; quoted
-function names (`"load_extension"('x')`) skip `BANNED_FUNCTIONS` but SQLite answers "not
-authorized" because python's sqlite3 disables extension loading and has no readfile/writefile/
-edit; `LIMIT 5, 100000` is lowered correctly; `mode=ro` + `PRAGMA query_only` refused a direct
-`DELETE`.
+Non-issues (verified, do not relitigate): stacked statements, ATTACH/PRAGMA/VACUUM INTO/
+REPLACE/EXPLAIN (parse as Command → rejected), quoted/backticked `load_extension`, bare
+table-valued functions (empty name → rejected), `LIMIT -1`/`LIMIT (SELECT n)` (lowered),
+cartesian join and recursive `count(*)` (stopped at 5001 ms), `mode=ro` refuses DELETE.

@@ -11,8 +11,9 @@ from pathlib import Path
 import pytest
 
 from nlq.agent.errors import DatabaseMissing, QueryFailed, QueryTimeout
-from nlq.agent.executor import Executor
+from nlq.agent.executor import MAX_RESULT_BYTES, Executor
 from nlq.agent.sql_guard import guard
+from nlq.db.connection import MAX_COLUMNS, MAX_VALUE_BYTES, open_read_only
 from nlq.db.seed import seed_database
 
 TODAY = date(2026, 9, 11)
@@ -72,6 +73,19 @@ def test_a_runaway_query_is_stopped_at_the_deadline(db_path: Path) -> None:
     assert time.monotonic() - started < 1.0
 
 
+def test_a_cartesian_join_over_tickets_is_stopped_at_the_deadline(db_path: Path) -> None:
+    started = time.monotonic()
+    with pytest.raises(QueryTimeout):
+        Executor(db_path, timeout_ms=100).run("SELECT COUNT(*) FROM tickets AS a, tickets AS b")
+    assert time.monotonic() - started < 1.0
+
+
+def test_a_cartesian_join_returning_rows_stops_at_the_row_cap(db_path: Path) -> None:
+    result = Executor(db_path, max_rows=5).run("SELECT a.ticket_id FROM tickets AS a, tickets AS b")
+    assert result.row_count == 5
+    assert result.truncated
+
+
 def test_a_broken_query_stays_repairable_even_past_the_deadline(db_path: Path) -> None:
     # The deadline says whether it interrupted anything; the clock does not. A
     # real SQL error must not be relabelled a timeout, or the repair loop gives
@@ -81,10 +95,44 @@ def test_a_broken_query_stays_repairable_even_past_the_deadline(db_path: Path) -
     assert "nonexistent_column" in error.value.message
 
 
-def test_an_enormous_single_row_is_refused_rather_than_held_in_memory(db_path: Path) -> None:
+def test_rows_that_add_up_past_the_byte_budget_are_refused_rather_than_held_in_memory(
+    db_path: Path,
+) -> None:
+    # Each value stays under SQLite's length limit; together they pass MAX_RESULT_BYTES.
+    per_row = MAX_VALUE_BYTES // 4 * 2  # hex() doubles the blob
+    rows_needed = MAX_RESULT_BYTES // per_row + 1
     with pytest.raises(QueryFailed) as error:
-        Executor(db_path, max_rows=5).run("SELECT hex(zeroblob(20000000)) FROM tickets")
-    assert "larger than" in error.value.message
+        Executor(db_path, max_rows=rows_needed + 5).run(
+            f"SELECT hex(zeroblob({MAX_VALUE_BYTES // 4})) FROM tickets"
+        )
+    assert error.value.message.startswith(f"The result is larger than {MAX_RESULT_BYTES} bytes.")
+
+
+def test_a_value_over_the_length_limit_fails_inside_sqlite_before_python_holds_it(
+    db_path: Path,
+) -> None:
+    started = time.monotonic()
+    with pytest.raises(QueryFailed, match="too big"):
+        Executor(db_path).run(f"SELECT length(hex(zeroblob({MAX_VALUE_BYTES}))) AS n")
+    assert time.monotonic() - started < 1.0
+
+
+def test_a_value_under_the_length_limit_still_runs(db_path: Path) -> None:
+    half = MAX_VALUE_BYTES // 4  # hex() doubles it
+    assert Executor(db_path).run(f"SELECT length(hex(zeroblob({half}))) AS n").rows == [[half * 2]]
+
+
+def test_a_result_wider_than_the_column_limit_is_refused(db_path: Path) -> None:
+    columns = ", ".join(f"{n} AS c{n}" for n in range(MAX_COLUMNS + 1))
+    with pytest.raises(QueryFailed, match="too many columns"):
+        Executor(db_path).run(f"SELECT {columns}")
+
+
+def test_blobs_come_back_as_text_or_their_repr_never_raw_bytes(db_path: Path) -> None:
+    result = Executor(db_path).run(
+        "SELECT CAST('Nets' AS BLOB) AS text_blob, X'FF00' AS binary_blob"
+    )
+    assert result.rows == [["Nets", "b'\\xff\\x00'"]]
 
 
 def test_a_write_handed_straight_to_the_executor_is_refused(db_path: Path) -> None:
@@ -93,6 +141,39 @@ def test_a_write_handed_straight_to_the_executor_is_refused(db_path: Path) -> No
         Executor(db_path).run("DELETE FROM tickets")
     assert error.value.repairable
     assert _ticket_count(db_path) == before
+
+
+def test_the_connection_itself_refuses_a_write_with_the_guard_and_query_only_both_gone(
+    db_path: Path,
+) -> None:
+    before = _ticket_count(db_path)
+    connection = open_read_only(db_path)
+    try:
+        connection.execute(
+            "PRAGMA query_only = 0"
+        )  # lift the second latch; mode=ro must still hold
+        with pytest.raises(sqlite3.OperationalError, match="readonly"):
+            connection.execute("DELETE FROM tickets")
+    finally:
+        connection.close()
+    assert _ticket_count(db_path) == before
+
+
+@pytest.mark.parametrize("folder", ["a#b", "a?mode=rwc"])
+def test_a_database_path_with_uri_characters_still_opens_read_only(
+    db_path: Path, tmp_path: Path, folder: str
+) -> None:
+    copy = tmp_path / folder / "tickets.db"
+    copy.parent.mkdir()
+    copy.write_bytes(db_path.read_bytes())
+    connection = open_read_only(copy)
+    try:
+        connection.execute("PRAGMA query_only = 0")
+        assert connection.execute("SELECT COUNT(*) FROM tickets").fetchone()[0] > 0
+        with pytest.raises(sqlite3.OperationalError, match="readonly"):
+            connection.execute("DELETE FROM tickets")
+    finally:
+        connection.close()
 
 
 def test_a_missing_database_is_reported_from_run_not_from_the_constructor(

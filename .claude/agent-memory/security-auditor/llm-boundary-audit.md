@@ -19,11 +19,11 @@ Verified clean — do not re-flag unless the code changes:
   SQL in this layer. SQL execution stays behind the BSE-3 guard + read-only connection
   ([[sql-guard-bypasses]]).
 
-Judgement call (advisory, not a blocker): `map_api_error`'s
-`ModelError(f"The model call failed: {error}")` surfaces the SDK's
-`"Error code: N - {raw body}"`, which carries Anthropic's `request_id`/workspace metadata
-but never the key or the prompt. Acceptable for a single-user demo; if a multi-user or
-hosted surface appears, reduce it to a generic sentence and keep the detail in the trace.
+Former judgement call, RESOLVED by BSE-23: `map_api_error` now returns the fixed
+`MODEL_ERROR_MESSAGE` and logs the SDK text (`logger.exception`), covered by
+tests/test_llm.py::test_a_model_error_hides_the_sdk_text_and_logs_it_once. Note the log line
+carries the SDK body (request_id), never the key. Row data reaches the answer writer as
+plain text in the user turn; its output is rendered as React text, so steering is text-only.
 
 BSE-7 (eval harness, 2026-09-12) — PASS after one fix. Confirmed pattern worth reusing:
 **any generated artifact a scripted/fake mode can overwrite must record its provenance.**

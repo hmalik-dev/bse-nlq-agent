@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import pytest
 
+from nlq.agent import sql_guard
 from nlq.agent.errors import InvalidSql, UnsafeSql
 from nlq.agent.sql_guard import ALLOWED_TABLES, guard
 
@@ -62,6 +63,35 @@ def test_detach_is_refused() -> None:
 def test_a_bare_command_is_refused() -> None:
     with pytest.raises(UnsafeSql):
         _guard("VACUUM")
+
+
+def test_vacuum_into_a_file_is_refused() -> None:
+    with pytest.raises(UnsafeSql):
+        _guard("VACUUM INTO '/tmp/copy.db'")
+
+
+@pytest.mark.parametrize(
+    "sql",
+    [
+        "SELECT 1 FROM tickets; DROP TABLE tickets",
+        "SELECT 1 FROM tickets /* ; */; DELETE FROM tickets --",
+        "SELECT 1 FROM tickets -- \n; DELETE FROM tickets",
+        "DROP/**/TABLE tickets",
+        "/* SELECT */ DELETE FROM tickets",
+        "SELECT 1 FROM tickets;;",
+    ],
+    ids=[
+        "second-write",
+        "comment-hides-semicolon",
+        "newline-after-comment",
+        "comment-as-space",
+        "comment-before-write",
+        "empty-second-statement",
+    ],
+)
+def test_comment_and_statement_tricks_never_get_a_write_through(sql: str) -> None:
+    with pytest.raises((UnsafeSql, InvalidSql)):
+        _guard(sql)
 
 
 def test_a_transaction_is_refused() -> None:
@@ -134,6 +164,45 @@ def test_a_shadowing_cte_cannot_smuggle_a_table_past_the_allowlist() -> None:
         )
 
 
+@pytest.mark.parametrize(
+    "sql",
+    [
+        "SELECT sql FROM (SELECT 1 AS a) AS x, sqlite_master AS x",
+        "SELECT sql FROM sqlite_master AS x, (SELECT 1 AS a) AS x",
+        "WITH c AS (SELECT 1 AS a) SELECT sql FROM c, sqlite_master AS c",
+        "SELECT file FROM (SELECT 1 AS a) AS x, pragma_database_list() AS x",
+    ],
+    ids=["subquery-alias", "subquery-alias-reversed", "cte-alias", "table-function-alias"],
+)
+def test_an_alias_shared_with_a_subquery_or_cte_cannot_smuggle_a_table_past_the_allowlist(
+    sql: str,
+) -> None:
+    with pytest.raises(InvalidSql):
+        _guard(sql)
+
+
+def test_a_recursive_cte_is_still_accepted_as_its_own_name() -> None:
+    sql = (
+        "WITH RECURSIVE n(x) AS (SELECT 1 UNION ALL SELECT x + 1 FROM n WHERE x < 3) "
+        "SELECT x FROM n"
+    )
+    assert guard(sql, max_rows=MAX_ROWS).tables == []
+
+
+@pytest.mark.parametrize(
+    "sql",
+    [
+        "WITH c AS (SELECT 1 AS a) "
+        "SELECT ticket_id FROM tickets WHERE ticket_id IN (SELECT a FROM c)",
+        "WITH c AS (SELECT 1 AS a), d AS (SELECT a FROM c) SELECT a FROM d",
+        "WITH c AS (SELECT 1 AS a) SELECT x.a FROM c AS x",
+    ],
+    ids=["used-in-subquery", "used-by-a-later-cte", "aliased-cte"],
+)
+def test_a_cte_is_exempt_wherever_it_is_in_scope(sql: str) -> None:
+    assert set(guard(sql, max_rows=MAX_ROWS).tables) <= {"tickets"}
+
+
 def test_unparsable_text_is_repairable() -> None:
     with pytest.raises(InvalidSql) as error:
         _guard("SELECT FROM WHERE ((")
@@ -197,6 +266,23 @@ def test_a_limit_above_the_cap_is_lowered() -> None:
     lowered = _guard("SELECT * FROM tickets LIMIT 100000")
     assert f"LIMIT {CAP}" in lowered
     assert "100000" not in lowered
+
+
+def test_a_limit_that_is_not_a_number_counts_as_unbounded_and_is_lowered() -> None:
+    lowered = _guard("SELECT * FROM tickets LIMIT (SELECT 100000)")
+    assert f"LIMIT {CAP}" in lowered
+    assert "100000" not in lowered
+
+
+def test_when_scopes_cannot_be_resolved_every_table_is_checked(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def unresolvable(statement: object) -> None:
+        raise RuntimeError("scope resolution failed")
+
+    monkeypatch.setattr(sql_guard, "traverse_scope", unresolvable)
+    with pytest.raises(InvalidSql, match="no table named recent"):
+        _guard("WITH recent AS (SELECT * FROM tickets) SELECT * FROM recent")
 
 
 def test_a_limit_within_the_cap_is_left_alone() -> None:

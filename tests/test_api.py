@@ -45,6 +45,7 @@ TABLE_NAMES = ["venues", "teams", "events", "customers", "orders", "tickets"]
 MAX_DEFINITION_CHARS = 90
 MAX_DEFINITIONS = 8
 QUESTION = "How many tickets did we sell last month?"
+LOCAL_URL = "http://127.0.0.1:8000"
 
 
 class StubAgent:
@@ -76,6 +77,7 @@ def no_real_agent(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(Agent, "from_env", refuse)
     monkeypatch.delenv("NLQ_FAKE_AGENT", raising=False)
     monkeypatch.delenv("NLQ_MAX_QUESTION_CHARS", raising=False)
+    monkeypatch.delenv("NLQ_ALLOWED_HOSTS", raising=False)
 
 
 @pytest.fixture
@@ -99,7 +101,35 @@ def built(tmp_path: Path) -> Path:
 
 
 def client(agent: object | None, static_dir: Path) -> TestClient:
-    return TestClient(create_app(agent, static_dir=static_dir))
+    return TestClient(create_app(agent, static_dir=static_dir), base_url=LOCAL_URL)
+
+
+@pytest.mark.parametrize("host", ["localhost:8000", "127.0.0.1:8000", "localhost"])
+def test_the_local_host_names_are_served(host: str, unbuilt: Path) -> None:
+    response = client(StubAgent(), unbuilt).get("/api/health", headers={"host": host})
+    assert response.status_code == 200
+
+
+def test_a_foreign_host_header_is_refused_before_the_agent_runs(unbuilt: Path) -> None:
+    # A DNS-rebinding page reaches 127.0.0.1 under its own name; the Host header gives it away.
+    agent = StubAgent()
+    response = client(agent, unbuilt).post(
+        "/api/ask",
+        json={"question": QUESTION},
+        headers={"host": "attacker.example", "origin": "http://attacker.example"},
+    )
+    assert response.status_code == 400
+    assert response.text == "Invalid host header"
+    assert agent.questions == []
+
+
+def test_the_allowed_hosts_are_read_from_the_environment(
+    monkeypatch: pytest.MonkeyPatch, unbuilt: Path
+) -> None:
+    monkeypatch.setenv("NLQ_ALLOWED_HOSTS", "insights.example.com")
+    api = client(StubAgent(), unbuilt)
+    assert api.get("/api/health", headers={"host": "insights.example.com"}).status_code == 200
+    assert api.get("/api/health", headers={"host": "localhost"}).status_code == 400
 
 
 @pytest.mark.parametrize(
@@ -181,7 +211,7 @@ def test_a_missing_database_reaches_the_client_without_the_server_path(
     assert not missing.exists()
     sql_writer = SqlWriter(FakeAnthropic([SqlPlan(answerable=True, sql="SELECT 1")]))
     agent = Agent(
-        sql_writer, Executor(missing), AnswerWriter(FakeAnthropic([])), today=date.today()
+        sql_writer, Executor(missing), AnswerWriter(FakeAnthropic([])), today=date(2026, 9, 11)
     )
 
     response = client(agent, unbuilt).post("/api/ask", json={"question": "How many tickets?"})
@@ -334,12 +364,43 @@ def test_a_built_ui_is_served_with_its_assets_and_an_index_fallback(built: Path)
     assert len(api.get("/api/examples").json()) == 6  # the API still wins over the fallback
 
 
-def test_a_path_outside_the_static_directory_gets_the_index_not_the_file(
-    built: Path, tmp_path: Path
+@pytest.fixture
+def secret(tmp_path: Path) -> Path:
+    """A file beside the static directory, one `..` away from being served."""
+    path = tmp_path / "secret.txt"
+    path.write_text("keep out")
+    return path
+
+
+@pytest.mark.parametrize(
+    "url",
+    [
+        "/%2e%2e/secret.txt",
+        "/%2e%2e%2fsecret.txt",
+        "/..%2fsecret.txt",
+        "/brand/%2e%2e/%2e%2e/secret.txt",
+        "/assets/%2e%2e/%2e%2e/secret.txt",
+    ],
+)
+def test_a_path_that_climbs_out_of_the_static_directory_is_a_404(
+    built: Path, secret: Path, url: str
 ) -> None:
-    (tmp_path / "secret.txt").write_text("keep out")
-    api = client(StubAgent(), built)
-    response = api.get("/%2e%2e/secret.txt")
+    response = client(StubAgent(), built).get(url)
+    assert response.status_code == 404
+    assert "keep out" not in response.text
+
+
+def test_an_absolute_path_is_a_404_not_the_file_it_names(built: Path, secret: Path) -> None:
+    # `//tmp/...` would be read as a host by the client, so the leading slash goes in encoded.
+    response = client(StubAgent(), built).get("/%2F" + str(secret).lstrip("/"))
+    assert response.status_code == 404
+    assert "keep out" not in response.text
+
+
+def test_a_symlink_pointing_out_of_the_static_directory_is_a_404(built: Path, secret: Path) -> None:
+    (built / "brand" / "leak.txt").symlink_to(secret)
+    response = client(StubAgent(), built).get("/brand/leak.txt")
+    assert response.status_code == 404
     assert "keep out" not in response.text
 
 
@@ -384,4 +445,4 @@ def test_the_real_agent_is_built_on_the_first_request_not_at_import(
 
 def test_the_module_level_app_has_no_agent_until_asked() -> None:
     assert app.state.agent is None
-    assert TestClient(app).get("/api/health").status_code == 200
+    assert TestClient(app, base_url=LOCAL_URL).get("/api/health").status_code == 200

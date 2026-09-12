@@ -983,3 +983,39 @@ four stay one click away.
 
 **The canvas token `#08080A` replaces the brief's `#0B0B0D`** for the page
 background. The canvas is the drawn artefact and parity is measured against it.
+
+## Security
+
+The whole-app audit (BSE-23) is written up in `docs/security.md`: the boundary
+table, the seven findings it fixed, and the risks it accepted. The rulings:
+
+**The write-up is its own page**, linked from the README's tradeoffs. It is the
+page to open when asked "how is this safe?". Rejected: a README section (makes a
+long page longer), decisions entries only (no single table to talk through).
+
+**The container runs as a non-root user after all.** This reverses the "plain
+image" entry under Ship on that one point: three lines, and a hosted demo
+(BSE-11) needs it anyway. Health checks and memory limits stay out.
+
+**The API refuses a `Host` it does not know** (`NLQ_ALLOWED_HOSTS`, default
+`localhost,127.0.0.1`). No auth means a DNS-rebinding page could otherwise spend
+the reviewer's key. Starlette's `TrustedHostMiddleware` ships with FastAPI, so no
+dependency. Rejected: accepting the risk (a page the reviewer merely visits is
+enough), CORS rules (rebinding makes the request same-origin).
+
+**SQLite's own limits cap a value at 1 MB and a result at 100 columns.** The
+executor's byte count runs after SQLite has built the row, too late for one huge
+value. Rejected: a lower byte cap (still too late), a subprocess with a memory
+limit (a second process to manage for a local tool).
+
+**An escaping static path is a 404, not the index.** Paths inside the build still
+fall back to `index.html` for client routes.
+
+**Accepted, not built:** a request body size cap, hiding `/docs`, a rate limiter,
+and fixed text on 422s. `docs/security.md` gives the one-line reason for each.
+
+**Coverage is measured, not gated.** `uv run --with pytest-cov` and
+`npm i --no-save @vitest/coverage-v8` measure it once without adding either
+package to a lockfile.
+
+**Nothing became a follow-up ticket.** Every finding fitted a small fix here.

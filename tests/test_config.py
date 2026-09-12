@@ -32,6 +32,16 @@ def test_database_path_takes_an_absolute_setting_as_given(
     assert config.database_path() == absolute
 
 
+def test_allowed_hosts_default_to_local_and_honour_the_environment(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("NLQ_ALLOWED_HOSTS", raising=False)
+    assert config.allowed_hosts() == ["localhost", "127.0.0.1"]
+
+    monkeypatch.setenv("NLQ_ALLOWED_HOSTS", " insights.example.com, ,localhost ")
+    assert config.allowed_hosts() == ["insights.example.com", "localhost"]
+
+
 def test_query_bounds_default_and_honour_the_environment(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:

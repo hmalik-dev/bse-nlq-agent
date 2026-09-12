@@ -24,7 +24,13 @@ When a diff rewrites SQL text or guards it with sqlglot, check these:
   small or already passed; check whether the mapping should read SQLite's
   message instead.
 
-**Why:** all four were live defects in the BSE-3 guard/executor diff and none of
+- **Allowlist bypass probe.** Run each candidate through `guard()` and then
+  through a fresh `sqlite3` connection with `set_authorizer` collecting
+  `SQLITE_READ` table names; accepted + non-allowlisted read = bypass. Confirm by
+  the returned rows: the authorizer reported a `sqlite_master` read for a
+  `count(*)` that actually resolved to a shadowing CTE (BSE-23, false alarm).
+
+**Why:** the first four were live defects in the BSE-3 guard/executor diff and none of
 them are visible from reading the code alone.
 
 **How to apply:** on any diff touching `sql_guard.py`, `executor.py`, or a

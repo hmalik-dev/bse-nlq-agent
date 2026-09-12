@@ -20,6 +20,7 @@ from fastapi.responses import FileResponse, HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, field_validator
 from sqlglot import exp
+from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from nlq import config
 from nlq.agent.agent import INTERNAL_MESSAGE, Agent
@@ -122,6 +123,9 @@ def health() -> dict[str, bool]:
 def create_app(agent: AgentLike | None = None, *, static_dir: Path = config.STATIC_DIR) -> FastAPI:
     """Build the app. With no agent given, one is resolved on the first request."""
     app = FastAPI(title="BSE Insights")
+    # A page that rebinds its own domain to 127.0.0.1 is same-origin to the browser;
+    # its Host header is the one thing that still names it.
+    app.add_middleware(TrustedHostMiddleware, allowed_hosts=config.allowed_hosts())
     app.state.agent = agent
     app.include_router(router)
     if (static_dir / "index.html").is_file():
@@ -174,13 +178,18 @@ def _serve_ui(app: FastAPI, static_dir: Path) -> None:
 
 
 def _static_file(static_dir: Path, path: str) -> Path | None:
-    """The file `path` names inside `static_dir`, or None for anything else (or unresolvable)."""
+    """The file `path` names inside `static_dir`, or None for a client route (or unresolvable).
+
+    A path that resolves outside `static_dir` - `..`, an absolute path, a symlink
+    out - is a 404, not the index: it was never a route in the app.
+    """
     try:
         candidate = (static_dir / path).resolve()
     except (OSError, ValueError):  # a null byte, or a path the OS refuses to resolve
         return None
-    inside = candidate.is_relative_to(static_dir.resolve())
-    return candidate if inside and candidate.is_file() else None
+    if not candidate.is_relative_to(static_dir.resolve()):
+        raise HTTPException(status_code=404)
+    return candidate if candidate.is_file() else None
 
 
 @lru_cache(maxsize=1)

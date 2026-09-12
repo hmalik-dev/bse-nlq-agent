@@ -1,0 +1,4 @@
+# Files copied into every lane worktree. Git-ignored, so a fresh worktree would
+# otherwise start without them and the agent would have no API key and no pinned
+# "today" (see docs/decisions.md, "The seed and the agent share one today").
+.env

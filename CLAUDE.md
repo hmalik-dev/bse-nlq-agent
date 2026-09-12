@@ -12,7 +12,7 @@ and why; add to it whenever you make a new call. Then, for the work at hand:
 | `docs/decisions.md` | every decision made so far, and why the rejected option lost |
 | `docs/data-spec.md` | what the generated data must look like, and the ranges tests assert |
 | `docs/design-brief.md` | brand assets, tokens, screens and states, the API response shape |
-| `docs/backlog.md` | the eight tickets, their acceptance criteria and their dependencies |
+| `docs/backlog.md` | which Linear tickets exist and what order they run in |
 
 ## Commands
 
@@ -55,8 +55,13 @@ goes through `Agent.ask(question) -> AskResult`.
 
 ## Project
 
-- **Tracker**: Linear, project `BSE NLQ`. Tickets are written in `docs/backlog.md`
-  first and created from it. Ready = Todo/Backlog.
+- **Tracker**: Linear team `BSE`, project `BSE NLQ`. Ready = Todo/Backlog. The
+  tickets themselves are the source; `docs/backlog.md` maps them and their order.
+- **Pipeline settings**: `.claude/project.json` — base branch, tracker states,
+  lane settings, verify patterns. CI (`.github/workflows/ci.yml`) is the merge gate.
+- **Verification agents**: `.claude/agents/browser-verifier.md` drives the ask
+  flow in a browser; `.claude/agents/parity-checker.md` compares a screen against
+  its frame in the design canvas.
 - **Lanes**: no lane tooling. There is no database server and no long-running
   service, so a ticket runs in a plain git worktree: `uv sync`, then the commands
   above.

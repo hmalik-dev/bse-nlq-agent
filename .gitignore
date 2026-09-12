@@ -14,3 +14,6 @@ PRESENTATION_NOTES.md
 
 # Editor-local state.
 .vscode/
+
+# Built web assets, produced by the Vite build into the package.
+src/nlq/static/

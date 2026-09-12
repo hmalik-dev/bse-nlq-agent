@@ -75,14 +75,17 @@ The full specification, including what is deliberately not modelled, is in
 
 ## Process
 
-**Tickets live in Linear**, project `BSE NLQ`, written first in `docs/backlog.md`
-so the reasoning behind each one survives outside the tracker. Eight tickets, one
-per concern, sized so each can be implemented unattended and reviewed on its own.
+**Tickets live in Linear**, project `BSE NLQ`, one per concern, sized so each can
+be implemented unattended and reviewed on its own. The tickets carry the
+acceptance criteria; `docs/backlog.md` is the map of which exist and in what
+order. They were drafted in that file first, which is why the early history has
+them there.
 
-**Work order.** The data pass, SQL generation and the SQL guard are independent and
-can run in parallel; orchestration joins them; the API, the interface, the
-evaluation and shipping follow. Nothing about the interface blocks the agent, which
-is the part being graded hardest.
+**Work order.** Pipeline setup comes first and unblocks everything. The data pass
+and the SQL guard are independent of each other and run in parallel; SQL
+generation needs both, orchestration joins them, and the API, the evaluation, the
+interface and shipping follow. Nothing about the interface blocks the agent, which
+is the part being graded hardest. The graph is in `docs/backlog.md`.
 
 **The database is generated, not committed.** `seed.py` builds it relative to the
 current date, so "last month" always has data in it. The seed is deterministic
@@ -104,6 +107,29 @@ those terms are defined, and it is injected into the prompt.
 **Fictional performer names** for concerts and comedy. Real team and venue names
 are used because the exercise's questions need them, but no real artist is shown
 as having played a date they did not play.
+
+**The pipeline is configured in the repo, and CI is the merge gate.**
+`.claude/project.json` binds the Linear team and the base branch; a single GitHub
+Actions job (`uv sync --frozen`, ruff format, ruff check, pytest) runs on every
+pull request. The repository is private on the free plan, where branch protection
+and auto-merge are both paid, so the merge-wait script merges each PR itself once
+that one check is green — without any check it would never merge and every lane
+would time out. Rejected: no CI (nothing ever lands unattended), and a hosted
+runner matrix across Python versions (the app ships in one container on 3.12).
+
+**No lane tooling.** There is no database server, no ports to allocate and no
+long-running service, so a ticket runs in a plain git worktree. The only thing a
+worktree needs that git will not give it is `.env`, which is ignored, so
+`.worktreeinclude` copies it in — otherwise a lane has no API key and no pinned
+`NLQ_TODAY`. Rejected: per-lane databases (nothing to isolate; the SQLite file is
+generated per worktree anyway).
+
+**Parity runs offline, against the canvas committed in the repo.** Because
+`design-plan/BSE Insights.dc.html` ships alongside the app, `parity-checker` can
+compare layout, tokens, typography and chrome copy without calling out to Claude
+Design. Where the canvas and `docs/design-brief.md` disagree on styling, the
+canvas wins. What parity does and does not compare is set out under "The design
+canvas is a style reference, not data" in the Interface section below.
 
 ## Model
 
@@ -149,9 +175,12 @@ Rejected: Streamlit (fast, but every Streamlit app looks the same and a custom
 design cannot be built faithfully), plain HTML (no build step, but hand-rolled
 state handling gets messy at this level of polish).
 
-**Reviewers get a hosted link**, with the API key held server-side under a spend
-cap and a per-visitor rate limit, plus a `docker run` fallback in the README for
-anyone with their own key. Reviewers are not assumed to have an Anthropic account.
+**Reviewers run it locally**, with `docker run` and their own key, documented in
+the README. Hosting it was the original plan — a public link, the key held
+server-side under a spend cap and a per-visitor rate limit — and it is cancelled:
+it costs real money to leave running, and an exposed key is a liability the
+exercise does not need. The spend guard in the API stays, because it is worth
+showing either way.
 
 **BSE branding, on the company's own instruction.** The exercise is meant to mimic
 the internal tools this role would build, so the app is branded as one: the product

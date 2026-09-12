@@ -1,0 +1,27 @@
+{
+  "baseBranch": "main",
+  "tracker": {
+    "type": "linear",
+    "team": "BSE",
+    "project": "BSE NLQ",
+    "states": {
+      "ready": ["Todo", "Backlog"],
+      "inProgress": "In Progress",
+      "done": "Done",
+      "canceled": "Canceled"
+    }
+  },
+  "lane": {
+    "up": null,
+    "exec": null,
+    "down": null,
+    "services": [],
+    "healthcheck": null,
+    "memoryGb": 1,
+    "dockerGb": 0,
+    "maxConcurrent": 3
+  },
+  "verify": {
+    "contentionPattern": null
+  }
+}

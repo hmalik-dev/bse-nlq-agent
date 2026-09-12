@@ -38,6 +38,50 @@ illustrative: event names, categories, numbers, column names and SQL text. The
 running app always shows the real dataset, and design parity is judged on layout,
 tokens, typography and component presence, never on data content.
 
+## Parity source
+
+The design of record is the committed canvas, `design-plan/BSE Insights.dc.html`.
+It is the artefact `parity-checker` compares the running app against, so parity
+runs offline with no call out to Claude Design. It needs `support.js` served
+beside it, so serve the folder over HTTP and never open it over `file://`:
+
+```
+cd design-plan && python3 -m http.server 8000
+# http://localhost:8000/BSE%20Insights.dc.html
+```
+
+Seventeen frames, across four artboards:
+
+| Frame label in the canvas | Viewport |
+|---|---|
+| `01 Ask empty` | 1440 |
+| `02 Thinking` | 1440 |
+| `03 Answer results` | 1440 |
+| `04 Answer chart` | 1440 |
+| `05 Answer SQL` | 1440 |
+| `06 Empty result` | 1440 |
+| `07 Unanswerable` | 1440 |
+| `08 Blocked` | 1440 |
+| `09 Error` | 1440 |
+| `10 Schema drawer` | 1440 |
+| `11 Session history` | 1440 |
+| `12 Ask 1024` | 1024 |
+| `13 Answer 1024` | 1024 |
+| `14 Ask 768` | 768 |
+| `15 Answer 768` | 768 |
+| `16 Ask mobile` | 390 x 844 |
+| `17 Answer mobile` | 390 x 844 |
+
+The canvas sets its type in **Archivo** (display and headings), **Inter** (body)
+and **JetBrains Mono** (SQL, labels and every number), all three from Google
+Fonts. That is what "tight grotesk" above resolves to.
+
+**Where this brief and the canvas disagree on styling, the canvas wins** — it is
+the drawn artefact and the thing parity is measured against. Everything that is
+not styling (the example questions, the API response shape, the accessibility
+rules) is this brief's to decide. Styling is also all parity covers — see "The
+canvas is a style reference" above for the data the checker must never compare.
+
 ## Brand assets
 
 Committed at `web/public/brand/`. Measured, not assumed:

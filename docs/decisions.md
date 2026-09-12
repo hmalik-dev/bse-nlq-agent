@@ -311,8 +311,14 @@ state handling gets messy at this level of polish).
 the README. Hosting it was the original plan — a public link, the key held
 server-side under a spend cap and a per-visitor rate limit — and it is cancelled:
 it costs real money to leave running, and an exposed key is a liability the
-exercise does not need. The spend guard in the API stays, because it is worth
-showing either way.
+exercise does not need. The spend guard planned alongside it (a per-minute
+question limit and a daily dollar budget in a usage file) goes with it: the
+reviewer runs the app with their own key on their own machine, the repair limit
+and the row cap already bound what one question can cost, and a spend cap on the
+key in the Anthropic console is the right outer layer. A locked, atomically
+written, date-rolling usage file to protect a local demo is more code than the
+risk it covers. Rejected: keeping it because it is worth showing (the brief asks
+for an agent, not a billing system).
 
 **BSE branding, on the company's own instruction.** The exercise is meant to mimic
 the internal tools this role would build, so the app is branded as one: the product

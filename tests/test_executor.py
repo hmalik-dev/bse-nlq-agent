@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import sqlite3
 import time
 from datetime import date
@@ -100,6 +101,21 @@ def test_a_missing_database_is_reported_from_run_not_from_the_constructor(
     executor = Executor(tmp_path / "absent.db")
     with pytest.raises(DatabaseMissing):
         executor.run("SELECT 1")
+
+
+def test_a_missing_database_names_the_seed_command_and_logs_the_path_only(
+    tmp_path: Path, caplog: pytest.LogCaptureFixture
+) -> None:
+    missing = tmp_path / "absent.db"
+    with caplog.at_level(logging.WARNING, logger="nlq"), pytest.raises(DatabaseMissing) as raised:
+        Executor(missing).run("SELECT 1")
+
+    assert raised.value.message == "No database found. Create it with: uv run python -m nlq.db.seed"
+    assert str(missing) not in raised.value.message
+    logged = [record for record in caplog.records if record.name == "nlq"]
+    assert len(logged) == 1
+    assert logged[0].levelno == logging.WARNING
+    assert str(missing) in logged[0].getMessage()
 
 
 def test_a_broken_query_carries_sqlites_own_message(db_path: Path) -> None:

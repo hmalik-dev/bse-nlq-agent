@@ -62,6 +62,12 @@ class ModelRateLimited(NlqError):
     code = "rate_limited"
 
 
+class ModelUsageExhausted(NlqError):
+    """The key's credit balance or its spend cap is used up. Expected, not a fault."""
+
+    code = "usage_exhausted"
+
+
 class ModelTimeout(NlqError):
     """The API did not answer in time, or could not be reached at all."""
 

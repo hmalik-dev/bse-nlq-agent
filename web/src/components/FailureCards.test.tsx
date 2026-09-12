@@ -75,6 +75,9 @@ describe("errorCopy", () => {
     expect(errorCopy("query_timeout")).toBe("That question took too long to run. Try narrowing it.");
     expect(errorCopy("repairs_exhausted")).toBe("The generated query kept failing. Try rewording.");
     expect(errorCopy("database_missing")).toContain("uv run python -m nlq.db.seed");
+    expect(errorCopy("usage_exhausted")).toBe(
+      "This demo has used up its usage allowance. Nothing is broken; asking works again once it is topped up.",
+    );
     expect(errorCopy("something_new")).toBe(GENERIC_ERROR);
   });
 });

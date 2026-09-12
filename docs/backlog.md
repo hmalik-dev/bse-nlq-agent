@@ -13,11 +13,11 @@ choices they implement is in `docs/decisions.md`.
 | BSE-3 | SQL guard and read-only executor |
 | BSE-4 | Question to SQL: prompt context, structured SqlPlan, typed errors, fake client |
 | BSE-5 | Agent orchestration: Agent.ask with repair loop, answer writer, AskResult |
-| BSE-6 | HTTP API: /api/ask, /api/schema, /api/examples, spend guard, static serving, fake agent |
+| BSE-6 | HTTP API: /api/ask, /api/schema, /api/examples, static serving, fake agent |
 | BSE-7 | Accuracy evaluation and model choice |
 | BSE-8 | Web interface, part 1: scaffold, design tokens, ask to answer flow, session history |
 | BSE-9 | Web interface, part 2: failure states, schema drawer, responsive layouts, accessibility |
-| BSE-10 | Ship: Dockerfile, startup seed, smoke script, README with local run instructions |
+| BSE-10 | Ship: README with local run instructions, Dockerfile, smoke script |
 | BSE-11 | Ship, part 2: hosted deployment on Fly.io with server-side key and spend cap |
 
 ## Order

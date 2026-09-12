@@ -3,17 +3,14 @@ import { render, screen } from "@testing-library/react";
 import { TraceStrip } from "./TraceStrip";
 import { PipelineSteps, STEP_NAMES } from "./PipelineSteps";
 import { AnswerCard } from "./AnswerCard";
-import { ANSWERED, EMPTY, ERROR, NETS } from "../test-fixtures";
+import { ANSWERED, NETS } from "../test-fixtures";
 
 describe("AnswerCard", () => {
-  it("shows the answer, the error message, or the fixed empty sentence", () => {
-    const { unmount } = render(<AnswerCard result={ANSWERED} />);
+  it("shows the answer in a polite live region with one chip per assumption", () => {
+    render(<AnswerCard result={ANSWERED} />);
     expect(screen.getByText(ANSWERED.answer)).toBeTruthy();
-    unmount();
-    render(<AnswerCard result={ERROR} />);
-    expect(screen.getByText("The model is rate limited right now.")).toBeTruthy();
-    render(<AnswerCard result={EMPTY} />);
-    expect(screen.getByText("No rows matched this question.")).toBeTruthy();
+    expect(screen.getByRole("region", { name: "Answer" }).getAttribute("aria-live")).toBe("polite");
+    expect(screen.getAllByRole("listitem").map((item) => item.textContent)).toEqual(["ASSUMEDRevenue is the face value of sold tickets."]);
   });
 });
 

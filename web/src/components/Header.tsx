@@ -1,25 +1,51 @@
 import type { JSX } from "react";
-export function Header(): JSX.Element {
+import { SCHEMA_TITLE } from "./SchemaDrawer";
+
+type Open = (button: HTMLElement) => void;
+
+interface Props {
+  onOpenSchema: Open;
+  /** Present when the session has history to show; the button only renders below 1024. */
+  onOpenHistory: Open | null;
+}
+
+/** The lockup, the history button on narrow screens, and the button that opens the schema drawer. */
+export function Header({ onOpenSchema, onOpenHistory }: Props): JSX.Element {
   return (
-    <header className="flex h-16 items-center gap-4 border-b border-hairline px-6">
-      <img
-        src="/brand/bse.svg"
-        alt="BSE Global"
-        width={672}
-        height={254}
-        className="block h-7 w-auto"
-      />
+    <header className="flex h-16 items-center gap-3 border-b border-hairline px-4 lg:gap-4 lg:px-6">
+      {onOpenHistory && (
+        <button
+          type="button"
+          aria-label="Open session history"
+          onClick={(event) => onOpenHistory(event.currentTarget)}
+          className="control flex h-9 w-9 items-center justify-center lg:hidden"
+        >
+          <MenuIcon />
+        </button>
+      )}
+      <img src="/brand/bse.svg" alt="BSE Global" width={672} height={254} className="block h-5 w-auto lg:h-7" />
       <div className="h-6 w-px bg-hairline" aria-hidden="true" />
       <span className="font-display text-[17px] font-semibold tracking-[-0.01em]">Insights</span>
       <div className="flex-1" />
-      {/* Part 2 wires this to the schema drawer; until then it is present but inert. */}
       <button
         type="button"
-        aria-disabled="true"
-        className="control h-9 bg-panel px-3.5 text-[13px] font-medium hover:bg-raised"
+        aria-label={SCHEMA_TITLE}
+        onClick={(event) => onOpenSchema(event.currentTarget)}
+        className="control flex h-9 items-center bg-panel px-0 text-[13px] font-medium hover:bg-raised max-lg:w-9 max-lg:justify-center lg:px-3.5"
       >
-        What&rsquo;s in the data?
+        <span aria-hidden="true" className="font-mono text-sm font-semibold lg:hidden">
+          ?
+        </span>
+        <span className="hidden lg:inline">{SCHEMA_TITLE}</span>
       </button>
     </header>
+  );
+}
+
+function MenuIcon(): JSX.Element {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <path d="M2 4h12M2 8h12M2 12h12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
   );
 }

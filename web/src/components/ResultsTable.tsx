@@ -10,6 +10,7 @@ interface Props {
 
 /** A real table. Numbers are right-aligned tabular mono; wide results scroll inside the panel. */
 export function ResultsTable({ columns, rows }: Props): JSX.Element {
+  if (rows.length === 0) return <p className="px-5 py-6 text-sm text-ink-2">No rows to show.</p>;
   const numeric = columns.map((_, index) => isNumericColumn(rows, index));
   const align = (index: number): string => (numeric[index] ? "num" : "text-left");
   return (

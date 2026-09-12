@@ -11,7 +11,7 @@ const LABELS: Record<TabId, string> = { results: "Results", sql: "SQL", chart: "
 /** Results / SQL / Chart with a WAI-ARIA tablist: arrow keys move and select. */
 export function ResultTabs({ result }: { result: AskResult }): JSX.Element {
   const tabs: TabId[] = result.chart ? ["results", "sql", "chart"] : ["results", "sql"];
-  const [active, setActive] = useState<TabId>("results");
+  const [active, setActive] = useState<TabId>(result.rows.length === 0 ? "sql" : "results");
   const buttons = useRef<Map<TabId, HTMLButtonElement>>(new Map());
 
   function handleKey(event: KeyboardEvent<HTMLButtonElement>, index: number): void {

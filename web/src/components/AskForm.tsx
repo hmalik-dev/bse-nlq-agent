@@ -45,7 +45,7 @@ export function AskForm({ value, onChange, onSubmit }: Props): JSX.Element {
       <label htmlFor="question" className="text-[13px] font-medium text-ink-2">
         Your question
       </label>
-      <div className="flex items-stretch gap-3">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-stretch">
         <textarea
           id="question"
           name="question"
@@ -60,7 +60,7 @@ export function AskForm({ value, onChange, onSubmit }: Props): JSX.Element {
         <button
           type="submit"
           disabled={!question}
-          className="h-14 self-start rounded-control bg-accent px-8 text-[15px] font-semibold text-black transition-colors duration-150 hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-accent"
+          className="h-14 rounded-control bg-accent px-8 text-[15px] font-semibold text-black transition-colors duration-150 hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-accent lg:self-start"
         >
           Ask
         </button>

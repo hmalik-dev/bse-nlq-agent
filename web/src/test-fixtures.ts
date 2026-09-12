@@ -1,5 +1,5 @@
 // One AskResult per status, shaped like the fake agent's answers. Test-only.
-import type { AskResult, Trace } from "./types";
+import type { AskResult, Schema, Trace } from "./types";
 
 export const TRACE: Trace = {
   steps: [
@@ -77,7 +77,11 @@ export const UNANSWERABLE: AskResult = {
   rows: [],
   row_count: 0,
   chart: null,
-  suggestions: ["Top 5 event categories by total revenue"],
+  suggestions: [
+    "How many tickets did we sell for Nets home games last month?",
+    "Top 5 event categories by total revenue",
+    "Which 2024 events had the highest average ticket price?",
+  ],
 };
 
 export const BLOCKED: AskResult = {
@@ -94,6 +98,7 @@ export const ERROR: AskResult = {
   status: "error",
   question: "rate limit",
   answer: "",
+  sql: "SELECT COUNT(*) FROM tickets",
   suggestions: [],
   error: { code: "rate_limited", message: "The model is rate limited right now." },
 };
@@ -114,6 +119,18 @@ export const EXAMPLES = [
   { question: "How much revenue did refunds cost us last season?", badge: null },
   { question: "Compare web and box office sales for concerts", badge: null },
 ];
+
+export const SCHEMA: Schema = {
+  tables: ["venues", "teams", "events", "customers", "orders", "tickets"].map((name) => ({
+    name,
+    description: `One row per ${name.slice(0, -1)}.`,
+    columns: [
+      { name: `${name.slice(0, -1)}_id`, type: "INTEGER", description: "Primary key." },
+      { name: "name", type: "TEXT", description: "Display name." },
+    ],
+  })),
+  definitions: ["Revenue is SUM(price) over tickets with status = 'sold'.", "\"Home games\" are events where the home club is a BSE club."],
+};
 
 /** A Response the way fetch would hand it back. */
 export function jsonResponse(body: unknown, status = 200): Response {

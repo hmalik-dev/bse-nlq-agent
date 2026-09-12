@@ -17,7 +17,7 @@ interface Props {
 /** Every question asked this session, newest last, the current one in cyan. React state only. */
 export function HistoryRail({ entries, currentId, onSelect, onNew }: Props): JSX.Element {
   return (
-    <nav aria-label="Session history" className="flex w-60 shrink-0 flex-col gap-3.5 border-r border-hairline px-3 py-5">
+    <nav aria-label="Session history" className="flex flex-col gap-3.5 px-3 py-5">
       <button
         type="button"
         aria-label="New question"

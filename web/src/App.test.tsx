@@ -2,18 +2,25 @@ import { afterEach, describe, expect, it, vi, type Mock } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { App } from "./App";
-import { ANSWERED, EXAMPLES, NETS, jsonResponse } from "./test-fixtures";
+import { ANSWERED, BLOCKED, EMPTY, ERROR, EXAMPLES, NETS, jsonResponse } from "./test-fixtures";
 
 /** Routes /api/examples to the chips and /api/ask to a result picked by keyword, like the fake agent. */
 function stubApi(): Mock {
   const fetchMock = vi.fn((url: string, init?: RequestInit) => {
     if (url === "/api/examples") return Promise.resolve(jsonResponse(EXAMPLES));
     const { question } = JSON.parse(String(init?.body)) as { question: string };
-    const result = /nets/i.test(question) ? NETS : ANSWERED;
+    const result = byKeyword(question);
     return Promise.resolve(jsonResponse({ ...result, question }));
   });
   vi.stubGlobal("fetch", fetchMock);
   return fetchMock;
+}
+
+function byKeyword(question: string) {
+  if (/nothing/i.test(question)) return EMPTY;
+  if (/delete/i.test(question)) return BLOCKED;
+  if (/rate limit/i.test(question)) return ERROR;
+  return /nets/i.test(question) ? NETS : ANSWERED;
 }
 
 const askCalls = (fetchMock: Mock): number =>
@@ -30,7 +37,7 @@ describe("App", () => {
     expect(document.querySelectorAll("[data-badge=nets]")).toHaveLength(1);
     expect(document.querySelectorAll("[data-badge=liberty]")).toHaveLength(1);
     expect((screen.getByRole("button", { name: "Ask" }) as HTMLButtonElement).disabled).toBe(true);
-    expect(screen.getByRole("button", { name: "What’s in the data?" }).getAttribute("aria-disabled")).toBe("true");
+    expect(screen.getByRole("button", { name: "What’s in the data?" }).getAttribute("aria-disabled")).toBeNull();
   });
 
   it("submits an example chip and renders the answer", async () => {
@@ -108,5 +115,75 @@ describe("App", () => {
     expect(screen.queryByLabelText("Your question")).toBeNull();
     resolve(jsonResponse(ANSWERED));
     expect(await screen.findByText(ANSWERED.answer)).toBeTruthy();
+  });
+
+  it("renders the empty state on the SQL tab and asks a suggestion when its chip is clicked", async () => {
+    const user = userEvent.setup();
+    const fetchMock = stubApi();
+    render(<App />);
+    await user.type(await screen.findByLabelText("Your question"), "nothing here{Enter}");
+    expect(await screen.findByRole("heading", { name: "No rows matched this question" })).toBeTruthy();
+    expect(screen.getAllByRole("tab").map((tab) => tab.textContent)).toEqual(["Results", "SQL"]);
+    expect(screen.getByRole("tab", { name: "SQL" }).getAttribute("aria-selected")).toBe("true");
+    await user.click(screen.getByRole("tab", { name: "Results" }));
+    expect(screen.getByText("No rows to show.")).toBeTruthy();
+    await user.click(screen.getByRole("button", { name: "Try a wider date range" }));
+    await screen.findByText(ANSWERED.answer);
+    expect(askCalls(fetchMock)).toBe(2);
+    expect(JSON.parse(String(fetchMock.mock.calls.at(-1)?.[1]?.body))).toEqual({ question: "Try a wider date range" });
+  });
+
+  it("refuses a destructive question without tabs and clears to the ask screen", async () => {
+    const user = userEvent.setup();
+    stubApi();
+    render(<App />);
+    await user.type(await screen.findByLabelText("Your question"), "Delete all ticket records{Enter}");
+    expect(await screen.findByText("REJECTED STATEMENT")).toBeTruthy();
+    expect(screen.queryByRole("tab")).toBeNull();
+    await user.click(screen.getByRole("button", { name: "Ask a different question" }));
+    expect((screen.getByLabelText("Your question") as HTMLTextAreaElement).value).toBe("");
+    expect(screen.getByRole("heading", { name: "Ask anything about ticket sales" })).toBeTruthy();
+  });
+
+  it("keeps the question in the box on an error and Retry asks it again", async () => {
+    const user = userEvent.setup();
+    const fetchMock = stubApi();
+    render(<App />);
+    await user.type(await screen.findByLabelText("Your question"), "rate limit please{Enter}");
+    await screen.findByRole("heading", { name: "Asking is paused until the service responds." });
+    expect((screen.getByLabelText("Your question") as HTMLTextAreaElement).value).toBe("rate limit please");
+    expect(screen.queryByText(ERROR.error?.message ?? "")).toBeNull();
+    expect(screen.queryByRole("tab")).toBeNull();
+    await user.click(screen.getByRole("button", { name: "Retry" }));
+    await screen.findByRole("heading", { name: "Asking is paused until the service responds." });
+    expect(askCalls(fetchMock)).toBe(2);
+    expect(JSON.parse(String(fetchMock.mock.calls.at(-1)?.[1]?.body))).toEqual({ question: "rate limit please" });
+    expect((screen.getByLabelText("Your question") as HTMLTextAreaElement).value).toBe("rate limit please");
+  });
+
+  it("opens the history as a menu from the header button and closes it on selection", async () => {
+    const user = userEvent.setup();
+    stubApi();
+    render(<App />);
+    expect(screen.queryByRole("button", { name: "Open session history" })).toBeNull();
+    await user.click(await screen.findByRole("button", { name: "Top 5 event categories by total revenue" }));
+    await screen.findByText(ANSWERED.answer);
+    await user.click(screen.getByRole("button", { name: "Open session history" }));
+    const menu = screen.getByRole("dialog", { name: "This session" });
+    await user.click(menu.querySelector("li button") as HTMLElement);
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(screen.getByText(ANSWERED.answer)).toBeTruthy();
+  });
+
+  it("opens the schema drawer from the header and returns focus on Esc", async () => {
+    const user = userEvent.setup();
+    stubApi();
+    render(<App />);
+    const opener = await screen.findByRole("button", { name: "What’s in the data?" });
+    await user.click(opener);
+    expect(screen.getByRole("dialog", { name: "What’s in the data?" })).toBeTruthy();
+    await user.keyboard("{Escape}");
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(document.activeElement).toBe(opener);
   });
 });

@@ -2,7 +2,7 @@ import type { JSX } from "react";
 export function Footer(): JSX.Element {
   return (
     <footer className="border-t border-hairline">
-      <div className="mx-auto flex max-w-[1200px] items-center gap-4 px-6 py-5">
+      <div className="mx-auto flex max-w-[1200px] flex-wrap items-center gap-4 px-4 py-5 lg:px-6">
         <img
           src="/brand/barclays-center.svg"
           alt="Barclays Center"

@@ -594,5 +594,44 @@ Nets" and "New York Liberty" are the names the seed writes into `events.name`,
 and the badge is drawn from the text of the rendered cell, so it works for any
 query that returns the event name first and never for one that does not.
 
+**Error wording is one map keyed by `error.code`, and the raw message never
+reaches the screen.** `web/src/error-copy.ts` holds one sentence per code the
+API can send; an unknown code gets "Something went wrong." The server's
+`error.message` is not rendered anywhere, so an `internal` error cannot leak a
+path or an SDK string even if the API's own scrubbing (BSE-12) is imperfect.
+Rejected: showing the message under the heading (it is written for a log, not a
+user, and it is the only place internal detail could surface).
+
+**One slide-over primitive serves the schema drawer and the phone history menu.**
+`SlideOver` owns the backdrop, the dialog role, the focus trap, Esc, and the
+return of focus to the opener; the drawer and the menu are its two children.
+The history menu renders the same `HistoryRail` the desktop shows in its left
+column, so there is one list of questions, not two. Rejected: a second drawer
+with its own focus code (the ticket names it as out of scope, and a copy of a
+focus trap is where keyboard bugs come from).
+
+**The drawer skips the canvas's search box and footer.** Frame 10 draws a
+"Search tables and columns" input and a Barclays footer inside the panel. The
+search would be a feature with no behaviour behind it in this ticket, and the
+footer repeats the page footer twelve pixels away. Both are recorded as parity
+deviations rather than built. Rejected: a decorative disabled search input (a
+control that does nothing is worse than no control).
+
+**An empty result opens on the SQL tab.** Frame 06 draws the SQL tab active
+with a dimmed Results tab, because the useful thing to look at when nothing
+came back is the query. The Results tab stays reachable and says "No rows to
+show." Rejected: opening on Results (an empty table under a card that already
+says no rows matched).
+
+**An error keeps the question in the box, on the answer screen.** Frame 09
+draws the question input under the error card, so Retry and a reworded question
+are both one action away and nothing typed is lost. Every other status clears
+the draft, as part 1 did. Rejected: sending the user back to the ask screen with
+the draft filled in (two screens for one recovery).
+
+**The `<details>` groups open `events` and `tickets` by default**, as frame 10
+draws them: they are the two tables almost every question joins, and the other
+four stay one click away.
+
 **The canvas token `#08080A` replaces the brief's `#0B0B0D`** for the page
 background. The canvas is the drawn artefact and parity is measured against it.

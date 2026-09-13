@@ -25,113 +25,66 @@ docker run --env-file .env -p 127.0.0.1:8000:8000 bse-insights
 
 **One question from the terminal:** `uv run python -m nlq.ask "How many tickets did we sell last month?"` prints the result as JSON.
 
+## How it works
+
+```mermaid
+flowchart LR
+    Q[Question] --> B[Model writes SQL<br/>from the tables, business terms and examples]
+    B --> C[Safety check<br/>reading only]
+    C --> D[Run on a read-only database]
+    C & D -->|failed: retry, at most twice| B
+    D --> E[Model writes the answer<br/>from the rows]
+```
+
+- **It can only read.** A check refuses anything but a single `SELECT`, and the database is opened read-only, so nothing can change the data. Details: [`docs/security.md`](docs/security.md).
+- **It says when it can't answer.** A question the data can't answer, or one asking to change data, gets a plain refusal instead of a guess.
+- **It shows its reading.** An ambiguous question ("revenue" with or without fees?) is answered with the assumption stated, not a question back.
+
 ## Results
 
-- **Accuracy:** Claude Sonnet 5 passed 20/20 golden questions. They include the
-  brief's examples word for word, three writes, two unanswerable questions and
-  three prompt injections.
-- **Cost:** $0.0215 per question on average, with a median latency of 4,510 ms.
-- **Safety:** a SQL guard in front of a read-only connection. Nothing the model
-  writes can change the data.
+- **Accuracy:** Claude Sonnet 5 passed 20/20 test questions, including the brief's examples, three requests to change data, two questions the data can't answer and three prompt injections. Haiku 4.5 scored 16/20.
+- **Cost:** $0.0215 per question on average.
+- **Safety:** every request to change data was refused before anything ran.
 
 | ![The answer on the SQL tab, showing the SELECT the agent wrote](docs/images/answer-sql.png) | ![A request to delete all ticket records, refused before anything ran](docs/images/blocked-write.png) |
 | --- | --- |
 | *The SQL behind that answer.* | *"Delete all ticket records." is refused.* |
 
-## How it works
-
-```mermaid
-flowchart LR
-    UI[Web interface] -->|POST /api/ask| API[FastAPI]
-    API --> A
-    subgraph Agent.ask
-        A[Build context<br/>schema, dictionary, examples, today] --> B[Generate SQL<br/>one model call, structured output]
-        B --> C[Guard<br/>one SELECT, known tables, LIMIT]
-        C --> D[Execute<br/>read-only SQLite, row, byte and time caps]
-        D -->|error, at most twice| B
-        D --> E[Write answer<br/>second model call, rows only]
-    end
-    E --> API --> UI
-```
-
-- **One fixed pipeline, one entry point.** The UI, CLI, evaluation and tests all
-  call `Agent.ask(question) -> AskResult`. It never raises.
-- **Two safety layers.** The guard refuses anything but one `SELECT` over known
-  tables. The connection is opened read-only, so a statement that fools the
-  guard still cannot write. Details: [`docs/security.md`](docs/security.md).
-- **Five statuses, always HTTP 200:** `answered`, `empty` (no rows), `unanswerable`
-  (the data cannot say), `blocked` (refused before it ran) and `error` (with a
-  code the UI turns into one sentence). A malformed question gets a 422.
-- **Bounded cost.** At most three SQL calls and one answer call per question.
-  Every result carries its tokens and dollar cost in `trace`.
+## Key files
 
 | File | What it does |
 |---|---|
-| `src/nlq/agent/agent.py` | The pipeline and the repair loop |
-| `src/nlq/agent/sql_guard.py` | Safety layer one: parse and refuse |
-| `src/nlq/agent/executor.py` | Safety layer two: read-only SQLite with caps |
-| `src/nlq/agent/context.py`, `src/nlq/db/dictionary.yaml`, `src/nlq/agent/examples.yaml` | The prompt: schema, business terms, worked examples |
-| `src/nlq/agent/llm.py`, `src/nlq/agent/answer.py` | The two model calls and the error map |
-| `src/nlq/api.py`, `web/` | The HTTP API and the React interface |
-| `eval/run.py`, `eval/golden.yaml` | The evaluation and the model decision rule |
-
-## Evaluation
-
-Twenty golden questions ran once each against Sonnet 5 and Haiku 4.5 on
-2026-09-12. The rule, fixed first: the cheapest model within one question of the
-best score that gets every refusal right. Haiku scored 16/20, so Sonnet 5 is the
-default. Per-question results: [`docs/eval-results.md`](docs/eval-results.md).
-Rerun with `uv run python -m eval.run` (about $0.59).
-
-## Building without spending tokens
-
-- Tests never call the Anthropic API; a scripted client stands in, so CI is free.
-- `NLQ_FAKE_AGENT=1` serves canned answers for every screen, so the interface was built and browser-tested without a key.
-- `uv run python -m eval.run --fake --out data/fake-eval.md` checks the evaluation harness for free, writing beside that report and never over the committed results.
-- The real evaluation costs about $0.59 a run, so it ran only when the prompt or agent code changed.
-
-## The data
-
-Six tables: `venues`, `teams`, `events`, `customers`, `orders` and `tickets`,
-one row per seat. Three calendar years of Barclays Center home games, concerts
-and shows, about five million tickets at full scale. It is generated relative to
-today, so "last month" always has data. Refunds, comps and fees make "revenue"
-and "tickets sold" ambiguous on purpose; `src/nlq/db/dictionary.yaml` defines
-them. Ranges and quirks: [`docs/data.md`](docs/data.md).
-Delete `data/tickets.db` and run `npm run dev` again to reseed for today.
+| `src/nlq/agent/agent.py` | The steps from question to answer, including the retry |
+| `src/nlq/agent/sql_guard.py` | Refuses any SQL that isn't a single read |
+| `src/nlq/agent/executor.py` | Runs the query on a read-only connection |
+| `src/nlq/db/dictionary.yaml` | What "revenue", "tickets sold" and other business terms mean |
+| `eval/golden.yaml` | The 20 test questions and what counts as right |
 
 ## Tradeoffs
 
-- *Fixed pipeline over a tool-using agent:* testable and bounded, but it needs
-  the schema to fit in the prompt.
-- *One row per seat:* "how many tickets" is a plain `COUNT`, at the cost of a
-  large database that is generated, not committed.
-- *Resolve ambiguity, don't ask:* the model states its reading as assumptions,
-  because there is no conversation to ask in.
-- *SQLite:* nothing to install and a real read-only guarantee; a smaller dialect.
-- *Local, single user:* no auth or rate limit, because the person asking owns the key.
-- *Sonnet over Haiku:* about three times the cost for four more right answers.
+- *Fixed steps, not a free-roaming agent:* predictable and testable, but the whole schema has to fit in the prompt.
+- *SQLite:* nothing to install and a real read-only mode, but a smaller SQL dialect.
+- *Local and single user:* no login or rate limits, because whoever runs it owns the key.
+- *Sonnet 5 over Haiku 4.5:* about three times the cost for four more right answers.
 
-**What I'd do differently**
+## What I'd do differently
 
-- Write the golden questions before the prompt, so they shape it rather than
-  confirm it.
-- Seed small by default from the first commit.
-- Build the interface thinner and later; it took more tickets than the agent.
+- Write the test questions before the prompt, so they push it further instead of checking what it already handles.
+- With more time: databases too big to fit in the prompt, and follow-up questions.
 
-**With more time:** tool-using retrieval for schemas too big for the prompt, attendance
-and scan data, wrong answers fed back as worked examples, and follow-up questions.
+## How it was built
 
-**AI tools used.** [Claude Code](https://claude.com/claude-code) wrote the code,
-tests and docs from tickets. Claude Design drew the mockups in `design-plan/`.
-In the app, Claude Sonnet 5 writes the SQL and the answer.
+[Claude Code](https://claude.com/claude-code) wrote the code, tests and docs from tickets tracked in Linear, and Claude Design drew the mockups in `design-plan/`. Tests, CI and interface work used a stand-in for the model, so they cost nothing; the paid evaluation ran only when the prompt changed.
+
+## The data
+
+Six tables, from venues and events down to one row per ticket: three years of Barclays Center games, concerts and shows, about five million tickets at full size. Refunds, comps and fees make "revenue" ambiguous on purpose.
+Dates are generated relative to today, so "last month" always has data. To reseed for a new day, delete `data/tickets.db` and run `npm run dev` again.
 
 ## Docs
 
 - [`docs/decisions.md`](docs/decisions.md): the choices a reviewer would ask about, and why.
-- [`docs/data.md`](docs/data.md): the dataset, its scale, its quirks and the ranges tests assert.
-- [`docs/design.md`](docs/design.md): brand rules, tokens, screens, states and the API response.
-- [`docs/security.md`](docs/security.md): trust boundaries, controls, tests and accepted risks.
-- [`docs/eval-results.md`](docs/eval-results.md): the latest evaluation, generated by `eval/run.py`.
-
-The work was tracked as tickets in Linear. Settings are in `.env.example`.
+- [`docs/data.md`](docs/data.md): the dataset, its scale and its quirks.
+- [`docs/design.md`](docs/design.md): brand, screens and the API response.
+- [`docs/security.md`](docs/security.md): what could go wrong and what stops it.
+- [`docs/eval-results.md`](docs/eval-results.md): every test question and how each model did.

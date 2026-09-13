@@ -179,6 +179,9 @@ The choices a reviewer would ask about, and why. One entry each: the decision,
 - **One command is the setup; Docker is the only alternative.**
   *Why:* a reviewer should reach a working app without choosing between paths.
   *Rejected:* keeping the manual block, which duplicates `CLAUDE.md` and makes setup look harder than it is.
+- **The README is for the interviewer; detail lives in docs.**
+  *Why:* a reviewer should grasp and run the app in a few minutes, in plain English.
+  *Rejected:* one README serving both reviewers and contributors (latency, fake modes and internal contracts buried the point).
 - **`npm run dev` names a missing uv or Node, or an old Node, and stops; it never installs them.**
   *Why:* one printed line makes the fix obvious without running a remote installer on someone else's machine.
   *Rejected:* installing uv automatically.

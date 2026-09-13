@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type JSX } from "react";
-import { ask, examples as fetchExamples, hasApiKey } from "./api";
-import type { AskResult, ExampleQuestion } from "./types";
+import { ask, examples as fetchExamples, health as fetchHealth } from "./api";
+import type { AskResult, ExampleQuestion, Health } from "./types";
 import { Header } from "./components/Header";
 import { Footer } from "./components/Footer";
 import { AskForm } from "./components/AskForm";
@@ -23,15 +23,15 @@ export function App(): JSX.Element {
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [screen, setScreen] = useState<Screen>({ kind: "ask" });
   const [panel, setPanel] = useState<Panel>(null);
-  const [apiKey, setApiKey] = useState<boolean | null>(null); // null until /api/health answers
+  const [health, setHealth] = useState<Health | null | undefined>(undefined); // undefined until /api/health answers, null if it fails
   const schema = useSchema(panel?.kind === "schema");
   const nextId = useRef(1);
 
   useEffect(() => {
     let cancelled = false;
-    void hasApiKey().then((present) => {
-      if (!cancelled) setApiKey(present);
-    }); // hasApiKey never rejects
+    void fetchHealth().then((result) => {
+      if (!cancelled) setHealth(result);
+    }); // fetchHealth never rejects
     return () => {
       cancelled = true;
     };
@@ -84,6 +84,7 @@ export function App(): JSX.Element {
 
   const current = screen.kind === "answer" ? history.find((entry) => entry.id === screen.id) : undefined;
   const showRail = history.length > 0 && screen.kind !== "thinking";
+  const needsKey = health?.api_key === false; // a failed check counts as a key: asking then reports its own error
   const rail = (
     <HistoryRail
       entries={history}
@@ -105,26 +106,29 @@ export function App(): JSX.Element {
       />
       <div className="flex flex-1">
         {showRail && <div className="hidden w-60 shrink-0 border-r border-hairline lg:block">{rail}</div>}
-        <main className="min-w-0 flex-1">
-          {screen.kind === "ask" && apiKey === false && <SetupScreen />}
-          {screen.kind === "ask" && apiKey === true && (
-            <AskScreen draft={draft} examples={examples} onChange={setDraft} onSubmit={submit} onPick={pick} />
-          )}
-          {screen.kind === "thinking" && <ThinkingScreen question={screen.question} />}
-          {current && (
-            <AnswerScreen
-              key={current.id}
-              result={current.result}
-              draft={draft}
-              onChange={setDraft}
-              onSubmit={submit}
-              onPick={pick}
-              onReset={reset}
-            />
-          )}
-        </main>
+        {/* The footer shares the content column, so with the rail it sits beside the rail, not under it. */}
+        <div className="flex min-w-0 flex-1 flex-col">
+          <main className="flex-1">
+            {screen.kind === "ask" && health && needsKey && <SetupScreen database={health.database} />}
+            {screen.kind === "ask" && health !== undefined && !needsKey && (
+              <AskScreen draft={draft} examples={examples} onChange={setDraft} onSubmit={submit} onPick={pick} />
+            )}
+            {screen.kind === "thinking" && <ThinkingScreen question={screen.question} />}
+            {current && (
+              <AnswerScreen
+                key={current.id}
+                result={current.result}
+                draft={draft}
+                onChange={setDraft}
+                onSubmit={submit}
+                onPick={pick}
+                onReset={reset}
+              />
+            )}
+          </main>
+          <Footer />
+        </div>
       </div>
-      <Footer />
       {panel?.kind === "schema" && <SchemaDrawer state={schema} opener={panel.opener} onClose={() => setPanel(null)} />}
       {panel?.kind === "history" && (
         <SlideOver

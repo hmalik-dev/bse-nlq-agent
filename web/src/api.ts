@@ -28,13 +28,12 @@ export async function schema(): Promise<Schema> {
   return getJson<Schema>(`${API}/schema`);
 }
 
-/** Whether the server has an API key. A failed check counts as yes: asking then reports its own error. */
-export async function hasApiKey(): Promise<boolean> {
+/** Whether the server has its database and an API key, or null when the check fails: asking then reports its own error. */
+export async function health(): Promise<Health | null> {
   try {
-    const health = await getJson<Health>(`${API}/health`);
-    return health.api_key;
+    return await getJson<Health>(`${API}/health`);
   } catch {
-    return true;
+    return null;
   }
 }
 

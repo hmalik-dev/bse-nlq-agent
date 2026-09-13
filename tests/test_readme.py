@@ -23,28 +23,55 @@ def summary_rows() -> dict[str, list[str]]:
     }
 
 
+README_SECTIONS = [
+    "Run it locally",
+    "Other ways to run",
+    "How it works",
+    "Results",
+    "Key files",
+    "Tradeoffs",
+    "What I'd do differently",
+    "How it was built",
+    "The data",
+    "Docs",
+]
+CONTRIBUTOR_DETAIL = (
+    "median latency",
+    "never raises",
+    "AskResult",
+    "NLQ_FAKE_AGENT",
+    "--fake",
+    "HTTP 200",
+    "Seed small",
+    "thinner and later",
+)
+
+
+def test_the_readme_is_short_and_follows_the_interviewer_outline() -> None:
+    assert len(README.splitlines()) <= 90
+    headings = [line[3:] for line in README.splitlines() if line.startswith("## ")]
+    assert headings == README_SECTIONS
+
+
+def test_the_readme_leaves_contributor_detail_to_the_docs() -> None:
+    assert [detail for detail in CONTRIBUTOR_DETAIL if detail in README] == []
+
+
 def test_the_summary_quotes_each_models_score_and_leaves_the_table_to_the_report() -> None:
     rows = summary_rows()
     assert list(rows) == ["claude-sonnet-5", "claude-haiku-4-5"]
-    assert f"Claude Sonnet 5 passed {rows['claude-sonnet-5'][1]} golden questions" in README
-    assert f"Haiku scored {rows['claude-haiku-4-5'][1]}" in README
+    assert f"Claude Sonnet 5 passed {rows['claude-sonnet-5'][1]} test questions" in README
+    assert f"Haiku 4.5 scored {rows['claude-haiku-4-5'][1]}" in README
     assert SUMMARY_ROW.search(README) is None
 
 
-def test_the_headline_quotes_the_chosen_models_mean_cost_and_latency() -> None:
-    _, _, _, latency, mean_cost, _ = summary_rows()["claude-sonnet-5"]
-    assert (
-        f"- **Cost:** {mean_cost} per question on average, with a median latency of {latency}."
-        in README
-    )
+def test_the_headline_quotes_the_chosen_models_mean_cost() -> None:
+    mean_cost = summary_rows()["claude-sonnet-5"][4]
+    assert f"- **Cost:** {mean_cost} per question on average." in README
 
 
 def test_every_dollar_figure_comes_from_the_latest_evaluation_run() -> None:
-    rows = summary_rows().values()
-    rerun_cost = sum(float(cells[5].lstrip("$")) for cells in rows)
-    allowed = set(DOLLAR_FIGURE.findall(EVAL_RESULTS)) | {f"${rerun_cost:.2f}"}
-    assert set(DOLLAR_FIGURE.findall(README)) <= allowed
-    assert f"about ${rerun_cost:.2f}" in README
+    assert set(DOLLAR_FIGURE.findall(README)) <= set(DOLLAR_FIGURE.findall(EVAL_RESULTS))
 
 
 def test_every_path_the_readme_names_exists() -> None:
@@ -104,15 +131,6 @@ def test_every_setup_command_is_one_claude_md_or_the_scripts_also_use() -> None:
 def test_the_readme_drops_the_manual_run_block_and_the_smoke_script() -> None:
     assert "Without `npm run dev`" not in README
     assert "scripts/smoke.sh" not in README
-
-
-def test_building_without_spending_tokens_covers_each_fake_and_the_real_cost() -> None:
-    lines = section("Building without spending tokens")
-    assert len(lines) <= 6
-    text = "\n".join(lines)
-    for mention in ("Tests never call the Anthropic API", "`NLQ_FAKE_AGENT=1`", "--fake", "$0.59"):
-        assert mention in text
-    assert README.index("## Evaluation") < README.index("## Building without spending tokens")
 
 
 def test_the_decisions_record_the_fakes_exactly_once() -> None:

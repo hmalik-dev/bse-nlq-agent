@@ -7,6 +7,7 @@ import os
 from datetime import date
 from pathlib import Path
 
+import anthropic
 import pytest
 import yaml
 from fastapi.testclient import TestClient
@@ -16,7 +17,6 @@ from nlq.agent.agent import INTERNAL_MESSAGE, Agent
 from nlq.agent.answer import AnswerWriter
 from nlq.agent.context import build_context
 from nlq.agent.executor import Executor
-from nlq.agent.fake import FakeAgent
 from nlq.agent.llm import SqlWriter
 from nlq.agent.models import AskResult, ErrorInfo, SqlPlan, Trace
 from nlq.api import app, create_app
@@ -46,6 +46,7 @@ MAX_DEFINITION_CHARS = 90
 MAX_DEFINITIONS = 8
 QUESTION = "How many tickets did we sell last month?"
 LOCAL_URL = "http://127.0.0.1:8000"
+REAL_FROM_ENV = Agent.from_env
 
 
 class StubAgent:
@@ -69,13 +70,12 @@ def result(status: str, **fields: object) -> AskResult:
 
 @pytest.fixture(autouse=True)
 def no_real_agent(monkeypatch: pytest.MonkeyPatch) -> None:
-    """No test may build a real agent; the fake or a stub stands in."""
+    """No test may build a real agent; a stub stands in."""
 
     def refuse(*args: object, **kwargs: object) -> None:
         raise AssertionError("Agent.from_env must not be called in a test")
 
     monkeypatch.setattr(Agent, "from_env", refuse)
-    monkeypatch.delenv("NLQ_FAKE_AGENT", raising=False)
     monkeypatch.delenv("NLQ_MAX_QUESTION_CHARS", raising=False)
     monkeypatch.delenv("NLQ_ALLOWED_HOSTS", raising=False)
 
@@ -154,7 +154,7 @@ def test_the_allowed_hosts_are_read_from_the_environment(
 
 
 @pytest.mark.parametrize(
-    "canned",
+    "expected",
     [
         result("answered", answer="Five.", columns=["n"], rows=[[5]], row_count=1),
         result("empty", sql="SELECT 1", suggestions=["Try a wider date range."]),
@@ -162,15 +162,17 @@ def test_the_allowed_hosts_are_read_from_the_environment(
         result("blocked", answer="Refused.", sql="DELETE FROM tickets"),
         result("error", error=ErrorInfo(code="rate_limited", message="Slow down.")),
     ],
-    ids=lambda canned: canned.status,
+    ids=lambda expected: expected.status,
 )
-def test_ask_returns_200_with_the_result_for_every_status(canned: AskResult, unbuilt: Path) -> None:
-    agent = StubAgent(canned)
+def test_ask_returns_200_with_the_result_for_every_status(
+    expected: AskResult, unbuilt: Path
+) -> None:
+    agent = StubAgent(expected)
 
     response = client(agent, unbuilt).post("/api/ask", json={"question": QUESTION})
 
     assert response.status_code == 200
-    assert response.json() == canned.model_dump()
+    assert response.json() == expected.model_dump()
     assert set(response.json()) == RESULT_KEYS
     assert agent.questions == [QUESTION]
 
@@ -331,17 +333,33 @@ def test_health_reports_whether_the_database_file_exists(
     monkeypatch.setenv("NLQ_DATABASE_PATH", str(database))
     api = client(StubAgent(), unbuilt)
 
-    assert api.get("/api/health").json() == {"ok": True, "database": False, "fake": False}
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    assert api.get("/api/health").json() == {"ok": True, "database": False, "api_key": False}
 
     database.write_bytes(b"")
     response = api.get("/api/health")
     assert response.status_code == 200
-    assert response.json() == {"ok": True, "database": True, "fake": False}
+    assert response.json() == {"ok": True, "database": True, "api_key": False}
 
 
-def test_health_reports_fake_mode(monkeypatch: pytest.MonkeyPatch, unbuilt: Path) -> None:
-    monkeypatch.setenv("NLQ_FAKE_AGENT", "1")
-    assert client(StubAgent(), unbuilt).get("/api/health").json()["fake"] is True
+@pytest.mark.parametrize(
+    ("value", "expected"), [("", False), ("   ", False), ("sk-ant-test-123", True)]
+)
+def test_health_reports_whether_a_key_is_set_and_never_the_key(
+    monkeypatch: pytest.MonkeyPatch, unbuilt: Path, value: str, expected: bool
+) -> None:
+    monkeypatch.setenv("ANTHROPIC_API_KEY", value)
+    response = client(StubAgent(), unbuilt).get("/api/health")
+    assert response.json()["api_key"] is expected
+    if value.strip():
+        assert value not in response.text
+
+
+def test_health_reports_no_key_when_the_variable_is_unset(
+    monkeypatch: pytest.MonkeyPatch, unbuilt: Path
+) -> None:
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    assert client(StubAgent(), unbuilt).get("/api/health").json()["api_key"] is False
 
 
 def test_the_root_is_a_page_naming_the_three_ways_forward_when_there_is_no_build(
@@ -361,14 +379,14 @@ def test_the_root_is_a_page_naming_the_three_ways_forward_when_there_is_no_build
 def test_the_api_routes_answer_the_same_with_and_without_a_build(
     tmp_path: Path, built: Path
 ) -> None:
-    canned = result("answered", answer="Five.", columns=["n"], rows=[[5]], row_count=1)
-    without = client(StubAgent(canned), tmp_path / "missing")
-    with_build = client(StubAgent(canned), built)
+    answered = result("answered", answer="Five.", columns=["n"], rows=[[5]], row_count=1)
+    without = client(StubAgent(answered), tmp_path / "missing")
+    with_build = client(StubAgent(answered), built)
     for path in ("/api/examples", "/api/schema", "/api/health"):
         assert without.get(path).json() == with_build.get(path).json(), path
     body = {"question": QUESTION}
     asked = [api.post("/api/ask", json=body).json() for api in (without, with_build)]
-    assert asked[0] == asked[1] == canned.model_dump()
+    assert asked[0] == asked[1] == answered.model_dump()
     assert without.get("/").text != with_build.get("/").text
 
 
@@ -431,17 +449,21 @@ def test_a_path_the_filesystem_cannot_resolve_gets_the_index_not_a_500(built: Pa
     assert response.text == built.joinpath("index.html").read_text()
 
 
-def test_the_fake_agent_is_used_when_the_flag_is_set(
+def test_ask_without_a_key_is_the_missing_key_error_and_builds_no_client(
     monkeypatch: pytest.MonkeyPatch, unbuilt: Path
 ) -> None:
-    monkeypatch.setenv("NLQ_FAKE_AGENT", "1")
-    api = client(None, unbuilt)
+    monkeypatch.setattr(Agent, "from_env", REAL_FROM_ENV)
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    clients: list[object] = []
+    monkeypatch.setattr(anthropic, "Anthropic", lambda *args, **kwargs: clients.append(args))
 
-    body = api.post("/api/ask", json={"question": "Delete all ticket records"}).json()
+    response = client(None, unbuilt).post("/api/ask", json={"question": QUESTION})
 
-    assert body["status"] == "blocked"
-    assert body["sql"] == "DELETE FROM tickets"
-    assert isinstance(api.app.state.agent, FakeAgent)
+    assert response.status_code == 200
+    body = response.json()
+    assert body["status"] == "error"
+    assert body["error"]["code"] == "missing_api_key"
+    assert clients == []
 
 
 def test_the_real_agent_is_built_on_the_first_request_not_at_import(

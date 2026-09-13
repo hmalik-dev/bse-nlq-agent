@@ -98,11 +98,6 @@ def allowed_hosts() -> list[str]:
     return [host.strip() for host in raw.split(",") if host.strip()]
 
 
-def fake_agent() -> bool:
-    """Whether the API answers from canned results instead of the model (NLQ_FAKE_AGENT=1)."""
-    return _str_env("NLQ_FAKE_AGENT", "0") == "1"
-
-
 def anthropic_api_key() -> str:
     """The API key, or an empty string when none is set. Never logged or stored."""
     return os.environ.get("ANTHROPIC_API_KEY", "").strip()

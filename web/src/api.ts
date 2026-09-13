@@ -1,4 +1,4 @@
-import type { AskResult, ExampleQuestion, Schema } from "./types";
+import type { AskResult, ExampleQuestion, Health, Schema } from "./types";
 
 const API = "/api";
 const NETWORK_MESSAGE = "Could not reach the server. Check that it is running and try again.";
@@ -26,6 +26,16 @@ export async function examples(): Promise<ExampleQuestion[]> {
 /** The tables, columns and business definitions for the schema drawer. */
 export async function schema(): Promise<Schema> {
   return getJson<Schema>(`${API}/schema`);
+}
+
+/** Whether the server has an API key. A failed check counts as yes: asking then reports its own error. */
+export async function hasApiKey(): Promise<boolean> {
+  try {
+    const health = await getJson<Health>(`${API}/health`);
+    return health.api_key;
+  } catch {
+    return true;
+  }
 }
 
 async function getJson<T>(url: string): Promise<T> {

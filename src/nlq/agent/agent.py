@@ -198,7 +198,7 @@ def example_questions(examples: tuple[Example, ...]) -> list[str]:
     return list(answerable)[:SUGGESTION_COUNT]
 
 
-# What an empty result offers with the shipped worked examples; the fake agent shows it too.
+# What an empty result offers with the shipped worked examples.
 EMPTY_SUGGESTIONS = example_questions(load_examples())
 
 

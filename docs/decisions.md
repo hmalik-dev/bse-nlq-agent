@@ -197,3 +197,10 @@ The choices a reviewer would ask about, and why. One entry each: the decision,
 - **Tickets live in Linear; CI is the merge gate.**
   *Why:* each ticket carries its acceptance criteria and was built and reviewed on its own.
   *Rejected:* a backlog file in the repo (it drifted from the tracker).
+- **A total row names what it totals.** The prompt asks a total row to lead with each value
+  the question filters on (year, season, club, category); the scorer drops extra leading
+  columns that hold one value in every row; a lone column is left-aligned.
+  *Why:* a lone number with a blank left column reads as a broken table.
+  *Rejected:* a UI-only fix (the table can't know the filter value); adding label columns to
+  every golden reference (it would pin the model's alias and type choices). The accuracy report
+  predates this rule; it was spot-checked, not re-run.

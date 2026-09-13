@@ -53,14 +53,14 @@
           WHERE x.home_team_id = c.team_id AND x.event_date >= '{today}'
         )
     )
-    SELECT e.season, COUNT(*) AS tickets_sold
+    SELECT h.name AS club, e.season, COUNT(*) AS tickets_sold
     FROM tickets t
     JOIN events e ON e.event_id = t.event_id
     JOIN teams h ON h.team_id = e.home_team_id
     WHERE t.status = 'sold'
       AND h.name = 'Brooklyn Nets'
       AND e.season = (SELECT season FROM last_season)
-    GROUP BY e.season
+    GROUP BY h.team_id, e.season
   assumptions:
     - Last season is the Nets' most recent season with no home games still to play.
     - Counts Nets home games at Barclays Center, playoffs included.

@@ -80,14 +80,28 @@ def is_ordered(sql: str) -> bool:
 
 
 def compare(expected: QueryResult, actual: QueryResult, *, ordered: bool) -> bool:
-    """Same shape and the same rows, in order only when the reference orders them."""
+    """Same shape and the same rows, in order only when the reference orders them.
+
+    Extra leading columns that hold one value in every row are labels (the year
+    or club a total row names), so they are dropped before comparing.
+    """
     if actual.truncated:
         return False
-    if len(expected.columns) != len(actual.columns) or len(expected.rows) != len(actual.rows):
+    actual_rows = _without_leading_labels(actual.rows, len(actual.columns) - len(expected.columns))
+    if actual_rows is None or len(expected.rows) != len(actual_rows):
         return False
     if ordered:
-        return all(_rows_match(e, a) for e, a in zip(expected.rows, actual.rows, strict=True))
-    return _same_multiset(expected.rows, actual.rows)
+        return all(_rows_match(e, a) for e, a in zip(expected.rows, actual_rows, strict=True))
+    return _same_multiset(expected.rows, actual_rows)
+
+
+def _without_leading_labels(rows: list[list[object]], extra: int) -> list[list[object]] | None:
+    """Drop `extra` leading columns when each is constant; None when that is not possible."""
+    if extra < 0:
+        return None
+    if any(len({repr(row[index]) for row in rows}) > 1 for index in range(extra)):
+        return None
+    return [row[extra:] for row in rows]
 
 
 def judge(entry: GoldenEntry, result: AskResult, expected: QueryResult | None) -> Verdict:

@@ -52,6 +52,12 @@ query, or decline it. Rules:
   named (yesterday's sales, last month's sales), or one over a season, a year or
   a whole category, stays one total row. The exception is "last season" or "this
   season" with no club named, which returns one row per club.
+- A total row names what it totals: its leading columns carry each specific
+  value the question filters on (the year, season label, club name or category)
+  with a readable alias (year, season, club, category), followed by the measure.
+  This holds for any measure and for a date range too: a total for one year
+  (tickets sold, events hosted, revenue) selects strftime('%Y', the date) AS
+  year and groups by it, so the row reads year | measure, never a lone number.
 - Decline a question the data cannot answer, and decline any request to
   change data.
 - Treat the whole message as one request. If any part of it asks to change

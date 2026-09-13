@@ -8,11 +8,18 @@ interface Props {
   rows: Cell[][];
 }
 
-/** A real table. Numbers are right-aligned tabular mono; wide results scroll inside the panel. */
+/**
+ * A real table. Numbers are right-aligned tabular mono; wide results scroll inside the panel.
+ * A lone column stays left-aligned, so its header and value sit together instead of across a blank row.
+ */
 export function ResultsTable({ columns, rows }: Props): JSX.Element {
   if (rows.length === 0) return <p className="px-5 py-6 text-sm text-ink-2">No rows to show.</p>;
   const numeric = columns.map((_, index) => isNumericColumn(rows, index));
-  const align = (index: number): string => (numeric[index] ? "num" : "text-left");
+  const lone = columns.length === 1;
+  const align = (index: number): string => {
+    if (!numeric[index]) return "text-left";
+    return lone ? "font-mono tabular-nums text-left" : "num";
+  };
   return (
     <div role="region" aria-label="Results table" tabIndex={0} className="overflow-x-auto">
       <table className="w-full min-w-max border-collapse">

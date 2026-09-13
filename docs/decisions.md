@@ -37,7 +37,7 @@ The choices a reviewer would ask about, and why. One entry each: the decision,
   *Rejected:* an `NLQ_TODAY` override (a pinned demo goes stale and disagrees with its seed).
 - **Injection is handled in the prompt: a message is one request, and any write declines all of it.**
   *Why:* the guard and read-only connection already make writes impossible (BSE-21).
-  *Rejected:* an input sanitiser or injection classifier (a second model and a denylist).
+  *Rejected:* an input sanitizer or injection classifier (a second model and a denylist).
 
 ## Safety
 
@@ -140,16 +140,13 @@ The choices a reviewer would ask about, and why. One entry each: the decision,
 - **Real team and venue names; fictional performers.**
   *Why:* the questions need the teams, and no real artist should appear to play a date they did not.
   *Rejected:* real artist names.
-- **US English; the operator's sides are teams, everywhere, including `teams.is_home_team`.**
-  The one other word for a side survives only as a seat tier name, an arena seating level. The
-  drawer's definitions are whole sentences. A database seeded before the rename must be reseeded
-  (delete `data/tickets.db`, then `npm run dev`); there is no migration.
-  *Why:* the brief and its reader are American, and the model echoes the prompt's words back in
-  its answers and assumptions.
-  *Rejected:* keeping the old column name (the model reads column names too); renaming the seat
-  tier (it is a real Barclays seating level, not a team); a migration or startup check for a
-  synthetic, regenerated file. The accuracy report predates the wording change until its next
-  full run; a capped eight-question run in the browser checked it instead.
+- **US English: the operator's sides are teams everywhere, including `teams.is_home_team`.**
+  "Club" survives only as a seat tier, a real Barclays seating level. A database seeded before
+  the rename must be reseeded (delete `data/tickets.db`, then `npm run dev`).
+  *Why:* the brief and its reader are American, and the model echoes the prompt's words in its answers.
+  *Rejected:* keeping the old column name (the model reads column names too); a migration for a
+  synthetic, regenerated file. The accuracy report predates the rename; eight questions were
+  re-asked in the browser instead.
 
 ## Interface
 
@@ -198,9 +195,9 @@ The choices a reviewer would ask about, and why. One entry each: the decision,
 - **`npm run dev` names a missing uv or Node, or an old Node, and stops; it never installs them.**
   *Why:* one printed line makes the fix obvious without running a remote installer on someone else's machine.
   *Rejected:* installing uv automatically.
-- **The app runs only against the real model; a missing key is a setup screen.** `npm run dev` and `scripts/smoke.sh` stop with one line; the interface shows "API key required" from `/api/health`. The tests' scripted client and the evaluation's `--fake` stay: neither reaches a user.
+- **The app runs only against the real model; a missing key is a setup screen.** `npm run dev` and `scripts/smoke.sh` stop with one line; the interface shows "API key required" from `/api/health`. The tests' scripted client and `eval --fake` stay, since neither reaches a user.
   *Why:* a made-up answer shown to a new user reads as a wrong answer from the real agent.
-  *Rejected:* keeping the fake agent behind a flag (it was reachable by skipping one setup step); intercepting `/api/ask` in browser checks (it tests the mock, so they use the real key, capped at three questions).
+  *Rejected:* a fake agent behind a flag (reachable by skipping one setup step); mocking `/api/ask` in browser checks (that tests the mock, so they use the real key, capped at three questions).
 - **Quickstart seeds at `--scale 0.2`; full scale stays the default.**
   *Why:* a million tickets seed in seconds and answer every example question.
   *Rejected:* a smaller default (every documented figure would change).
@@ -211,9 +208,9 @@ The choices a reviewer would ask about, and why. One entry each: the decision,
   *Why:* each ticket carries its acceptance criteria and was built and reviewed on its own.
   *Rejected:* a backlog file in the repo (it drifted from the tracker).
 - **A total row names what it totals.** The prompt asks a total row to lead with each value
-  the question filters on (year, season, team, category); the scorer drops extra leading
+  the question filters on (year, season, team, category); the scorer ignores extra leading
   columns that hold one value in every row; a lone column is left-aligned.
-  *Why:* a lone number with a blank left column reads as a broken table.
-  *Rejected:* a UI-only fix (the table can't know the filter value); adding label columns to
-  every golden reference (it would pin the model's alias and type choices). The accuracy report
+  *Why:* a lone number beside a blank column reads as a broken table.
+  *Rejected:* a UI-only fix (the table can't know the filter value); label columns in every
+  golden reference (they would pin the model's alias and type choices). The accuracy report
   predates this rule; it was spot-checked, not re-run.

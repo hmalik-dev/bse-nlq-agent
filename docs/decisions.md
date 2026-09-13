@@ -155,6 +155,9 @@ The choices a reviewer would ask about, and why. One entry each: the decision,
 - **Two layouts, not four.**
   *Why:* it is reviewed on a laptop; one narrow layout proves it works on a phone.
   *Rejected:* 1024 and 768 layouts and an icon rail (hours of CSS nobody will see).
+- **The footer closes the content column, and the setup screen shows the `.env` line.** Below 1024 the example questions stack as rows (BSE-34, from the updated canvas).
+  *Why:* a full-width footer under the rail read as detached; a phone row of cramped chips hid the questions; the `.env` line is what a new user copies.
+  *Rejected:* a footer that moves only when history exists (two placements to test for one look); a separate 768 layout (two layouts, not four).
 - **One chart type: horizontal bars, offered only for one label and one number over 2–25 rows.**
   *Why:* every chart the agent offers is category against number; a line would imply a trend.
   *Rejected:* a chart-type picker; asking the model to choose.

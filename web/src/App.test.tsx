@@ -36,8 +36,8 @@ describe("App", () => {
     stubApi({ ...HEALTH, api_key: false });
     render(<App />);
     expect(await screen.findByRole("heading", { name: "API key required" })).toBeTruthy();
-    expect(screen.getByText(/then restart the server/).textContent).toBe(
-      "Add ANTHROPIC_API_KEY to the .env file in the project folder, then restart the server.",
+    expect(screen.getByText(/^GET \/api\/health/).textContent?.trim()).toBe(
+      "GET /api/health · api_key: false · database: ok",
     );
     await waitFor(() => expect(screen.queryAllByRole("listitem")).toHaveLength(0));
     expect(screen.queryByLabelText("Your question")).toBeNull();
@@ -118,6 +118,32 @@ describe("App", () => {
 
     await user.click(screen.getByRole("button", { name: "New question" }));
     expect(screen.getByRole("heading", { name: "Ask anything about ticket sales" })).toBeTruthy();
+  });
+
+  it("puts the footer in the content column beside the rail, under the answer", async () => {
+    const user = userEvent.setup();
+    stubApi();
+    render(<App />);
+    await user.click(await screen.findByRole("button", { name: "Top 5 event categories by total revenue" }));
+    await screen.findByText(ANSWERED.answer);
+
+    const footer = screen.getByAltText("Barclays Center").closest("footer") as HTMLElement;
+    const rail = screen.getByRole("navigation", { name: "Session history" });
+    expect(footer.parentElement).toBe(screen.getByRole("main").parentElement);
+    expect(footer.parentElement?.contains(rail)).toBe(false);
+    expect(footer.parentElement?.parentElement?.contains(rail)).toBe(true);
+  });
+
+  it("shows the ask screen when the health check fails, so asking reports the real error", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((url: string) =>
+        url === "/api/examples" ? Promise.resolve(jsonResponse(EXAMPLES)) : Promise.reject(new TypeError("offline")),
+      ),
+    );
+    render(<App />);
+    expect(await screen.findByLabelText("Your question")).toBeTruthy();
+    expect(screen.queryByRole("heading", { name: "API key required" })).toBeNull();
   });
 
   it("renders markup in a question, the answer and a cell as text in the answer, table and rail", async () => {

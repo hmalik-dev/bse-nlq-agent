@@ -1,20 +1,26 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { ask, examples, hasApiKey, schema } from "./api";
+import { ask, examples, health, schema } from "./api";
 import { BY_STATUS, EXAMPLES, HEALTH, jsonResponse } from "./test-fixtures";
 
 afterEach(() => vi.unstubAllGlobals());
 
-describe("hasApiKey", () => {
-  it.each([true, false])("reads api_key %s from /api/health", async (present) => {
-    const fetchMock = vi.fn().mockResolvedValue(jsonResponse({ ...HEALTH, api_key: present }));
+describe("health", () => {
+  it.each([true, false])("reads api_key %s and the database flag from /api/health", async (present) => {
+    const body = { ok: true, database: false, api_key: present };
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse(body));
     vi.stubGlobal("fetch", fetchMock);
-    expect(await hasApiKey()).toBe(present);
+    expect(await health()).toEqual(body);
     expect(fetchMock).toHaveBeenCalledWith("/api/health");
   });
 
-  it("assumes a key when the health check fails, so asking reports the real error", async () => {
+  it("is null when the health check fails, so the app shows the ask screen and asking reports the real error", async () => {
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new TypeError("Failed to fetch")));
-    expect(await hasApiKey()).toBe(true);
+    expect(await health()).toBeNull();
+  });
+
+  it("is null when the server answers with an error status", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(jsonResponse(HEALTH, 500)));
+    expect(await health()).toBeNull();
   });
 });
 

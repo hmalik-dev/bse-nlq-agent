@@ -7,7 +7,10 @@ states and the API response. Why it looks this way is in `docs/decisions.md`.
 
 **BSE Insights**, an internal tool for Brooklyn Sports & Entertainment. The header
 lockup is the BSE wordmark, a hairline divider and the word "Insights". The footer
-carries a small `Demo · synthetic data` pill.
+is one row: the Barclays Center mark, "Events at Barclays Center, 2024 to today" and a
+small `Demo · synthetic data` pill. It closes the content column, so beside the
+session rail it starts at the rail's edge, and it sits at the bottom of a short screen.
+In the one-column layout it shortens to "Barclays Center, 2024 to today" and `Demo`.
 
 ## Brand assets
 
@@ -55,19 +58,20 @@ The six chips on the ask screen, in order, served by `GET /api/examples` from
 | Frame | Screen | What it shows |
 |---|---|---|
 | 01 | Ask, empty | Lockup, question input, six chips, "What's in the data?", footer |
-| — | API key required | In place of the ask screen when `/api/health` says `api_key: false`: the title and one sentence on adding the key to `.env`; no input, no chips. No frame. |
 | 02 | Thinking | The question pinned; the five step names with a spinner |
 | 03–05 | Answer | Answer card, assumption chips, Results · SQL · Chart tabs, trace strip with real step times |
 | 06 | Empty result | "No rows matched", opens on the SQL tab, three example questions |
 | 07 | Unanswerable | The model's reason and three example questions |
 | 08 | Blocked | A fixed refusal, the read-only note, the rejected statement dimmed |
 | 09 | Error | One sentence per `error.code`, Retry, the question kept in the input |
-| 10 | Schema drawer | Slide-over: plain definitions and six tables; `events` and `tickets` open |
-| 11 | Session history | Left rail of this session's questions and "New question" |
-| 12–17 | 1024, 768, 390 | Reference only. The app has two layouts: 1440 at 1024 and up, one column below. |
+| 10 | API key required | In place of the ask screen when `/api/health` says `api_key: false`: one card with the title, one sentence on adding the key to `.env`, the `.env` line and the health check's `api_key` and `database` values; no input, no chips |
+| 11 | Schema drawer | Slide-over: plain definitions and six tables; `events` and `tickets` open |
+| 12 | Session history | Left rail of this session's questions and "New question"; the footer sits beside it |
+| 13–18 | 1024, 768, 390 | Reference only. The app has two layouts: 1440 at 1024 and up, one column below. |
 
-Below 1024 the rail moves behind a header button, the drawer goes full width and
-tables scroll inside their own container.
+Below 1024 the rail moves behind a header button, the drawer goes full width,
+tables scroll inside their own container, and the example questions stack as
+full-width rows of at least 44px with the whole question on each.
 
 **Results table.** A total row leads with what it totals (`YEAR | TICKETS SOLD`), and a
 lone column is left-aligned so its header and value sit together.

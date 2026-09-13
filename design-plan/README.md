@@ -7,8 +7,8 @@ reference; tokens, frames and parity rules are in `docs/design.md`.
 it, so open it over HTTP, not `file://`:
 
 ```sh
-cd design-plan && python3 -m http.server 8000
-# then open http://localhost:8000/BSE%20Insights.dc.html
+cd design-plan && python3 -m http.server 8100
+# then open http://localhost:8100/BSE%20Insights.dc.html
 ```
 
 Nothing here is imported at runtime. The source project is

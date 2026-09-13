@@ -48,6 +48,35 @@ def run_fake(harness: Path, *extra: str) -> tuple[int, Path]:
     return main([*args, *extra], today=date.fromisoformat(TODAY)), report
 
 
+def fake_json(harness: Path, model: str, report: str = "eval-results") -> dict:
+    """A fake run's JSON lands beside its report, never in the committed results."""
+    path = harness / f"{report}-json" / f"{model}.json"
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def test_a_fake_sweep_leaves_the_committed_results_untouched(harness: Path) -> None:
+    committed = harness / "results"
+    committed.mkdir()
+    for model in MODELS:
+        (committed / f"{model}.json").write_text('{"fake": false}\n', encoding="utf-8")
+
+    code, _ = run_fake(harness)
+
+    assert code == 0
+    assert sorted(path.name for path in committed.iterdir()) == sorted(
+        f"{model}.json" for model in MODELS
+    )
+    for model in MODELS:
+        assert (committed / f"{model}.json").read_text(encoding="utf-8") == '{"fake": false}\n'
+        assert fake_json(harness, model)["fake"] is True
+
+
+def test_only_a_real_run_writes_into_the_committed_results(harness: Path) -> None:
+    report = harness / "eval-results.md"
+    assert eval_run.results_dir(report, fake=False) == harness / "results"
+    assert eval_run.results_dir(report, fake=True) == harness / "eval-results-json"
+
+
 def test_a_fake_sweep_writes_a_json_file_per_model_covering_every_status(
     harness: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
@@ -55,7 +84,7 @@ def test_a_fake_sweep_writes_a_json_file_per_model_covering_every_status(
 
     assert code == 0
     for model in MODELS:
-        payload = json.loads((harness / "results" / f"{model}.json").read_text(encoding="utf-8"))
+        payload = fake_json(harness, model)
         assert payload["model"] == model and payload["today"] == TODAY
         assert payload["fake"] is True
         records = payload["records"]
@@ -91,7 +120,7 @@ def test_a_fake_sweep_writes_the_report_with_summary_matrix_and_decision(harness
 def test_only_runs_a_single_entry(harness: Path) -> None:
     code, report = run_fake(harness, "--only", "delete-all-tickets")
     assert code == 0
-    payload = json.loads((harness / "results" / f"{MODELS[0]}.json").read_text(encoding="utf-8"))
+    payload = fake_json(harness, MODELS[0])
     assert [record["id"] for record in payload["records"]] == ["delete-all-tickets"]
     assert "| 1 | Delete all ticket records. |" in report.read_text(encoding="utf-8")
 
@@ -155,7 +184,7 @@ def test_a_run_with_no_date_passed_in_uses_the_real_date(
         ]
     )
 
-    payload = json.loads((harness / "results" / f"{MODELS[0]}.json").read_text(encoding="utf-8"))
+    payload = fake_json(harness, MODELS[0], report="report")
     assert code == 0 and payload["today"] == TODAY
 
 

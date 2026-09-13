@@ -203,7 +203,7 @@ def test_npm_run_dev_refuses_a_node_older_than_24(stubs: dict[str, str]) -> None
 
 
 NO_KEY_LINE = "ANTHROPIC_API_KEY is not set: using the fake agent (canned answers)."
-ENV_HINT = " Add the .env file you were sent, or copy .env.example to .env."
+ENV_HINT = " Create .env with the ANTHROPIC_API_KEY= line you were sent."
 
 
 @pytest.mark.parametrize(

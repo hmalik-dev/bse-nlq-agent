@@ -36,7 +36,7 @@ if [[ "${NLQ_FAKE_AGENT:-}" != 1 ]] && ! in_env NLQ_FAKE_AGENT 1 \
   && [[ -z "${ANTHROPIC_API_KEY:-}" ]] && ! in_env ANTHROPIC_API_KEY '.+'; then
   export NLQ_FAKE_AGENT=1
   hint=""
-  [[ -f .env ]] || hint=" Add the .env file you were sent, or copy .env.example to .env."
+  [[ -f .env ]] || hint=" Create .env with the ANTHROPIC_API_KEY= line you were sent."
   echo "ANTHROPIC_API_KEY is not set: using the fake agent (canned answers).$hint"
 fi
 

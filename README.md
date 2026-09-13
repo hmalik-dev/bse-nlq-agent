@@ -11,7 +11,7 @@ Barclays Center, the Brooklyn Nets and the New York Liberty.
 You need [uv](https://docs.astral.sh/uv/getting-started/installation/) (it installs Python itself) and [Node 24](https://nodejs.org/en/download).
 
 1. Clone it: `git clone https://github.com/hmalik-dev/bse-nlq-agent.git && cd bse-nlq-agent`
-2. Put the `.env` file you were sent in that folder. It holds a real Anthropic API key with a small spending limit, so please try what the app can do rather than sending many repeated questions.
+2. Create a file named `.env` in that folder and paste in the `ANTHROPIC_API_KEY=` line from the link you were sent. The key is real and has a small spending limit, so please try what the app can do rather than sending many repeated questions.
 3. Run `npm run dev`. The first run installs and seeds the database, the browser opens on <http://localhost:4000>, and `Ctrl+C` stops it.
 
 ## Other ways to run

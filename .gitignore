@@ -20,3 +20,6 @@ src/nlq/static/
 
 # Lane worktrees created by the orchestrator. Never part of the tree.
 .claude/worktrees/
+
+# Review agents' working memory. Never part of the tree.
+.claude/agent-memory/

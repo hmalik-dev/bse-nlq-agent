@@ -104,9 +104,6 @@ The choices a reviewer would ask about, and why. One entry each: the decision,
 - **Evaluation misses fix the prompt, not the model.** Two questions failing on both models is a prompt defect.
   *Why:* the first sweep exposed a copied `LIMIT 5` and an undefined "last season"; the first injection run
   answered a smuggled `DROP` question silently. Each became one prompt rule. *Rejected:* chasing Haiku's misses.
-- **The harness runs free with `--fake` before any paid run.**
-  *Why:* the live sweep costs under a dollar, so it is the last step, not the debug loop.
-  *Rejected:* a response cache (replayed calls have no latency to measure).
 - **The direct Anthropic API, not Bedrock.**
   *Why:* one less account for a reviewer; Bedrock is a client swap.
   *Rejected:* Bedrock.
@@ -170,9 +167,6 @@ The choices a reviewer would ask about, and why. One entry each: the decision,
 - **No simulated progress while a question runs.**
   *Why:* the API is one call, so step times are only known when it returns.
   *Rejected:* advancing steps on a timer (shows times nothing measured).
-- **`NLQ_FAKE_AGENT=1` is the interface's test double.**
-  *Why:* every screen is reachable with no key, database or network, using real schema values.
-  *Rejected:* recorded real responses (they rot as the prompt changes).
 - **The drawer reads its own short `definitions`, not the prompt's business rules.**
   *Why:* people need one sentence per term; editing the prompt's rules would move accuracy.
   *Rejected:* shortening the rules for both; drawer search and row counts (six tables fit one screen).
@@ -182,6 +176,15 @@ The choices a reviewer would ask about, and why. One entry each: the decision,
 - **The local run is the primary path, and `npm run dev` is the one command.**
   *Why:* it installs, seeds on first run and opens the dev UI on :4000 with the API on :8000.
   *Rejected:* a production build on :8000 as the default (the build takes a minute on every change).
+- **One command is the setup; Docker is the only alternative.**
+  *Why:* a reviewer should reach a working app without choosing between paths.
+  *Rejected:* keeping the manual block, which duplicates `CLAUDE.md` and makes setup look harder than it is.
+- **`npm run dev` names a missing uv or Node, or an old Node, and stops; it never installs them.**
+  *Why:* one printed line makes the fix obvious without running a remote installer on someone else's machine.
+  *Rejected:* installing uv automatically.
+- **Fakes are development tooling:** the tests' scripted client, `NLQ_FAKE_AGENT=1`, and the evaluation's `--fake`.
+  *Why:* development and CI stayed free, and the interface could be built before the agent.
+  *Rejected:* deleting them (tests, browser checks and the smoke fallback need them); offering them to reviewers (canned answers don't show the agent).
 - **Quickstart seeds at `--scale 0.2`; full scale stays the default.**
   *Why:* a million tickets seed in seconds and answer every example question.
   *Rejected:* a smaller default (every documented figure would change).

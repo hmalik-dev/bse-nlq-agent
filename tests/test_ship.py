@@ -102,6 +102,7 @@ def stubs(tmp_path: Path) -> dict[str, str]:
     os.mkfifo(ready)
     _stub(bin_dir, "uv", UV_STUB)
     _stub(bin_dir, "npm", f'case "$*" in *"web dev"*) echo up > "{ready}"; exec sleep 60;; esac')
+    _stub(bin_dir, "node", "echo v24.0.0")
     _stub(bin_dir, "curl", """echo '{"ok":true,"database":true}'""")
     _stub(bin_dir, "python", "")
     _stub(bin_dir, "uvicorn", "")
@@ -128,13 +129,15 @@ def _calls(stubs: dict[str, str]) -> str:
     return log.read_text(encoding="utf-8") if log.exists() else ""
 
 
-def _run_dev_with_the_api_port_taken(stubs: dict[str, str]) -> subprocess.CompletedProcess[str]:
+def _run_dev_with_the_api_port_taken(
+    stubs: dict[str, str], script: Path = SCRIPTS[2]
+) -> subprocess.CompletedProcess[str]:
     with socket.socket() as holder:
         with contextlib.suppress(OSError):  # already taken by something else: the same case
             holder.bind(("127.0.0.1", DEV_API_PORT))
             holder.listen()
         return subprocess.run(
-            ["bash", str(SCRIPTS[2])], env=stubs, capture_output=True, text=True, timeout=30
+            ["bash", str(script)], env=stubs, capture_output=True, text=True, timeout=30
         )
 
 
@@ -150,6 +153,75 @@ def test_npm_run_dev_reuses_an_existing_database(stubs: dict[str, str]) -> None:
     run = _run_dev_with_the_api_port_taken(stubs)
     assert "nlq.db.seed" not in _calls(stubs)
     assert f"using the existing database at {stubs['STUB_DB']}" in run.stdout
+
+
+def _bin_dir(stubs: dict[str, str]) -> Path:
+    return Path(stubs["PATH"].split(":")[0])
+
+
+def _run_dev_with_only_the_stubs_on_path(stubs: dict[str, str]) -> subprocess.CompletedProcess[str]:
+    """PATH holds the stub directory and `dirname`, so no real uv or Node can answer."""
+    bin_dir = _bin_dir(stubs)
+    (bin_dir / "dirname").symlink_to(shutil.which("dirname") or "/usr/bin/dirname")
+    return subprocess.run(
+        [shutil.which("bash") or "/bin/bash", str(SCRIPTS[2])],
+        env={**stubs, "PATH": str(bin_dir)},
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+
+
+@pytest.mark.parametrize(
+    ("tool", "hint"),
+    [
+        ("uv", "uv is not installed: curl -LsSf https://astral.sh/uv/install.sh | sh"),
+        ("node", "node is not installed: install Node 24 from https://nodejs.org/en/download"),
+        ("npm", "npm is not installed: it ships with Node: https://nodejs.org/en/download"),
+    ],
+)
+def test_npm_run_dev_names_a_missing_tool_and_starts_nothing(
+    stubs: dict[str, str], tool: str, hint: str
+) -> None:
+    (_bin_dir(stubs) / tool).unlink()
+    run = _run_dev_with_only_the_stubs_on_path(stubs)
+    assert run.returncode == 1
+    assert run.stderr.strip() == hint
+    assert run.stdout == ""
+    assert "uv " not in _calls(stubs)
+    assert "npm " not in _calls(stubs)
+
+
+def test_npm_run_dev_refuses_a_node_older_than_24(stubs: dict[str, str]) -> None:
+    _stub(_bin_dir(stubs), "node", "echo v20.11.1")
+    run = _run_dev_with_only_the_stubs_on_path(stubs)
+    assert run.returncode == 1
+    assert run.stderr.strip() == (
+        "Node 24 or newer is required; found v20.11.1: https://nodejs.org/en/download"
+    )
+    assert "uv " not in _calls(stubs)
+
+
+NO_KEY_LINE = "ANTHROPIC_API_KEY is not set: using the fake agent (canned answers)."
+ENV_HINT = " Add the .env file you were sent, or copy .env.example to .env."
+
+
+@pytest.mark.parametrize(
+    ("env_file", "expected"),
+    [(None, NO_KEY_LINE + ENV_HINT), ("NLQ_SQL_MODEL=claude-sonnet-5\n", NO_KEY_LINE)],
+    ids=["no-env-file", "env-file-without-a-key"],
+)
+def test_npm_run_dev_without_a_key_says_where_the_key_goes_only_when_env_is_missing(
+    stubs: dict[str, str], tmp_path: Path, env_file: str | None, expected: str
+) -> None:
+    repo = tmp_path / "clone"
+    (repo / "scripts").mkdir(parents=True)
+    script = repo / "scripts" / "dev.sh"
+    shutil.copy(SCRIPTS[2], script)
+    if env_file is not None:
+        (repo / ".env").write_text(env_file, encoding="utf-8")
+    run = _run_dev_with_the_api_port_taken(stubs, script)
+    assert expected in run.stdout.splitlines()
 
 
 def test_npm_run_dev_exits_non_zero_naming_a_taken_api_port(stubs: dict[str, str]) -> None:

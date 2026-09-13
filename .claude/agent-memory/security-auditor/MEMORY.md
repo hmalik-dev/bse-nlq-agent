@@ -1,6 +1,0 @@
-- [SQL guard bypasses](sql-guard-bypasses.md) — BSE-3 bypasses (fixed) plus BSE-23 open: alias-collision allowlist bypass, wide-row memory/deadline bypass.
-- [API boundary audit](api-boundary-audit.md) — traversal/symlink probes that pass, fixes since BSE-6, accepted low notes, Host-header rebinding note.
-- [Ship/container audit](ship-container-audit.md) — image/key boundary clean, git history clean, port and non-root fixed.
-- [Client export audit](client-export-audit.md) — BSE-20 CSV/SVG download clean; semicolon now quoted.
-- [LLM boundary audit](llm-boundary-audit.md) — secret handling clean; SDK text now fixed sentence + log (BSE-23).
-- Whole-app audits: the caller may edit the worktree concurrently — re-Read a file before citing a line, and state the snapshot.

@@ -9,6 +9,25 @@ cd "$(dirname "$0")/.."
 API_PORT=8000
 UI_PORT=4000
 READY_TIMEOUT_S=30
+NODE_MAJOR_REQUIRED=24 # the major CI uses (.github/workflows/ci.yml)
+
+# Name a missing tool and how to get it, before anything runs.
+require() {
+  if ! command -v "$1" >/dev/null 2>&1; then
+    echo "$1 is not installed: $2" >&2
+    exit 1
+  fi
+}
+require uv "curl -LsSf https://astral.sh/uv/install.sh | sh"
+require node "install Node $NODE_MAJOR_REQUIRED from https://nodejs.org/en/download"
+require npm "it ships with Node: https://nodejs.org/en/download"
+node_version=$(node --version)
+node_major=${node_version#v}
+node_major=${node_major%%.*}
+if [[ ! "$node_major" =~ ^[0-9]+$ ]] || ((node_major < NODE_MAJOR_REQUIRED)); then
+  echo "Node $NODE_MAJOR_REQUIRED or newer is required; found $node_version: https://nodejs.org/en/download" >&2
+  exit 1
+fi
 
 # The key and the fake flag may each be in the shell or in .env (the app reads
 # .env itself).
@@ -16,7 +35,9 @@ in_env() { grep -qE "^$1=$2\$" .env 2>/dev/null; }
 if [[ "${NLQ_FAKE_AGENT:-}" != 1 ]] && ! in_env NLQ_FAKE_AGENT 1 \
   && [[ -z "${ANTHROPIC_API_KEY:-}" ]] && ! in_env ANTHROPIC_API_KEY '.+'; then
   export NLQ_FAKE_AGENT=1
-  echo "ANTHROPIC_API_KEY is not set: using the fake agent (canned answers)."
+  hint=""
+  [[ -f .env ]] || hint=" Add the .env file you were sent, or copy .env.example to .env."
+  echo "ANTHROPIC_API_KEY is not set: using the fake agent (canned answers).$hint"
 fi
 
 echo "==> uv sync"

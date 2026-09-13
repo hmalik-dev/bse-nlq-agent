@@ -47,7 +47,7 @@ docker run --env-file .env -p 127.0.0.1:8000:8000 bse-insights
 - **Accuracy:** Claude Sonnet 5 passed 20/20 golden questions. They include the
   brief's examples word for word, three writes, two unanswerable questions and
   three prompt injections.
-- **Cost:** $0.0212 per question on average, with a median latency of 3,899 ms.
+- **Cost:** $0.0215 per question on average, with a median latency of 4,510 ms.
 - **Safety:** a SQL guard in front of a read-only connection. Nothing the model
   writes can change the data.
 
@@ -98,7 +98,7 @@ Twenty golden questions ran once each against Sonnet 5 and Haiku 4.5 on
 2026-09-12. The rule, fixed first: the cheapest model within one question of the
 best score that gets every refusal right. Haiku scored 16/20, so Sonnet 5 is the
 default. Per-question results: [`docs/eval-results.md`](docs/eval-results.md).
-Rerun with `uv run python -m eval.run` (about $0.58, or free with `--fake`).
+Rerun with `uv run python -m eval.run` (about $0.59, or free with `--fake`).
 
 ## The data
 

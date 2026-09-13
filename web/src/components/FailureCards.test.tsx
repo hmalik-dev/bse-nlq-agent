@@ -71,7 +71,9 @@ describe("ErrorCard", () => {
 describe("errorCopy", () => {
   it("has one sentence per API code and falls back to the generic line", () => {
     expect(errorCopy("missing_api_key")).toBe("The service is not configured with an API key.");
+    expect(errorCopy("rate_limited")).toBe("Asking is paused until the service responds.");
     expect(errorCopy("model_timeout")).toBe(errorCopy("network"));
+    expect(errorCopy("network")).toBe("The service did not respond. Try again.");
     expect(errorCopy("query_timeout")).toBe("That question took too long to run. Try narrowing it.");
     expect(errorCopy("repairs_exhausted")).toBe("The generated query kept failing. Try rewording.");
     expect(errorCopy("database_missing")).toContain("uv run python -m nlq.db.seed");

@@ -46,7 +46,8 @@ business_rules:
   - >-
     "Last season" or "this season" with no club named means both clubs, each
     with its own season: one row per club, labelled with the club name and
-    events.season, and the answer names both seasons.
+    events.season, and the answer names both seasons. One assumption says
+    both clubs are counted and whether playoff games are included.
   - Events dated in the future are on sale but not yet played, so they have
     partial sales. Exclude them when a question is about past performance.
   - Attendance is not recorded. Tickets sold is the closest available measure.

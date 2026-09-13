@@ -136,7 +136,7 @@ Synthetic ticketing data for a sports and entertainment operator that runs one v
 - An order with is_season_package = 1 is a season-ticket package: one pre-season purchase covering the same seats at every regular-season home game of one club season (playoff games are not included). Its tickets therefore span many events, and it is dated months before the first of them. Every other order is a single-game purchase and covers tickets to one event only.
 - A club season (events.season) covers that season's regular-season and playoff home games. Include playoff games unless the question says "regular season".
 - Seasons are worked out per club, from the data and today's date; never write a season label from memory. "Last season" for a club is that club's most recent events.season with no home games (regular season or playoffs) on or after today. "This season" for a club is its season in progress (home games both before and on or after today), or if none, its earliest season with games on or after today. Filter on events.season, not on dates.
-- "Last season" or "this season" with no club named means both clubs, each with its own season: one row per club, labelled with the club name and events.season, and the answer names both seasons.
+- "Last season" or "this season" with no club named means both clubs, each with its own season: one row per club, labelled with the club name and events.season, and the answer names both seasons. One assumption says both clubs are counted and whether playoff games are included.
 - Events dated in the future are on sale but not yet played, so they have partial sales. Exclude them when a question is about past performance.
 - Attendance is not recorded. Tickets sold is the closest available measure.
 

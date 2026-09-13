@@ -210,3 +210,14 @@ def test_no_season_label_is_written_into_the_rules_or_the_examples(
 
 def _rows(executor: Executor, sql: str) -> list[list]:
     return executor.run(guard(sql, max_rows=MAX_ROWS).sql).rows
+
+
+def test_the_both_clubs_example_assumes_both_clubs_and_playoffs_in_one_sentence(
+    context: PromptContext,
+) -> None:
+    (plan,) = [
+        e.plan
+        for e in context.examples
+        if e.question == "How many tickets did we sell last season?"
+    ]
+    assert any("both clubs" in line and "playoff" in line for line in plan.assumptions)

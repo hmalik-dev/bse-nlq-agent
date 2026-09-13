@@ -90,9 +90,8 @@
     GROUP BY h.team_id, e.season
     ORDER BY h.name
   assumptions:
-    - No club was named, so both clubs are counted, each for its own last season.
+    - No club was named, so both clubs are counted, each for its own last season, playoff games included.
     - A club's last season is its most recent season with no home games still to play.
-    - Playoff games are included.
   decline_reason: null
   decline_category: null
 

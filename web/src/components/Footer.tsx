@@ -17,7 +17,7 @@ export function Footer(): JSX.Element {
         </span>
         <div className="flex-1" />
         <span className="inline-flex h-[22px] items-center rounded-full border border-hairline bg-panel px-[9px] font-mono text-[10px] text-ink-2 lg:h-6 lg:px-2.5 lg:text-[11px]">
-          Demo<span className="max-lg:hidden">{" · synthetic data"}</span>
+          Demo<span className="max-lg:hidden">&nbsp;· synthetic data</span>
         </span>
       </div>
     </footer>

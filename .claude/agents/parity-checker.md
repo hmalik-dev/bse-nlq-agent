@@ -14,7 +14,7 @@ frame numbers, the app's base URL, the canvas URL and a scratchpad directory.
 
 ## The two sources
 
-- **The design**, `design-plan/BSE Insights.dc.html` — 17 frames, listed with
+- **The design**, `design-plan/BSE Insights.dc.html` — 18 frames, listed with
   their viewports in the "Parity source" section of `docs/design.md`. It
   needs `support.js` served beside it, so the caller serves the folder over HTTP
   and hands you the URL. Never open it over `file://` and never start the server

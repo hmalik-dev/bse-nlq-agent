@@ -11,7 +11,7 @@ Barclays Center, the Brooklyn Nets and the New York Liberty.
 You need [uv](https://docs.astral.sh/uv/getting-started/installation/) (it installs Python itself) and [Node 24](https://nodejs.org/en/download).
 
 1. Clone it: `git clone https://github.com/hmalik-dev/bse-nlq-agent.git && cd bse-nlq-agent`
-2. Put the `.env` file you were sent in that folder. It holds the Anthropic API key the app needs.
+2. Put the `.env` file you were sent in that folder. It holds a real Anthropic API key with a small spending limit, so please try what the app can do rather than sending many repeated questions.
 3. Run `npm run dev`. The first run installs and seeds the database, the browser opens on <http://localhost:4000>, and `Ctrl+C` stops it.
 
 ## Other ways to run
@@ -60,6 +60,7 @@ Claude Sonnet 5 passed 20/20 test questions, including the brief's examples, att
 
 - **Follow-up questions**, so you can refine an answer ("now just the Nets").
 - **Bigger databases**, by giving the model only the tables a question needs instead of all of them.
+- **Prompt caching** in everyday use, so repeated questions cost less. The evaluation ran without it to keep per-question costs comparable.
 
 ## How it was built
 

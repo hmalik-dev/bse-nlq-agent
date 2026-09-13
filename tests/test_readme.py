@@ -30,7 +30,7 @@ README_SECTIONS = [
     "How it works",
     "Results",
     "Tradeoffs",
-    "What I'd do differently",
+    "With more time",
     "How it was built",
     "Docs",
 ]
@@ -66,7 +66,7 @@ def test_the_summary_quotes_each_models_score_and_leaves_the_table_to_the_report
 
 def test_the_headline_quotes_the_chosen_models_mean_cost() -> None:
     mean_cost = summary_rows()["claude-sonnet-5"][4]
-    assert f"at {mean_cost} per question on average." in README
+    assert f"A question costs {mean_cost} on average." in README
 
 
 def test_every_dollar_figure_comes_from_the_latest_evaluation_run() -> None:

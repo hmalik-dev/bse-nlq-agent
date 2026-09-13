@@ -1,8 +1,22 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { ask, examples, schema } from "./api";
-import { BY_STATUS, EXAMPLES, jsonResponse } from "./test-fixtures";
+import { ask, examples, hasApiKey, schema } from "./api";
+import { BY_STATUS, EXAMPLES, HEALTH, jsonResponse } from "./test-fixtures";
 
 afterEach(() => vi.unstubAllGlobals());
+
+describe("hasApiKey", () => {
+  it.each([true, false])("reads api_key %s from /api/health", async (present) => {
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse({ ...HEALTH, api_key: present }));
+    vi.stubGlobal("fetch", fetchMock);
+    expect(await hasApiKey()).toBe(present);
+    expect(fetchMock).toHaveBeenCalledWith("/api/health");
+  });
+
+  it("assumes a key when the health check fails, so asking reports the real error", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new TypeError("Failed to fetch")));
+    expect(await hasApiKey()).toBe(true);
+  });
+});
 
 describe("ask", () => {
   it.each(Object.entries(BY_STATUS))("parses the %s result unchanged", async (status, fixture) => {

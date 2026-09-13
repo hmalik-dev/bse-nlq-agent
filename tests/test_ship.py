@@ -25,6 +25,7 @@ SCRIPTS = (
     PROJECT_ROOT / "scripts" / "dev.sh",
 )
 DEV_API_PORT = 8000
+KEY_VAR = "ANTHROPIC_API_KEY"
 
 
 @pytest.mark.parametrize("script", SCRIPTS, ids=lambda path: path.name)
@@ -115,6 +116,7 @@ def stubs(tmp_path: Path) -> dict[str, str]:
         "STUB_PID": str(tmp_path / "api.pid"),
         "STUB_READY": str(ready),
         "NLQ_DATABASE_PATH": str(tmp_path / "tickets.db"),
+        KEY_VAR: "a-key-for-the-script-checks",
     }
 
 
@@ -202,26 +204,49 @@ def test_npm_run_dev_refuses_a_node_older_than_24(stubs: dict[str, str]) -> None
     assert "uv " not in _calls(stubs)
 
 
-NO_KEY_LINE = "ANTHROPIC_API_KEY is not set: using the fake agent (canned answers)."
-ENV_HINT = " Create .env with the ANTHROPIC_API_KEY= line you were sent."
-
-
-@pytest.mark.parametrize(
-    ("env_file", "expected"),
-    [(None, NO_KEY_LINE + ENV_HINT), ("NLQ_SQL_MODEL=claude-sonnet-5\n", NO_KEY_LINE)],
-    ids=["no-env-file", "env-file-without-a-key"],
+NO_KEY_LINE = (
+    f"{KEY_VAR} is not set. Create .env with the {KEY_VAR}= line you were sent,"
+    " then run npm run dev again."
 )
-def test_npm_run_dev_without_a_key_says_where_the_key_goes_only_when_env_is_missing(
-    stubs: dict[str, str], tmp_path: Path, env_file: str | None, expected: str
-) -> None:
+
+
+def _clone_with(tmp_path: Path, script: Path, env_file: str | None) -> Path:
+    """A copy of `script` and the key check it sources, in a clone with the given .env."""
     repo = tmp_path / "clone"
     (repo / "scripts").mkdir(parents=True)
-    script = repo / "scripts" / "dev.sh"
-    shutil.copy(SCRIPTS[2], script)
+    for source in (script, PROJECT_ROOT / "scripts" / "require-key.sh"):
+        shutil.copy(source, repo / "scripts" / source.name)
     if env_file is not None:
         (repo / ".env").write_text(env_file, encoding="utf-8")
-    run = _run_dev_with_the_api_port_taken(stubs, script)
-    assert expected in run.stdout.splitlines()
+    return repo / "scripts" / script.name
+
+
+@pytest.mark.parametrize("script", SCRIPTS[1:], ids=lambda path: path.name)
+@pytest.mark.parametrize(
+    ("shell_key", "env_file"),
+    [(None, None), (None, "NLQ_SQL_MODEL=claude-sonnet-5\n"), ("  ", f"{KEY_VAR}=\n")],
+    ids=["no-env-file", "env-file-without-a-key", "blank-key"],
+)
+def test_a_script_without_a_key_names_it_and_installs_nothing(
+    stubs: dict[str, str], tmp_path: Path, script: Path, shell_key: str | None, env_file: str | None
+) -> None:
+    env = {name: value for name, value in stubs.items() if name != KEY_VAR}
+    if shell_key is not None:
+        env[KEY_VAR] = shell_key
+    clone = _clone_with(tmp_path, script, env_file)
+    run = subprocess.run(["bash", str(clone)], env=env, capture_output=True, text=True, timeout=30)
+    assert run.returncode == 1
+    assert run.stderr.strip() == NO_KEY_LINE
+    assert "uv " not in _calls(stubs)
+    assert "npm " not in _calls(stubs)
+
+
+def test_npm_run_dev_finds_a_key_that_is_only_in_env(stubs: dict[str, str], tmp_path: Path) -> None:
+    env = {name: value for name, value in stubs.items() if name != KEY_VAR}
+    clone = _clone_with(tmp_path, SCRIPTS[2], f"{KEY_VAR}=from-the-file\n")
+    run = _run_dev_with_the_api_port_taken(env, clone)
+    assert NO_KEY_LINE not in run.stderr
+    assert "uv sync" in _calls(stubs)
 
 
 def test_npm_run_dev_exits_non_zero_naming_a_taken_api_port(stubs: dict[str, str]) -> None:

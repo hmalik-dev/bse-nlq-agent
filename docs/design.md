@@ -55,6 +55,7 @@ The six chips on the ask screen, in order, served by `GET /api/examples` from
 | Frame | Screen | What it shows |
 |---|---|---|
 | 01 | Ask, empty | Lockup, question input, six chips, "What's in the data?", footer |
+| — | API key required | In place of the ask screen when `/api/health` says `api_key: false`: the title and one sentence on adding the key to `.env`; no input, no chips. No frame. |
 | 02 | Thinking | The question pinned; the five step names with a spinner |
 | 03–05 | Answer | Answer card, assumption chips, Results · SQL · Chart tabs, trace strip with real step times |
 | 06 | Empty result | "No rows matched", opens on the SQL tab, three example questions |
@@ -111,10 +112,9 @@ or over-long question gets a 422.
 |---|---|
 | `GET /api/schema` | `tables` (name, description, columns with type and `references`) and `definitions` for the drawer |
 | `GET /api/examples` | `[{"question": "...", "badge": "nets" \| "liberty" \| null}]` |
-| `GET /api/health` | `{"ok": true, "database": true, "fake": false}` |
+| `GET /api/health` | `{"ok": true, "database": true, "api_key": true}`; `api_key` says whether a key is set, never what it is |
 
-**Fake agent.** `NLQ_FAKE_AGENT=1` answers without a key or database. A word in
-the question picks the screen: `delete`, `drop`, `update` → blocked; `weather` →
-unanswerable; `nothing` → empty; `rate limit`, `no key`, `no database`,
-`out of credit` → that error; `slow` → a two-second wait; `nets` → a results
-table; anything else → the category chart.
+**API key required.** The app only answers with the real model. The interface reads
+`/api/health` on load and shows the setup screen when no key is set; `npm run dev`
+and `scripts/smoke.sh` stop before starting anything. If the screen is bypassed,
+`POST /api/ask` still returns the `missing_api_key` error.

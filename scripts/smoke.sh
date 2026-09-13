@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Prove the local path end to end: install, build the interface, seed a
 # temporary database, start the server, and check that one question is
-# answered. Uses the fake agent when there is no API key, the real one when
-# there is. Exit 0 means the README's instructions work on this machine.
+# answered by the real agent (one question, about $0.02). Stops before anything
+# runs when there is no API key. Exit 0 means the README's instructions work on this machine.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -22,17 +22,7 @@ cleanup() {
 }
 trap cleanup EXIT
 
-# The key and the fake flag may each be in the shell or in .env (the app reads
-# .env itself). The banner says which agent the server will actually use.
-in_env() { grep -qE "^$1=$2\$" .env 2>/dev/null; }
-if [[ "${NLQ_FAKE_AGENT:-}" == 1 ]] || in_env NLQ_FAKE_AGENT 1; then
-  echo "NLQ_FAKE_AGENT=1: running against the fake agent."
-elif [[ -z "${ANTHROPIC_API_KEY:-}" ]] && ! in_env ANTHROPIC_API_KEY '.+'; then
-  export NLQ_FAKE_AGENT=1
-  echo "ANTHROPIC_API_KEY is not set: running against the fake agent."
-else
-  echo "ANTHROPIC_API_KEY is set: running against the real agent."
-fi
+source scripts/require-key.sh
 
 echo "==> uv sync"
 uv sync

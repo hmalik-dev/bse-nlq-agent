@@ -122,7 +122,8 @@ def health() -> dict[str, bool]:
 
 def create_app(agent: AgentLike | None = None, *, static_dir: Path = config.STATIC_DIR) -> FastAPI:
     """Build the app. With no agent given, one is resolved on the first request."""
-    app = FastAPI(title="BSE Insights")
+    # No Swagger UI or ReDoc: both load a CDN script onto the app's own origin.
+    app = FastAPI(title="BSE Insights", docs_url=None, redoc_url=None)
     # A page that rebinds its own domain to 127.0.0.1 is same-origin to the browser;
     # its Host header is the one thing that still names it.
     app.add_middleware(TrustedHostMiddleware, allowed_hosts=config.allowed_hosts())

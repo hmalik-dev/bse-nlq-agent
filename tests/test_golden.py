@@ -232,11 +232,11 @@ def test_reference_sql_has_today_written_in_and_no_placeholder_left(
     assert any("2026-09-30" in (entry.sql or "") for entry in later)
 
 
-def test_refund_losses_last_season_expect_one_row_per_club_for_its_own_season(
+def test_refund_losses_last_season_expect_one_row_per_team_for_its_own_season(
     entries: list[GoldenEntry], db_path: Path
 ) -> None:
     rows = _reference_rows(entries, db_path, "refund-losses-last-season")
-    assert [(club, season) for club, season, _ in rows] == [
+    assert [(team, season) for team, season, _ in rows] == [
         ("Brooklyn Nets", "2025-26"),
         ("New York Liberty", "2025"),
     ]

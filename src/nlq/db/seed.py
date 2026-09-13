@@ -1,6 +1,6 @@
 """Generate the synthetic ticketing dataset.
 
-Everything here is fabricated. Club, venue and opponent names are real so the
+Everything here is fabricated. Team, venue and opponent names are real so the
 exercise's example questions are answerable; artists, customers, orders and
 tickets are invented. The generator is seeded, so the same inputs always give
 the same database.
@@ -85,7 +85,7 @@ VENUE_ID = BARCLAYS_CENTER[0]
 
 NETS_TEAM_ID = 1
 LIBERTY_TEAM_ID = 2
-HOME_CLUBS = (
+HOME_TEAMS = (
     (NETS_TEAM_ID, "Brooklyn Nets", "NBA", 1),
     (LIBERTY_TEAM_ID, "New York Liberty", "WNBA", 1),
 )
@@ -357,7 +357,7 @@ class PackageHolder:
 
 
 def _team_rows() -> list[tuple[object, ...]]:
-    rows: list[tuple[object, ...]] = list(HOME_CLUBS)
+    rows: list[tuple[object, ...]] = list(HOME_TEAMS)
     for team_id, (name, _) in enumerate(NBA_OPPONENTS, start=10):
         rows.append((team_id, name, "NBA", 0))
     wnba_start = 10 + len(NBA_OPPONENTS)
@@ -412,7 +412,7 @@ def _sport_event(
     )
 
 
-def _club_games(
+def _team_games(
     rng: random.Random,
     category: str,
     home_team_id: int,
@@ -450,7 +450,7 @@ def _nba_season(rng: random.Random, start_year: int) -> list[Event]:
         rng.choice(NBA_PLAYOFF_HOME_GAMES),
     )
     args = ("NBA", NETS_TEAM_ID, season, NBA_OPPONENTS)
-    return _club_games(rng, *args, regular, is_playoff=0) + _club_games(
+    return _team_games(rng, *args, regular, is_playoff=0) + _team_games(
         rng, *args, playoffs, is_playoff=1
     )
 
@@ -464,7 +464,7 @@ def _wnba_season(rng: random.Random, year: int) -> list[Event]:
         WNBA_PLAYOFF_HOME_GAMES,
     )
     args = ("WNBA", LIBERTY_TEAM_ID, str(year), WNBA_OPPONENTS)
-    return _club_games(rng, *args, regular, is_playoff=0) + _club_games(
+    return _team_games(rng, *args, regular, is_playoff=0) + _team_games(
         rng, *args, playoffs, is_playoff=1
     )
 
@@ -535,7 +535,7 @@ def _nba_season_start_years(today: date) -> range:
 
 
 def _build_events(rng: random.Random, today: date) -> list[Event]:
-    """Every event in the window: club home games, then concerts and shows.
+    """Every event in the window: team home games, then concerts and shows.
 
     The window is whole calendar years, so a question about "2024" has a full
     year of events behind it rather than the tail of one season.
@@ -586,7 +586,7 @@ def _customer_rows(
 
 
 def _season_key(event: Event) -> tuple[str, str] | None:
-    """The club season a package covers, or None for playoffs and for shows."""
+    """The team season a package covers, or None for playoffs and for shows."""
     if event.category in PACKAGE_HOUSE_SHARE and not event.is_playoff and event.season:
         return event.category, event.season
     return None
@@ -619,7 +619,7 @@ def _season_openers(events: list[Event]) -> dict[tuple[str, str], date]:
 
 
 def _account_pools(seat_counts: dict[tuple[str, str], list[int]]) -> tuple[dict[str, int], int]:
-    """First customer id of each club's account pool, and how many accounts there are."""
+    """First customer id of each team's account pool, and how many accounts there are."""
     pool_start: dict[str, int] = {}
     next_id = 1
     for category in PACKAGE_HOUSE_SHARE:
@@ -632,9 +632,9 @@ def _account_pools(seat_counts: dict[tuple[str, str], list[int]]) -> tuple[dict[
 def _build_packages(
     rng: random.Random, events: list[Event], today: date, scale: float, order_ids: Iterator[int]
 ) -> tuple[dict[tuple[str, str], list[PackageHolder]], list[tuple[object, ...]], int]:
-    """Season-ticket accounts per club season, plus the one order each places.
+    """Season-ticket accounts per team season, plus the one order each places.
 
-    Accounts renew, so each club draws from a fixed pool of customer ids; the
+    Accounts renew, so each team draws from a fixed pool of customer ids; the
     two pools together are the customers flagged `is_season_member`.
     """
     openers = _season_openers(events)
@@ -868,7 +868,7 @@ def seed_database(
 
     `today` defaults to `config.today()`, the real date; tests pass one in for
     determinism. `scale` shrinks the seats sold per event and
-    the customer base together, so per-customer behaviour stays realistic while
+    the customer base together, so per-customer behavior stays realistic while
     tests run on a fraction of the rows. Row counts are returned for logging.
     """
     as_of = today or config.today()

@@ -143,16 +143,25 @@ def test_sport_events_have_both_teams_and_others_have_none(db: sqlite3.Connectio
     assert bad_other == 0
 
 
-def test_home_games_belong_to_the_operator_clubs(db: sqlite3.Connection) -> None:
+def test_home_games_belong_to_the_operator_teams(db: sqlite3.Connection) -> None:
     foreign_home = _scalar(
         db,
         """
         SELECT COUNT(*) FROM events e
         JOIN teams t ON t.team_id = e.home_team_id
-        WHERE t.is_home_club = 0
+        WHERE t.is_home_team = 0
     """,
     )
     assert foreign_home == 0
+
+
+def test_the_teams_table_flags_the_two_home_teams(db: sqlite3.Connection) -> None:
+    columns = [row[1] for row in db.execute("PRAGMA table_info(teams)")]
+    assert columns == ["team_id", "name", "league", "is_home_team"]
+    home = db.execute("SELECT name FROM teams WHERE is_home_team = 1 ORDER BY team_id").fetchall()
+    assert home == [("Brooklyn Nets",), ("New York Liberty",)]
+    opponents = _scalar(db, "SELECT COUNT(*) FROM teams WHERE is_home_team = 0")
+    assert opponents == _scalar(db, "SELECT COUNT(*) FROM teams") - 2
 
 
 def test_comps_are_free_and_sold_tickets_are_not(db: sqlite3.Connection) -> None:
@@ -207,7 +216,7 @@ def test_every_nba_season_in_the_window_is_a_full_41_game_schedule(db: sqlite3.C
 
 
 def _nba_season_bounds(season: str) -> tuple[date, date]:
-    """21 October to 12 April of the season labelled '2025-26'."""
+    """21 October to 12 April of the season labeled '2025-26'."""
     start_year = int(season[:4])
     return date(start_year, 10, 21), date(start_year + 1, 4, 12)
 
@@ -257,7 +266,7 @@ def test_each_calendar_year_has_a_full_liberty_home_slate(db: sqlite3.Connection
         assert counts == (20, 2), f"{year} Liberty slate is {counts}"
 
 
-# (club, season, is_playoff): first and last allowed date, from docs/data.md.
+# (league, season, is_playoff): first and last allowed date, from docs/data.md.
 SEASON_WINDOWS = (
     ("NBA", "2025-26", 0, "2025-10-21", "2026-04-12"),
     ("NBA", "2025-26", 1, "2026-04-18", "2026-06-20"),
@@ -267,7 +276,7 @@ SEASON_WINDOWS = (
 
 
 @pytest.mark.parametrize(("category", "season", "is_playoff", "opens", "closes"), SEASON_WINDOWS)
-def test_club_games_fall_inside_the_real_league_calendar(
+def test_home_games_fall_inside_the_real_league_calendar(
     db: sqlite3.Connection, category: str, season: str, is_playoff: int, opens: str, closes: str
 ) -> None:
     first, last = db.execute(

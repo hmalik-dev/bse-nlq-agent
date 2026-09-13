@@ -1,7 +1,7 @@
 """The six starter questions the ask screen offers as chips.
 
 The list is the one in `docs/design.md` under "Example questions", in
-that order; the badge names the club mark drawn on the chip.
+that order; the badge names the team mark drawn on the chip.
 """
 
 from __future__ import annotations
@@ -14,7 +14,7 @@ Badge = Literal["nets", "liberty"]
 
 
 class ExampleQuestion(BaseModel):
-    """One chip: the question it asks, and which club mark it carries, if any."""
+    """One chip: the question it asks, and which team mark it carries, if any."""
 
     question: str
     badge: Badge | None = None

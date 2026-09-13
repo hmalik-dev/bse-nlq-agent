@@ -7,7 +7,7 @@ const SQL = "-- note\nSELECT name FROM events WHERE category = 'Concert'";
 afterEach(() => vi.useRealTimers());
 
 describe("SqlBlock", () => {
-  it("numbers the lines and colours keywords, strings and comments", () => {
+  it("numbers the lines and colors keywords, strings and comments", () => {
     render(<SqlBlock sql={SQL} />);
     const pre = screen.getByText("SELECT").closest("pre");
     expect(pre?.textContent).toContain(" 1-- note");

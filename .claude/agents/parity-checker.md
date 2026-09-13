@@ -30,7 +30,7 @@ Compare only what is visible and not data:
 
 - layout and spacing — structure, order, alignment, gutters, stacking at the
   frame's breakpoint;
-- colour tokens — surfaces, borders, text tiers, accents;
+- color tokens — surfaces, borders, text tiers, accents;
 - typography — family, weight, size relationships, tabular right-aligned numbers;
 - component presence — every element the frame carries is on the screen;
 - UI chrome copy — headings, labels, button text, tab names, empty-state wording.
@@ -45,7 +45,7 @@ either — a working feature the frame does not show is not a failure.
 Per frame: resize the browser to the frame's viewport, screenshot the canvas
 frame, drive the app to the same state, screenshot it, and save both to the
 scratchpad as `frame-<nn>-design.png` and `frame-<nn>-app.png`. Use
-`browser_evaluate` to read computed colours and font families when a difference
+`browser_evaluate` to read computed colors and font families when a difference
 is too small to call from the screenshot. Close the browser when finished.
 
 ## Report

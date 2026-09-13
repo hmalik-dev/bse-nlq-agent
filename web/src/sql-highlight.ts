@@ -1,5 +1,5 @@
 // A hand-rolled tokenizer for the SQL tab. Keywords, strings and comments get a
-// colour; everything else stays default. Deliberately small: SQLite's SELECT grammar
+// color; everything else stays default. Deliberately small: SQLite's SELECT grammar
 // is all the guard lets through, so this is the whole vocabulary that matters.
 
 export type TokenKind = "keyword" | "string" | "comment" | "text";

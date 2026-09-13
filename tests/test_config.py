@@ -32,7 +32,7 @@ def test_database_path_takes_an_absolute_setting_as_given(
     assert config.database_path() == absolute
 
 
-def test_allowed_hosts_default_to_local_and_honour_the_environment(
+def test_allowed_hosts_default_to_local_and_honor_the_environment(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.delenv("NLQ_ALLOWED_HOSTS", raising=False)
@@ -42,7 +42,7 @@ def test_allowed_hosts_default_to_local_and_honour_the_environment(
     assert config.allowed_hosts() == ["insights.example.com", "localhost"]
 
 
-def test_query_bounds_default_and_honour_the_environment(
+def test_query_bounds_default_and_honor_the_environment(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.delenv("NLQ_QUERY_TIMEOUT_MS", raising=False)
@@ -56,7 +56,7 @@ def test_query_bounds_default_and_honour_the_environment(
     assert config.max_rows() == 10
 
 
-def test_model_settings_default_and_honour_the_environment(
+def test_model_settings_default_and_honor_the_environment(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     for name in ("NLQ_SQL_MODEL", "NLQ_ANSWER_MODEL", "NLQ_LLM_TIMEOUT_S"):

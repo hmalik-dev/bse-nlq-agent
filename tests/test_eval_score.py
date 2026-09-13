@@ -88,8 +88,8 @@ def test_an_extra_constant_label_column_passes() -> None:
 
 
 def test_an_extra_varying_column_fails() -> None:
-    labelled = rows([2024, "a", 1], [2025, "b", 2])
-    assert not compare(rows(["a", 1], ["b", 2]), labelled, ordered=False)
+    labeled = rows([2024, "a", 1], [2025, "b", 2])
+    assert not compare(rows(["a", 1], ["b", 2]), labeled, ordered=False)
 
 
 def test_a_wrong_measure_with_a_label_column_fails() -> None:

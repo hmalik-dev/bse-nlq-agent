@@ -28,26 +28,26 @@ export function App(): JSX.Element {
   const nextId = useRef(1);
 
   useEffect(() => {
-    let cancelled = false;
+    let canceled = false;
     void fetchHealth().then((result) => {
-      if (!cancelled) setHealth(result);
+      if (!canceled) setHealth(result);
     }); // fetchHealth never rejects
     return () => {
-      cancelled = true;
+      canceled = true;
     };
   }, []);
 
   useEffect(() => {
-    let cancelled = false;
+    let canceled = false;
     fetchExamples()
       .then((list) => {
-        if (!cancelled) setExamples(list);
+        if (!canceled) setExamples(list);
       })
       .catch(() => {
-        if (!cancelled) setExamples([]); // no chips is a degraded page, not a broken one
+        if (!canceled) setExamples([]); // no chips is a degraded page, not a broken one
       });
     return () => {
-      cancelled = true;
+      canceled = true;
     };
   }, []);
 

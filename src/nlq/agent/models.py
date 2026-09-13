@@ -105,7 +105,7 @@ class ErrorInfo(BaseModel):
 
 
 class AskResult(BaseModel):
-    """Everything `Agent.ask` returns; the API serialises it unchanged."""
+    """Everything `Agent.ask` returns; the API serializes it unchanged."""
 
     status: Status
     question: str

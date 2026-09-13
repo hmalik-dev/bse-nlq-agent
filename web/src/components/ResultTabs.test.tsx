@@ -54,7 +54,7 @@ describe("ResultTabs", () => {
     expect(screen.getByText("$118.4M")).toBeTruthy();
   });
 
-  it("serialises the chart as a standalone SVG whose colours do not depend on classes", async () => {
+  it("serializes the chart as a standalone SVG whose colors do not depend on classes", async () => {
     const user = userEvent.setup();
     render(<ResultTabs result={ANSWERED} />);
     await user.click(screen.getByRole("tab", { name: "Chart" }));

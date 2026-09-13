@@ -25,8 +25,6 @@ def summary_rows() -> dict[str, list[str]]:
 
 README_SECTIONS = [
     "Run it locally",
-    "Other ways to run",
-    "Tests",
     "How it works",
     "Results",
     "Tradeoffs",
@@ -112,23 +110,17 @@ def test_run_it_locally_is_one_prerequisites_line_and_three_steps_ending_in_npm_
         assert absent not in text
 
 
-def test_other_ways_to_run_is_docker_and_the_cli_in_at_most_eight_lines() -> None:
-    lines = section("Other ways to run")
-    assert len(lines) <= 8
-    found = commands(lines)
-    assert "docker build -t bse-insights ." in found
-    assert any(command.startswith("uv run python -m nlq.ask ") for command in found)
-
-
 def test_every_setup_command_is_one_claude_md_or_the_scripts_also_use() -> None:
-    found = commands(section("Run it locally") + section("Other ways to run") + section("Tests"))
+    found = commands(section("Run it locally"))
     assert "npm run dev" in found
     assert [command for command in found if command not in CLAUDE_MD + SCRIPT_TEXT] == []
 
 
-def test_the_readme_drops_the_manual_run_block_and_the_smoke_script() -> None:
-    assert "Without `npm run dev`" not in README
-    assert "scripts/smoke.sh" not in README
+def test_npm_run_dev_is_the_only_way_the_readme_runs_anything() -> None:
+    """Docker, the CLI, the tests and the smoke script live in CLAUDE.md, not the README."""
+    assert commands(README.splitlines()) == ["npm run dev"]
+    for absent in ("docker", "nlq.ask", "pytest", "scripts/smoke.sh", "Without `npm run dev`"):
+        assert absent not in README, absent
 
 
 def test_the_decisions_record_the_fakes_exactly_once() -> None:

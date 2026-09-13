@@ -82,6 +82,20 @@ def test_a_different_column_count_fails() -> None:
     assert not compare(rows(["a", 1]), rows(["a"]), ordered=False)
 
 
+def test_an_extra_constant_label_column_passes() -> None:
+    assert compare(rows([333707]), rows([2024, 333707]), ordered=False)
+    assert compare(rows(["a", 1], ["b", 2]), rows(["Nets", "a", 1], ["Nets", "b", 2]), ordered=True)
+
+
+def test_an_extra_varying_column_fails() -> None:
+    labelled = rows([2024, "a", 1], [2025, "b", 2])
+    assert not compare(rows(["a", 1], ["b", 2]), labelled, ordered=False)
+
+
+def test_a_wrong_measure_with_a_label_column_fails() -> None:
+    assert not compare(rows([333707]), rows([2024, 290000]), ordered=False)
+
+
 def test_a_different_row_count_fails() -> None:
     assert not compare(rows(["a", 1]), rows(["a", 1], ["b", 2]), ordered=False)
 

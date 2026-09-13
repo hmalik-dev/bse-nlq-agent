@@ -104,6 +104,13 @@ def test_the_output_contract_names_both_decline_categories(context: PromptContex
     assert '"destructive"' in context.system
 
 
+def test_a_total_row_leads_with_the_values_it_filters_on(context: PromptContext) -> None:
+    assert "A total row names what it totals" in context.system
+    assert "(the year, season label, club name or category)" in context.system
+    assert "alias (year, season, club, category), followed by the measure" in context.system
+    assert "selects strftime('%Y', the date) AS\n  year and groups by it" in context.system
+
+
 def test_the_context_is_cached_per_day() -> None:
     assert build_context(GOLDEN_TODAY) is build_context(GOLDEN_TODAY)
     assert build_context(GOLDEN_TODAY) is not build_context(date(2025, 3, 2))
@@ -190,7 +197,7 @@ def test_last_season_is_worked_out_per_club_from_the_data_and_today(
     nets = _rows(executor, by_question["How many tickets did the Nets sell last season?"])
     both = _rows(executor, by_question["How many tickets did we sell last season?"])
 
-    assert [row[0] for row in nets] == ["2025-26"]
+    assert [(club, season) for club, season, _ in nets] == [("Brooklyn Nets", "2025-26")]
     assert [(club, season) for club, season, _ in both] == [
         ("Brooklyn Nets", "2025-26"),
         ("New York Liberty", "2025"),

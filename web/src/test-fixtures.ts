@@ -142,3 +142,15 @@ export function jsonResponse(body: unknown, status = 200): Response {
     headers: { "Content-Type": "application/json" },
   });
 }
+
+/** A single total with no filter to label: one column, one value. */
+export const ONE_VALUE: AskResult = {
+  ...BASE,
+  question: "How many tickets have we ever sold?",
+  answer: "We have sold 1,204,880 tickets.",
+  sql: "SELECT COUNT(*) AS tickets_sold FROM tickets WHERE status = 'sold'",
+  columns: ["tickets_sold"],
+  rows: [[1204880]],
+  row_count: 1,
+  chart: null,
+};

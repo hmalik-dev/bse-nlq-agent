@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { ResultsTable } from "./ResultsTable";
+import { ONE_VALUE } from "../test-fixtures";
 
 function bodyRows(): HTMLTableRowElement[] {
   const [, ...rows] = screen.getAllByRole("row") as HTMLTableRowElement[];
@@ -24,5 +25,25 @@ describe("ResultsTable row dividers", () => {
       expect(classes).not.toContain("border-b");
       expect(classes).not.toContain("last:border-b-0");
     }
+  });
+});
+
+describe("ResultsTable alignment", () => {
+  it("puts a lone column's header and value on the same side", () => {
+    render(<ResultsTable columns={ONE_VALUE.columns} rows={ONE_VALUE.rows} />);
+    const header = screen.getByRole("columnheader", { name: "tickets sold" });
+    const cell = screen.getByRole("cell", { name: "1,204,880" });
+    for (const element of [header, cell]) {
+      const classes = element.className.split(" ");
+      expect(classes).toContain("text-left");
+      expect(classes).not.toContain("num");
+    }
+    expect(cell.className.split(" ")).toContain("tabular-nums");
+  });
+
+  it("keeps numbers right-aligned when there is more than one column", () => {
+    render(<ResultsTable columns={["year", "tickets_sold"]} rows={[[2024, 333707]]} />);
+    expect(screen.getByRole("columnheader", { name: "tickets sold" }).className.split(" ")).toContain("num");
+    expect(screen.getByRole("cell", { name: "333,707" }).className.split(" ")).toContain("num");
   });
 });

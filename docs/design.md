@@ -68,6 +68,9 @@ The six chips on the ask screen, in order, served by `GET /api/examples` from
 Below 1024 the rail moves behind a header button, the drawer goes full width and
 tables scroll inside their own container.
 
+**Results table.** A total row leads with what it totals (`YEAR | TICKETS SOLD`), and a
+lone column is left-aligned so its header and value sit together.
+
 **Accessibility.** A real label on the input, `aria-label` on icon buttons,
 4.5:1 text contrast, visible cyan focus rings, and a real `<table>` with header cells.
 

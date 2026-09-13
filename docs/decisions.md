@@ -140,14 +140,16 @@ The choices a reviewer would ask about, and why. One entry each: the decision,
 - **Real team and venue names; fictional performers.**
   *Why:* the questions need the teams, and no real artist should appear to play a date they did not.
   *Rejected:* real artist names.
-- **US English; the operator's sides are teams.** "Club" survives only as the `'Club'` seat tier,
-  an arena seating level; the column is `teams.is_home_team`. The drawer's definitions are whole
-  sentences.
-  *Why:* the brief and its reader are American, and the model echoes the prompt's words, so a prompt
-  that said "club" answered "both clubs".
-  *Rejected:* keeping `is_home_club` in the database (the model reads column names too); renaming
-  the seat tier (it is a real Barclays seating level, not a team). The accuracy report predates
-  the wording change until its next full run; it was checked with a capped eight-question run.
+- **US English; the operator's sides are teams, everywhere, including `teams.is_home_team`.**
+  The one other word for a side survives only as a seat tier name, an arena seating level. The
+  drawer's definitions are whole sentences. A database seeded before the rename must be reseeded
+  (delete `data/tickets.db`, then `npm run dev`); there is no migration.
+  *Why:* the brief and its reader are American, and the model echoes the prompt's words back in
+  its answers and assumptions.
+  *Rejected:* keeping the old column name (the model reads column names too); renaming the seat
+  tier (it is a real Barclays seating level, not a team); a migration or startup check for a
+  synthetic, regenerated file. The accuracy report predates the wording change until its next
+  full run; a capped eight-question run in the browser checked it instead.
 
 ## Interface
 

@@ -6,7 +6,8 @@ Each question is asked once per model, sequentially, through `Agent.ask`, with
 today as the real date and a database seeded for it. The
 outcome is one JSON file per model, `docs/eval-results.md`, and the model the
 decision rule in `docs/decisions.md` picks. `--fake` drives the same pipeline
-through a scripted client, which is how the harness is debugged for nothing.
+through a scripted client, which is how the harness is debugged for nothing; its
+JSON goes beside the `--out` report, in `<report name>-json/`, never `eval/results/`.
 """
 
 from __future__ import annotations
@@ -125,10 +126,11 @@ def main(argv: list[str] | None = None, *, today: date | None = None) -> int:
         sweep(model, entries, expected, database, today, fake=args.fake)
         for model in args.models.split(",")
     ]
+    out = Path(args.out)
     for run in runs:
-        write_json(run, today, database, fake=args.fake)
+        write_json(run, today, database, results_dir(out, fake=args.fake), fake=args.fake)
     decision = decide(runs)
-    write_report(Path(args.out), runs, decision, today, database, fake=args.fake)
+    write_report(out, runs, decision, today, database, fake=args.fake)
     print(f"Total cost: ${sum(run.total_cost_usd for run in runs):.4f}")
     print(f"Decision: {decision.winner or 'no model qualifies'} - {decision.reason}")
     return EXIT_OK
@@ -281,13 +283,23 @@ def decide(runs: list[ModelRun]) -> Decision:
     )
 
 
-def write_json(run: ModelRun, today: date, database: Path, *, fake: bool = False) -> Path:
+def results_dir(out: Path, *, fake: bool) -> Path:
+    """Where the per-model JSON goes. A measured run writes the committed results;
+    a fake run writes beside its report, so it can never overwrite them."""
+    if fake:
+        return out.parent / f"{out.stem}-json"
+    return RESULTS_DIR
+
+
+def write_json(
+    run: ModelRun, today: date, database: Path, directory: Path, *, fake: bool = False
+) -> Path:
     """One file per model, so a failure's generated SQL can be read after the run.
 
     `fake` is recorded so a scripted sweep can never be mistaken for a measured one.
     """
-    RESULTS_DIR.mkdir(parents=True, exist_ok=True)
-    path = RESULTS_DIR / f"{run.model}.json"
+    directory.mkdir(parents=True, exist_ok=True)
+    path = directory / f"{run.model}.json"
     payload = {
         "model": run.model,
         "today": today.isoformat(),

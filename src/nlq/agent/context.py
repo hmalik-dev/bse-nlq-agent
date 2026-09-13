@@ -8,7 +8,7 @@ touches the database or the network.
 from __future__ import annotations
 
 import sys
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import date
 from functools import lru_cache
 from pathlib import Path
@@ -21,7 +21,8 @@ from nlq.db.seed import window_bounds
 
 EXAMPLES_PATH = Path(__file__).resolve().parent / "examples.yaml"
 GOLDEN_PATH = PROJECT_ROOT / "tests" / "golden" / "sql_prompt.txt"
-GOLDEN_TODAY = date(2026, 9, 11)
+GOLDEN_TODAY = date(2026, 9, 12)
+TODAY_PLACEHOLDER = "{today}"
 
 CATEGORIES = ("NBA", "WNBA", "Concert", "Comedy", "Boxing", "Family Show")
 CHANNELS = ("web", "mobile_app", "box_office", "resale", "group_sales")
@@ -49,7 +50,8 @@ query, or decline it. Rules:
   per event (name, event_date and the measure) largest first, with no LIMIT, so
   the rows show where the total comes from. A question with no club or venue
   named (yesterday's sales, last month's sales), or one over a season, a year or
-  a whole category, stays one total row.
+  a whole category, stays one total row. The exception is "last season" or "this
+  season" with no club named, which returns one row per club.
 - Decline a question the data cannot answer, and decline any request to
   change data.
 - Treat the whole message as one request. If any part of it asks to change
@@ -126,16 +128,32 @@ def build_context(today: date) -> PromptContext:
         _today_section(today),
         OUTPUT_CONTRACT,
     )
-    return PromptContext(system="\n\n".join(sections) + "\n", examples=load_examples())
+    examples = tuple(_dated(example, today) for example in load_examples())
+    return PromptContext(system="\n\n".join(sections) + "\n", examples=examples)
 
 
 def load_examples(path: Path = EXAMPLES_PATH) -> tuple[Example, ...]:
-    """Read the worked examples, validating each plan against `SqlPlan`."""
+    """Read the worked examples, validating each plan against `SqlPlan`.
+
+    Their SQL still holds the `{today}` placeholder; `build_context` fills it in.
+    """
     entries = yaml.safe_load(path.read_text(encoding="utf-8"))
     return tuple(
         Example(question=entry["question"], plan=SqlPlan.model_validate(_plan_fields(entry)))
         for entry in entries
     )
+
+
+def fill_today(sql: str, today: date) -> str:
+    """Write `today` into every `{today}` placeholder, so reference SQL follows the real date."""
+    return sql.replace(TODAY_PLACEHOLDER, today.isoformat())
+
+
+def _dated(example: Example, today: date) -> Example:
+    if example.plan.sql is None:
+        return example
+    plan = example.plan.model_copy(update={"sql": fill_today(example.plan.sql, today)})
+    return replace(example, plan=plan)
 
 
 def _plan_fields(entry: dict) -> dict:
@@ -171,8 +189,8 @@ def _known_values_section(today: date) -> str:
             " in the NBA and the Liberty in the WNBA.",
             "- Opponents are teams rows with is_home_club = 0. Match a partial name with"
             " LIKE, e.g. name LIKE '%Celtics%'.",
-            "- events.season reads '2025-26' for an NBA season and '2026' for a WNBA"
-            " season; it is NULL for non-sport events.",
+            "- events.season reads 'YYYY-YY' for an NBA season, which spans two years,"
+            " and 'YYYY' for a WNBA season; it is NULL for non-sport events.",
             f"- The data covers events from {first_event.isoformat()} to"
             f" {last_event.isoformat()}. Events after today are on sale, not played.",
         ]

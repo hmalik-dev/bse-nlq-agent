@@ -2,8 +2,9 @@
 # teaches a join shape the brief's questions need; nothing here is decoration,
 # because every entry is paid for as prompt tokens on every question.
 #
-# Dates inside the SQL are written against a literal "today" of 2026-09-11 so
-# the model sees how to plug in the date the system prompt supplies.
+# Today's date is written as the placeholder {today}, which build_context fills
+# with the date the system prompt supplies, so the examples always match it.
+# Season labels are never written in; the SQL works them out from the data.
 
 - question: How many tickets did we sell last month?
   answerable: true
@@ -12,8 +13,8 @@
     FROM tickets t
     JOIN orders o ON o.order_id = t.order_id
     WHERE t.status = 'sold'
-      AND o.ordered_at >= date('2026-09-11', 'start of month', '-1 month')
-      AND o.ordered_at < date('2026-09-11', 'start of month')
+      AND o.ordered_at >= date('{today}', 'start of month', '-1 month')
+      AND o.ordered_at < date('{today}', 'start of month')
   assumptions:
     - "Sold means purchased last month (orders.ordered_at), not for events held last month."
     - Refunded tickets and comps are not counted.
@@ -42,23 +43,56 @@
 - question: How many tickets did the Nets sell last season?
   answerable: true
   sql: |-
+    WITH last_season AS (
+      SELECT MAX(s.season) AS season
+      FROM events s
+      JOIN teams c ON c.team_id = s.home_team_id
+      WHERE c.name = 'Brooklyn Nets'
+        AND s.season NOT IN (
+          SELECT x.season FROM events x
+          WHERE x.home_team_id = c.team_id AND x.event_date >= '{today}'
+        )
+    )
     SELECT e.season, COUNT(*) AS tickets_sold
     FROM tickets t
     JOIN events e ON e.event_id = t.event_id
     JOIN teams h ON h.team_id = e.home_team_id
     WHERE t.status = 'sold'
       AND h.name = 'Brooklyn Nets'
-      AND e.season = (
-        SELECT MAX(season) FROM events
-        WHERE category = 'NBA'
-          AND season NOT IN (
-            SELECT season FROM events WHERE category = 'NBA' AND event_date >= '2026-09-11'
-          )
-      )
+      AND e.season = (SELECT season FROM last_season)
     GROUP BY e.season
   assumptions:
-    - Last season is the most recent NBA season with no games still to play.
+    - Last season is the Nets' most recent season with no home games still to play.
     - Counts Nets home games at Barclays Center, playoffs included.
+  decline_reason: null
+  decline_category: null
+
+- question: How many tickets did we sell last season?
+  answerable: true
+  sql: |-
+    WITH last_season AS (
+      SELECT s.home_team_id, MAX(s.season) AS season
+      FROM events s
+      JOIN teams c ON c.team_id = s.home_team_id
+      WHERE c.is_home_club = 1
+        AND s.season NOT IN (
+          SELECT x.season FROM events x
+          WHERE x.home_team_id = c.team_id AND x.event_date >= '{today}'
+        )
+      GROUP BY s.home_team_id
+    )
+    SELECT h.name AS club, e.season, COUNT(*) AS tickets_sold
+    FROM tickets t
+    JOIN events e ON e.event_id = t.event_id
+    JOIN last_season ls ON ls.home_team_id = e.home_team_id AND ls.season = e.season
+    JOIN teams h ON h.team_id = e.home_team_id
+    WHERE t.status = 'sold'
+    GROUP BY h.team_id, e.season
+    ORDER BY h.name
+  assumptions:
+    - No club was named, so both clubs are counted, each for its own last season.
+    - A club's last season is its most recent season with no home games still to play.
+    - Playoff games are included.
   decline_reason: null
   decline_category: null
 
@@ -69,7 +103,7 @@
     FROM tickets t
     JOIN events e ON e.event_id = t.event_id
     WHERE t.status = 'sold'
-      AND e.event_date < '2026-09-11'
+      AND e.event_date < '{today}'
     GROUP BY e.category
     ORDER BY revenue DESC
     LIMIT 5
@@ -107,8 +141,8 @@
     JOIN teams h ON h.team_id = e.home_team_id
     WHERE t.status = 'sold'
       AND h.name = 'New York Liberty'
-      AND o.ordered_at >= date('2026-09-11', 'start of month', '-1 month')
-      AND o.ordered_at < date('2026-09-11', 'start of month')
+      AND o.ordered_at >= date('{today}', 'start of month', '-1 month')
+      AND o.ordered_at < date('{today}', 'start of month')
     GROUP BY e.event_id
     ORDER BY tickets_sold DESC
   assumptions:
@@ -129,7 +163,7 @@
     JOIN teams a ON a.team_id = e.away_team_id
     WHERE t.status = 'sold'
       AND h.name = 'Brooklyn Nets'
-      AND e.event_date < '2026-09-11'
+      AND e.event_date < '{today}'
     GROUP BY a.team_id
     ORDER BY average_gate DESC
     LIMIT 1

@@ -1,8 +1,9 @@
 """Run the golden set against each candidate model and write the results.
 
-    uv run python -m eval.run --models claude-sonnet-5,claude-haiku-4-5 --today 2026-09-11
+    uv run python -m eval.run --models claude-sonnet-5,claude-haiku-4-5
 
-Each question is asked once per model, sequentially, through `Agent.ask`. The
+Each question is asked once per model, sequentially, through `Agent.ask`, with
+today as the real date and a database seeded for it. The
 outcome is one JSON file per model, `docs/eval-results.md`, and the model the
 decision rule in `docs/decisions.md` picks. `--fake` drives the same pipeline
 through a scripted client, which is how the harness is debugged for nothing.
@@ -33,7 +34,6 @@ from nlq.agent.sql_guard import guard
 from nlq.db.seed import seed_database
 
 DEFAULT_MODELS = "claude-sonnet-5,claude-haiku-4-5"
-DEFAULT_TODAY = "2026-09-11"
 DEFAULT_REPORT = config.PROJECT_ROOT / "docs" / "eval-results.md"
 DATA_DIR = config.PROJECT_ROOT / "data"
 RESULTS_DIR = Path(__file__).resolve().parent / "results"
@@ -111,13 +111,14 @@ class Decision:
     reason: str
 
 
-def main(argv: list[str] | None = None) -> int:
+def main(argv: list[str] | None = None, *, today: date | None = None) -> int:
+    """`today` is the real date; tests pass one in so a run is reproducible."""
     args = parse_args(argv)
     if not args.fake and not config.anthropic_api_key():
         print("ANTHROPIC_API_KEY is not set. Add it to .env, or run with --fake.", file=sys.stderr)
         return EXIT_MISSING_KEY
-    today = date.fromisoformat(args.today)
-    entries = select_entries(load_golden(), args.only)
+    today = today or config.today()
+    entries = select_entries(load_golden(today), args.only)
     database = prepare_database(today)
     expected = reference_results(entries, database)
     runs = [
@@ -136,7 +137,6 @@ def main(argv: list[str] | None = None) -> int:
 def parse_args(argv: list[str] | None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(prog="python -m eval.run", description=__doc__)
     parser.add_argument("--models", default=DEFAULT_MODELS, help="comma-separated model names")
-    parser.add_argument("--today", default=DEFAULT_TODAY, help="the date the agent treats as now")
     parser.add_argument("--only", help="run a single golden entry by id")
     parser.add_argument("--fake", action="store_true", help="use the scripted client, no API")
     parser.add_argument("--out", default=str(DEFAULT_REPORT), help="where the markdown report goes")
@@ -153,9 +153,8 @@ def select_entries(entries: list[GoldenEntry], only: str | None) -> list[GoldenE
 
 
 def prepare_database(today: date) -> Path:
-    """Pin the agent to `today` and to a database seeded for that date."""
+    """Point the agent at a database seeded for `today`, seeding it if this date has none yet."""
     path = DATA_DIR / f"eval-{today.isoformat()}.db"
-    os.environ["NLQ_TODAY"] = today.isoformat()
     os.environ["NLQ_DATABASE_PATH"] = str(path)
     if not path.is_file():
         print(f"Seeding {path} at full scale for {today.isoformat()} ...")

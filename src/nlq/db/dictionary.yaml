@@ -18,6 +18,10 @@ business_rules:
     events.seating_capacity for that event. Use seating_capacity, not
     venues.capacity, because the arena is reconfigured per event.
   - '"Home games" are events where home_team_id points at a club with is_home_club = 1.'
+  - >-
+    The data holds Barclays Center home games only. A Nets season has 41
+    regular-season home games (of 82 played) and a Liberty season has 20 (of 44
+    played), plus any home playoff games. Away games are not in the data.
   - Date wording about when a game or show happened filters events.event_date.
     Date wording about when a purchase happened filters orders.ordered_at.
     If the question is ambiguous, prefer orders.ordered_at for "sold"/"bought"
@@ -33,9 +37,16 @@ business_rules:
     playoff home games. Include playoff games unless the question says
     "regular season".
   - >-
-    "Last season" with no club named means the most recent NBA season with no
-    games left to play, e.g. '2025-26' on a date in September 2026. Filter on
-    events.season, not on dates.
+    Seasons are worked out per club, from the data and today's date; never write
+    a season label from memory. "Last season" for a club is that club's most
+    recent events.season with no home games (regular season or playoffs) on or
+    after today. "This season" for a club is its season in progress (home games
+    both before and on or after today), or if none, its earliest season with
+    games on or after today. Filter on events.season, not on dates.
+  - >-
+    "Last season" or "this season" with no club named means both clubs, each
+    with its own season: one row per club, labelled with the club name and
+    events.season, and the answer names both seasons.
   - Events dated in the future are on sale but not yet played, so they have
     partial sales. Exclude them when a question is about past performance.
   - Attendance is not recorded. Tickets sold is the closest available measure.
@@ -52,9 +63,11 @@ definitions:
   - term: Sell-through
     text: is tickets sold divided by the event's `seating_capacity`.
   - term: Home games
-    text: are Nets or Liberty games at Barclays Center.
+    text: are all the data holds, 41 of 82 a Nets season and 20 of 44 a Liberty one.
   - term: A season
     text: includes its playoff games unless you say "regular season".
+  - term: Last season
+    text: is each club's latest season with no home games left, one row per club.
   - term: Attendance
     text: is not recorded, so tickets sold stands in for it.
 
@@ -84,7 +97,10 @@ tables:
       home_team_id: Home club for sport events, NULL otherwise.
       away_team_id: Visiting club for sport events, NULL otherwise.
       event_date: Date the event takes or took place (ISO date).
-      season: "NBA seasons read '2025-26'; WNBA seasons read '2026'; NULL for non-sport events."
+      season: >-
+        NBA seasons span two years and read 'YYYY-YY' (the opening year, then the
+        last two digits of the closing year); WNBA seasons read 'YYYY'; NULL for
+        non-sport events.
       is_playoff: 1 for postseason games.
       seating_capacity: >-
         Seats this event's house was configured for: 17732 for basketball, 19000

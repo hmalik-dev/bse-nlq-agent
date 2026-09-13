@@ -19,7 +19,7 @@ from nlq.agent.agent import (
     chart_for,
 )
 from nlq.agent.answer import AnswerWriter
-from nlq.agent.context import load_examples
+from nlq.agent.context import build_context, load_examples
 from nlq.agent.executor import Executor, QueryResult
 from nlq.agent.fake import FakeAgent
 from nlq.agent.llm import SqlWriter
@@ -180,7 +180,7 @@ def test_every_empty_suggestion_asked_through_the_fake_client_is_answerable(
 ) -> None:
     empty_agent, _, _ = make_agent(db_path, [plan(EMPTY_SQL)])
     suggestions = empty_agent.ask(QUESTION).suggestions
-    worked_plans = {example.question: example.plan for example in load_examples()}
+    worked_plans = {example.question: example.plan for example in build_context(TODAY).examples}
 
     statuses = {}
     for suggestion in suggestions:

@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
+from datetime import date
 from pathlib import Path
 from typing import Literal
 
@@ -15,6 +16,7 @@ import sqlglot
 import yaml
 from pydantic import BaseModel, Field, model_validator
 
+from nlq.agent.context import fill_today
 from nlq.agent.executor import QueryResult
 from nlq.agent.models import AskResult
 
@@ -63,9 +65,12 @@ class Verdict:
     reason: str
 
 
-def load_golden(path: Path = GOLDEN_PATH) -> list[GoldenEntry]:
-    """Read and validate the golden set."""
+def load_golden(today: date, path: Path = GOLDEN_PATH) -> list[GoldenEntry]:
+    """Read and validate the golden set, with `today` written into its reference SQL."""
     entries = yaml.safe_load(path.read_text(encoding="utf-8"))
+    for entry in entries:
+        if entry.get("sql"):
+            entry["sql"] = fill_today(entry["sql"], today)
     return [GoldenEntry.model_validate(entry) for entry in entries]
 
 

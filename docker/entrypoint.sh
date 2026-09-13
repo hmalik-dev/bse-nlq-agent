@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Seed the database when the container has none (or NLQ_RESEED=1), then serve.
+# NLQ_SEED_SCALE shrinks the seed (the hosted demo uses 0.2); full scale is the default.
 # The dataset is generated relative to today, which is why it is built here
 # rather than baked into the image.
 set -euo pipefail
@@ -14,8 +15,9 @@ if [[ ! -f "$NLQ_DATABASE_PATH" || "${NLQ_RESEED:-0}" == "1" ]]; then
     echo "remove it (docker volume rm bse-data) and start again." >&2
     exit 1
   fi
-  echo "Seeding the database at $NLQ_DATABASE_PATH (about a minute) ..."
-  python -m nlq.db.seed
+  scale="${NLQ_SEED_SCALE:-1.0}"
+  echo "Seeding the database at $NLQ_DATABASE_PATH at scale $scale (about a minute at 1.0) ..."
+  python -m nlq.db.seed --scale "$scale"
   echo "Seed finished. Starting the server."
 else
   echo "Using the existing database at $NLQ_DATABASE_PATH (set NLQ_RESEED=1 to rebuild it)."

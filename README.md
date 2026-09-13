@@ -42,6 +42,10 @@ docker run --env-file .env -p 127.0.0.1:8000:8000 bse-insights
 
 `scripts/smoke.sh` checks the local path end to end and ends with `SMOKE PASSED`.
 
+**Hosted:** <https://bse-insights.fly.dev> is the same app for a first look, on synthetic
+data with a spend-capped key; run it locally to exercise it fully. Hosting is Fly, one machine,
+one volume; `scripts/deploy.sh` redeploys with a dedicated, capped `ANTHROPIC_API_KEY` that the operator exports.
+
 ## Results
 
 - **Accuracy:** Claude Sonnet 5 passed 20/20 golden questions. They include the

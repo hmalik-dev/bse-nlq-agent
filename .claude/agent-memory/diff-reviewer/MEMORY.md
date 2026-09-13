@@ -2,3 +2,4 @@
 - [SQL rewriting checklist rows](review_checklist_sql_rewriting.md) — trailing `--` comments, sqlglot class assumptions, quoted function names, clock-based error mapping
 - [Model client checklist rows](review_checklist_model_client.md) — greps that settle Anthropic SDK surface and fake-client fidelity before claiming drift
 - [CI scope checklist row](review_checklist_ci_scope.md) — CI lints only `src tests`; new top-level packages escape the gate. Settled sqlglot ORDER BY facts.
+- [Deploy/hosting config checklist rows](review_checklist_deploy_config.md) — volume ownership vs non-root USER, health-check Host vs TrustedHostMiddleware, public-vs-local risks

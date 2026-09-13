@@ -17,6 +17,7 @@ SCRIPTS = (
     PROJECT_ROOT / "docker" / "entrypoint.sh",
     PROJECT_ROOT / "scripts" / "smoke.sh",
     PROJECT_ROOT / "scripts" / "dev.sh",
+    PROJECT_ROOT / "scripts" / "deploy.sh",
 )
 
 

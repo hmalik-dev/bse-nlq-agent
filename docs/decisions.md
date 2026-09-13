@@ -182,6 +182,9 @@ The choices a reviewer would ask about, and why. One entry each: the decision,
 - **The container seeds at start, runs as a non-root user, and has no other hardening.**
   *Why:* data stays relative to today and out of the image; `.dockerignore` keeps `.env*` out.
   *Rejected:* baking the database into the image (stale dates, huge image).
+- **Hosted on Fly as a second way in; the local run stays primary.**
+  *Why:* a link lets a reviewer see the app before cloning it; one warm machine and a volume, no cold start.
+  *Rejected:* Render (free tier sleeps); Vercel (no disk for SQLite); an in-app throttle (the spend cap bounds cost).
 - **Tickets live in Linear; CI is the merge gate.**
   *Why:* each ticket carries its acceptance criteria and was built and reviewed on its own.
   *Rejected:* a backlog file in the repo (it drifted from the tracker).

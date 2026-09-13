@@ -224,8 +224,14 @@ def _clone_with(tmp_path: Path, script: Path, env_file: str | None) -> Path:
 @pytest.mark.parametrize("script", SCRIPTS[1:], ids=lambda path: path.name)
 @pytest.mark.parametrize(
     ("shell_key", "env_file"),
-    [(None, None), (None, "NLQ_SQL_MODEL=claude-sonnet-5\n"), ("  ", f"{KEY_VAR}=\n")],
-    ids=["no-env-file", "env-file-without-a-key", "blank-key"],
+    [
+        (None, None),
+        (None, "NLQ_SQL_MODEL=claude-sonnet-5\n"),
+        ("  ", f"{KEY_VAR}=\n"),
+        (None, f'{KEY_VAR}=""\n'),
+        ("", f"{KEY_VAR}=from-the-file\n"),  # the app never lets .env override the shell
+    ],
+    ids=["no-env-file", "env-file-without-a-key", "blank-key", "quoted-blank", "blank-shell-wins"],
 )
 def test_a_script_without_a_key_names_it_and_installs_nothing(
     stubs: dict[str, str], tmp_path: Path, script: Path, shell_key: str | None, env_file: str | None
@@ -241,9 +247,14 @@ def test_a_script_without_a_key_names_it_and_installs_nothing(
     assert "npm " not in _calls(stubs)
 
 
-def test_npm_run_dev_finds_a_key_that_is_only_in_env(stubs: dict[str, str], tmp_path: Path) -> None:
+@pytest.mark.parametrize(
+    "line", ["{}=from-the-file", "export {}='from-the-file'", "  {}=from-the-file"]
+)
+def test_npm_run_dev_finds_a_key_that_is_only_in_env(
+    stubs: dict[str, str], tmp_path: Path, line: str
+) -> None:
     env = {name: value for name, value in stubs.items() if name != KEY_VAR}
-    clone = _clone_with(tmp_path, SCRIPTS[2], f"{KEY_VAR}=from-the-file\n")
+    clone = _clone_with(tmp_path, SCRIPTS[2], line.format(KEY_VAR) + "\n")
     run = _run_dev_with_the_api_port_taken(env, clone)
     assert NO_KEY_LINE not in run.stderr
     assert "uv sync" in _calls(stubs)

@@ -1,7 +1,7 @@
 // One AskResult per status, shaped like the fake agent's answers. Test-only.
 import type { AskResult, Schema, Trace } from "./types";
 
-export const TRACE: Trace = {
+const TRACE: Trace = {
   steps: [
     { name: "Reading schema", ms: 2 },
     { name: "Writing SQL", ms: 1240 },

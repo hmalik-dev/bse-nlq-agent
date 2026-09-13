@@ -26,13 +26,12 @@ def summary_rows() -> dict[str, list[str]]:
 README_SECTIONS = [
     "Run it locally",
     "Other ways to run",
+    "Tests",
     "How it works",
     "Results",
-    "Key files",
     "Tradeoffs",
     "What I'd do differently",
     "How it was built",
-    "The data",
     "Docs",
 ]
 CONTRIBUTOR_DETAIL = (
@@ -48,7 +47,7 @@ CONTRIBUTOR_DETAIL = (
 
 
 def test_the_readme_is_short_and_follows_the_interviewer_outline() -> None:
-    assert len(README.splitlines()) <= 90
+    assert len(README.splitlines()) <= 75
     headings = [line[3:] for line in README.splitlines() if line.startswith("## ")]
     assert headings == README_SECTIONS
 
@@ -67,7 +66,7 @@ def test_the_summary_quotes_each_models_score_and_leaves_the_table_to_the_report
 
 def test_the_headline_quotes_the_chosen_models_mean_cost() -> None:
     mean_cost = summary_rows()["claude-sonnet-5"][4]
-    assert f"- **Cost:** {mean_cost} per question on average." in README
+    assert f"at {mean_cost} per question on average." in README
 
 
 def test_every_dollar_figure_comes_from_the_latest_evaluation_run() -> None:
@@ -123,7 +122,7 @@ def test_other_ways_to_run_is_docker_and_the_cli_in_at_most_eight_lines() -> Non
 
 
 def test_every_setup_command_is_one_claude_md_or_the_scripts_also_use() -> None:
-    found = commands(section("Run it locally") + section("Other ways to run"))
+    found = commands(section("Run it locally") + section("Other ways to run") + section("Tests"))
     assert "npm run dev" in found
     assert [command for command in found if command not in CLAUDE_MD + SCRIPT_TEXT] == []
 

@@ -91,8 +91,8 @@ def max_question_chars() -> int:
 def allowed_hosts() -> list[str]:
     """The host names the API answers to; anything else is refused (DNS rebinding).
 
-    Local by default. A deployment behind its own domain sets NLQ_ALLOWED_HOSTS
-    to a comma-separated list.
+    localhost and 127.0.0.1 by default; NLQ_ALLOWED_HOSTS replaces them with a
+    comma-separated list.
     """
     raw = _str_env("NLQ_ALLOWED_HOSTS", DEFAULT_ALLOWED_HOSTS)
     return [host.strip() for host in raw.split(",") if host.strip()]

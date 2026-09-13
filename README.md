@@ -16,14 +16,18 @@ You need [uv](https://docs.astral.sh/uv/getting-started/installation/) (it insta
 
 ## Other ways to run
 
-**Docker**, for a machine without uv or Node. The first start seeds the full dataset in about a minute; the app is on <http://localhost:8000>.
+**Docker**, if you don't have uv or Node. The app is on <http://localhost:8000>.
 
 ```sh
 docker build -t bse-insights .
 docker run --env-file .env -p 127.0.0.1:8000:8000 bse-insights
 ```
 
-**One question from the terminal:** `uv run python -m nlq.ask "How many tickets did we sell last month?"` prints the result as JSON.
+**From the terminal:** `uv run python -m nlq.ask "How many tickets did we sell last month?"`
+
+## Tests
+
+`uv run pytest -q` for the Python side and `npm run -w web test` for the interface. Neither calls the Anthropic API.
 
 ## How it works
 
@@ -36,36 +40,21 @@ flowchart LR
     D --> E[Model writes the answer<br/>from the rows]
 ```
 
-- **It can only read.** A check refuses anything but a single `SELECT`, and the database is opened read-only, so nothing can change the data. Details: [`docs/security.md`](docs/security.md).
-- **It says when it can't answer.** A question the data can't answer, or one asking to change data, gets a plain refusal instead of a guess.
-- **It shows its reading.** An ambiguous question ("revenue" with or without fees?) is answered with the assumption stated, not a question back.
+- **Read-only.** A check allows only a single `SELECT`, and the database itself is opened read-only.
+- **No guessing.** If the data can't answer a question, or it asks to change data, the app says so. Ambiguous terms like "revenue" are answered with the assumption stated.
+
+The pipeline is in `src/nlq/agent/agent.py`.
 
 ## Results
 
-- **Accuracy:** Claude Sonnet 5 passed 20/20 test questions, including the brief's examples, three requests to change data, two questions the data can't answer and three prompt injections. Haiku 4.5 scored 16/20.
-- **Cost:** $0.0215 per question on average.
-- **Safety:** every request to change data was refused before anything ran.
-
-| ![The answer on the SQL tab, showing the SELECT the agent wrote](docs/images/answer-sql.png) | ![A request to delete all ticket records, refused before anything ran](docs/images/blocked-write.png) |
-| --- | --- |
-| *The SQL behind that answer.* | *"Delete all ticket records." is refused.* |
-
-## Key files
-
-| File | What it does |
-|---|---|
-| `src/nlq/agent/agent.py` | The steps from question to answer, including the retry |
-| `src/nlq/agent/sql_guard.py` | Refuses any SQL that isn't a single read |
-| `src/nlq/agent/executor.py` | Runs the query on a read-only connection |
-| `src/nlq/db/dictionary.yaml` | What "revenue", "tickets sold" and other business terms mean |
-| `eval/golden.yaml` | The 20 test questions and what counts as right |
+Claude Sonnet 5 passed 20/20 test questions, including the brief's examples, attempts to change data and prompt injections, at $0.0215 per question on average. Haiku 4.5 scored 16/20. Details: [`docs/eval-results.md`](docs/eval-results.md).
 
 ## Tradeoffs
 
-- *Fixed steps, not a free-roaming agent:* predictable and testable, but the whole schema has to fit in the prompt.
-- *SQLite:* nothing to install and a real read-only mode, but a smaller SQL dialect.
-- *Local and single user:* no login or rate limits, because whoever runs it owns the key.
-- *Sonnet 5 over Haiku 4.5:* about three times the cost for four more right answers.
+- **SQLite with generated data, not a real warehouse:** nothing to install and a true read-only mode, but a smaller SQL dialect.
+- **Local and single user:** no login or rate limits, since whoever runs it supplies the key.
+- **Stated assumptions, not follow-up questions:** each question stands on its own.
+- **Sonnet 5 over Haiku 4.5:** more accurate answers at about three times the cost.
 
 ## What I'd do differently
 
@@ -74,17 +63,11 @@ flowchart LR
 
 ## How it was built
 
-[Claude Code](https://claude.com/claude-code) wrote the code, tests and docs from tickets tracked in Linear, and Claude Design drew the mockups in `design-plan/`. Tests, CI and interface work used a stand-in for the model, so they cost nothing; the paid evaluation ran only when the prompt changed.
-
-## The data
-
-Six tables, from venues and events down to one row per ticket: three years of Barclays Center games, concerts and shows, about five million tickets at full size. Refunds, comps and fees make "revenue" ambiguous on purpose.
-Dates are generated relative to today, so "last month" always has data. To reseed for a new day, delete `data/tickets.db` and run `npm run dev` again.
+[Claude Code](https://claude.com/claude-code) wrote the code, tests and docs from tickets tracked in Linear; Claude Design drew the mockups in `design-plan/`.
 
 ## Docs
 
 - [`docs/decisions.md`](docs/decisions.md): the choices a reviewer would ask about, and why.
 - [`docs/data.md`](docs/data.md): the dataset, its scale and its quirks.
-- [`docs/design.md`](docs/design.md): brand, screens and the API response.
 - [`docs/security.md`](docs/security.md): what could go wrong and what stops it.
-- [`docs/eval-results.md`](docs/eval-results.md): every test question and how each model did.
+- [`docs/design.md`](docs/design.md): brand, screens and the API response.

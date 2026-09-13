@@ -37,6 +37,9 @@ Season dates are the same every year, close to the real calendars: Nets 21 Oct โ
 Season labels are `YYYY-YY` for the Nets and `YYYY` for the Liberty. "Last season"
 is per club: its latest season with no home games left.
 
+The calendar is generated relative to the day it is seeded, so "last month" always has data.
+`npm run dev` seeds only once; to reseed for a later day, delete `data/tickets.db` and run it again.
+
 ## Realism targets
 
 Medians across played events. Sell-through is tickets sold รท `seating_capacity`.

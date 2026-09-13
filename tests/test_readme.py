@@ -23,11 +23,12 @@ def summary_rows() -> dict[str, list[str]]:
     }
 
 
-def test_the_model_table_matches_the_latest_evaluation_run() -> None:
+def test_the_summary_quotes_each_models_score_and_leaves_the_table_to_the_report() -> None:
     rows = summary_rows()
     assert list(rows) == ["claude-sonnet-5", "claude-haiku-4-5"]
-    for cells in rows.values():
-        assert f"| {' | '.join(cells)} |" in README
+    assert f"Claude Sonnet 5 passed {rows['claude-sonnet-5'][1]} golden questions" in README
+    assert f"Haiku scored {rows['claude-haiku-4-5'][1]}" in README
+    assert SUMMARY_ROW.search(README) is None
 
 
 def test_the_headline_quotes_the_chosen_models_mean_cost_and_latency() -> None:

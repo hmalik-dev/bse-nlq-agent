@@ -1,6 +1,6 @@
 """The six starter questions the ask screen offers as chips.
 
-The list is the one in `docs/design-brief.md` under "Example questions", in
+The list is the one in `docs/design.md` under "Example questions", in
 that order; the badge names the club mark drawn on the chip.
 """
 

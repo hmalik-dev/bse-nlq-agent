@@ -1,83 +1,60 @@
 # CLAUDE.md — build conventions for this repo
 
-Natural language query agent over a synthetic sports and entertainment ticketing
-database. Built for a hiring exercise; it is judged on agent design, SQL accuracy,
-code quality, error handling, documentation and the ability to talk through it.
+Rules and commands for agents working on BSE Insights, a natural language query
+agent over a synthetic ticketing database, built for a hiring exercise. It is judged
+on agent design, SQL accuracy, code quality, error handling, docs and the walkthrough.
 
-**Read `docs/decisions.md` before changing anything.** It records what was chosen
-and why; add to it whenever you make a new call. Then, for the work at hand:
-
-| Doc | Read it for |
-|---|---|
-| `docs/decisions.md` | every decision made so far, and why the rejected option lost |
-| `docs/data-spec.md` | what the generated data must look like, and the ranges tests assert |
-| `docs/design-brief.md` | brand assets, tokens, screens and states, the API response shape |
-| `docs/backlog.md` | which Linear tickets exist and what order they run in |
+**Read `docs/decisions.md` before changing anything**, and add an entry for every new
+call. Then read what the work touches: `docs/data.md` (dataset and tested ranges),
+`docs/design.md` (brand, tokens, screens, API shape), `docs/security.md` (boundaries).
 
 ## Commands
 
 | Task | Command |
 |---|---|
-| Install | `uv sync` |
-| Seed the database | `uv run python -m nlq.db.seed` |
-| Tests | `uv run pytest -q` |
-| Lint | `uv run ruff check src tests` |
+| Run the app: install, seed once, API :8000, dev UI :4000 | `npm run dev` |
+| Install | `uv sync` · `npm ci` (root; an npm workspace) |
+| Seed the database | `uv run python -m nlq.db.seed` (`--scale 0.2` for a fifth) |
+| Python tests, lint | `uv run pytest -q` · `uv run ruff check src tests` |
+| Web lint, typecheck, tests | `npm run -w web lint` · `typecheck` · `test` |
 | Ask from the terminal | `uv run python -m nlq.ask "How many tickets did we sell last month?"` |
-| Run the API | `uv run uvicorn nlq.api:app --reload` |
-| Accuracy evaluation | `uv run python -m eval.run` |
-| Smoke test of the local path (fake agent without a key) | `scripts/smoke.sh` |
-| Build the container image | `docker build -t bse-insights .` |
-| Run the container (seeds on first start) | `docker run --env-file .env -p 127.0.0.1:8000:8000 bse-insights` |
-| Install the web toolchain | `npm ci` (at the root; it is an npm workspace) |
-| Web dev server, proxying `/api` to port 8000 | `npm run -w web dev` |
-| Web lint, typecheck, tests | `npm run -w web lint`, `typecheck`, `test` |
+| Run the API alone | `uv run uvicorn nlq.api:app --reload` |
+| Web dev server alone (:4000, proxies `/api` to :8000) | `npm run -w web dev` |
 | Build the UI into `src/nlq/static` | `npm run -w web build` |
+| Accuracy evaluation (writes `docs/eval-results.md`; never hand-edit it) | `uv run python -m eval.run` (`--fake` for no key) |
+| Smoke test of the local path | `scripts/smoke.sh` |
+| Container | `docker build -t bse-insights .` · `docker run --env-file .env -p 127.0.0.1:8000:8000 bse-insights` |
 
 ## Shape
 
 ```
 src/nlq/
-  config.py      paths, NLQ_TODAY, model names from env
+  config.py      paths and settings from the environment
   db/            schema.sql · dictionary.yaml · seed.py · connection.py (read-only)
-  agent/         context.py · llm.py · sql_guard.py · executor.py · answer.py · agent.py
-  pricing.py     dollars per million tokens; cost_usd() for the trace and the evaluation
+  agent/         context.py · llm.py · sql_guard.py · executor.py · answer.py · agent.py · fake.py
+  pricing.py     dollars per million tokens
   ask.py         CLI: one question in, AskResult JSON out
-  api.py         FastAPI: POST /api/ask, GET /api/schema, GET /api/examples
+  api.py         FastAPI: /api/ask, /api/schema, /api/examples, /api/health, the built UI
 web/             React + Vite + TypeScript + Tailwind, built into src/nlq/static
-eval/            golden.yaml · run.py
-tests/
+eval/            golden.yaml · run.py · report.py
+scripts/         dev.sh · smoke.sh
 ```
 
-The agent core never imports the API or the UI. Everything (UI, evaluation, tests)
-goes through `Agent.ask(question) -> AskResult`.
+The agent core never imports the API or the UI. Everything goes through
+`Agent.ask(question) -> AskResult`.
 
 ## Rules
 
 - Secrets come from the environment only. Never write a key into a file or a command.
-- The query path uses a read-only SQLite connection. The SQL guard is the second
-  line of defence, not the only one.
-- Every change ships with tests in the same commit. Tests never call the Anthropic
-  API — use the fake client.
-- No new dependency without a line in `docs/decisions.md` saying why.
-- Keep functions under ~30 lines and name things the way an interviewer would
-  expect to hear them described out loud. This code gets presented, not just read.
-- Conventional Commits, one commit per milestone.
+- The query path uses a read-only SQLite connection; the SQL guard is the second layer.
+- Every change ships with tests. Tests never call the Anthropic API; use the fake client.
+- No new dependency without a `docs/decisions.md` entry saying why.
+- Functions under ~30 lines, named the way you would say them out loud. Conventional Commits.
 
 ## Project
 
-- **Tracker**: Linear team `BSE`, project `BSE NLQ`. Ready = Todo/Backlog. The
-  tickets themselves are the source; `docs/backlog.md` maps them and their order.
-- **Pipeline settings**: `.claude/project.json` — base branch, tracker states,
-  lane settings, verify patterns. CI (`.github/workflows/ci.yml`) is the merge gate.
-- **Verification agents**: `.claude/agents/browser-verifier.md` drives the ask
-  flow in a browser; `.claude/agents/parity-checker.md` compares a screen against
-  its frame in the design canvas.
-- **Lanes**: no lane tooling. There is no database server and no long-running
-  service, so a ticket runs in a plain git worktree: `uv sync`, then the commands
-  above.
-- **Stack**: Python 3.12 managed by uv, FastAPI, SQLite. `web/` is Vite + React +
-  TypeScript + Tailwind, built into the package's static directory.
-- **Verification surface**: the ask flow end to end in a browser — question to
-  answer, the SQL tab, the schema drawer, and the blocked and unanswerable states.
-- **Brand assets**: `web/public/brand/`. The BSE and Nets marks are solid white, so
-  they only work on dark surfaces. Usage rules are in `docs/design-brief.md`.
+- **Tracker:** Linear team `BSE`, project `BSE NLQ`. Pipeline settings: `.claude/project.json`; CI is the merge gate.
+- **Lanes:** no lane tooling. A ticket runs in a plain git worktree; `.worktreeinclude` copies `.env`.
+- **Verification:** `.claude/agents/browser-verifier.md` drives the ask flow;
+  `.claude/agents/parity-checker.md` compares a screen with the canvas.
+- **Brand assets:** `web/public/brand/`; usage rules in `docs/design.md`.

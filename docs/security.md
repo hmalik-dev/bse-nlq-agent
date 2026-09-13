@@ -1,9 +1,8 @@
 # Security
 
-How BSE Insights stays safe when a user, the model or a dependency supplies
-something hostile. It is a local, single-user tool: one person runs it on their
-own machine with their own API key. Every control below has a test that fails
-if the control breaks. Audited end to end in BSE-23.
+How BSE Insights stays safe when a user, the model or a dependency sends something
+hostile. It is a local, single-user tool run with the user's own key. Every
+control has a test that fails if the control breaks.
 
 ## Boundaries
 
@@ -34,25 +33,13 @@ if the control breaks. Audited end to end in BSE-23.
 
 ## Findings fixed in BSE-23
 
-1. **An alias shared with a subquery got a table past the allowlist.**
-   `SELECT sql FROM (SELECT 1) AS x, sqlite_master AS x` read `sqlite_master`,
-   and `pragma_database_list()` the same way returned the database's absolute
-   path. The exemption now matches CTE names, not aliases.
-2. **A wide row could exhaust memory, or outrun the deadline.** SQLite built
-   `hex(zeroblob(...))` values of hundreds of MB before the byte cap could
-   count them, and one such call is a single step the deadline cannot
-   interrupt. The connection now sets SQLite's length (1 MB) and column (100)
-   limits.
-3. **Any `Host` header was accepted**, so a DNS-rebinding page could spend the
-   key and read answers. `TrustedHostMiddleware` now allows the local names only.
-4. **A `#` or `?` in the database path dropped `mode=ro`.** The raw path was
-   spliced into the URI, so `a#b/tickets.db` opened a different file, created
-   it and allowed writes. The path is now percent-encoded.
-5. **Static serving answered an escaping path with the index page**, not a 404.
-   It never served the outside file, but the response pretended the path was a
-   route. It is now a 404.
-6. **The CLI had no question length cap.** It now applies the API's cap.
-7. **The container ran as root.** It now runs as `nlq`.
+1. An alias shared with a subquery got `sqlite_master` past the allowlist.
+2. One huge value (`hex(zeroblob(...))`) could exhaust memory before the byte cap.
+3. Any `Host` header was accepted, so a DNS-rebinding page could spend the key.
+4. A `#` or `?` in the database path dropped `mode=ro`.
+5. An escaping static path got the index page instead of a 404.
+6. The CLI had no question length cap.
+7. The container ran as root.
 
 ## Accepted risks
 
@@ -60,8 +47,8 @@ if the control breaks. Audited end to end in BSE-23.
   their own key; a spend cap on the key in the Anthropic console is the outer layer.
 - **No request body size cap, and a 422 echoes the input.** Only the local user can
   send one; a hosted deployment needs a body limit at its proxy.
-- **`/docs` and `/openapi.json` are served.** They describe four routes that are
-  already public in the README.
+- **`/docs` and `/openapi.json` are served.** They describe the routes already
+  documented in `docs/design.md`.
 - **SQLite's own error text reaches `repairs_exhausted`.** It is SQL wording about
   the model's query, never a path, and the repair loop needs it.
 - **A dev-only advisory in `@vitest/mocker`** (GHSA-82fw-gwwq-j7x9). It is in the test

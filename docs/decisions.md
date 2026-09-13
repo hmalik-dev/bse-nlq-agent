@@ -59,6 +59,9 @@ The choices a reviewer would ask about, and why. One entry each: the decision,
 - **Error messages are fixed sentences; detail goes to the log, and the UI never renders `message`.**
   *Why:* no path or SDK text can reach a screen.
   *Rejected:* a response-scrubbing middleware (it has to guess what a path looks like).
+- **No Swagger UI or ReDoc; `/openapi.json` stays.**
+  *Why:* both pages load a CDN script onto the app's origin, where it could spend the key.
+  *Rejected:* self-hosting the Swagger assets (a dependency for a page nobody needs).
 - **No auth, rate limit or spend guard in the app.**
   *Why:* one user runs it with their own key; a console spend cap is the outer layer.
   *Rejected:* a per-minute limit and daily budget file (more code than the risk).
@@ -86,6 +89,9 @@ The choices a reviewer would ask about, and why. One entry each: the decision,
 - **Worked examples are conversation turns, with `{today}` filled in at build time.**
   *Why:* the model sees the exact output shape; the system prompt stays a stable snapshot.
   *Rejected:* pasting examples into the system prompt; literal dates.
+- **Assumption limits are asked for, not enforced: a fourth is dropped, a long one kept whole.**
+  *Why:* structured output cannot enforce `maxLength`, and a correct query failed on a 130-character assumption.
+  *Rejected:* rejecting the plan (2 of 18 live questions errored); truncating (loses the reading it states).
 - **One SDK retry and a 60-second timeout; every SDK failure maps to one named error code.**
   *Why:* a user is waiting, and the repair loop is the retry that matters.
   *Rejected:* the SDK default of two retries with backoff.

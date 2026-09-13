@@ -123,6 +123,27 @@ def test_a_foreign_host_header_is_refused_before_the_agent_runs(unbuilt: Path) -
     assert agent.questions == []
 
 
+def test_a_cross_site_form_post_is_refused_before_the_agent_runs(unbuilt: Path) -> None:
+    # A page on another site may post text/plain to localhost without a preflight;
+    # only a JSON body reaches the agent, and no CORS header lets the page read a reply.
+    agent = StubAgent()
+    response = client(agent, unbuilt).post(
+        "/api/ask",
+        content='{"question": "How many tickets did we sell last month?"}',
+        headers={"content-type": "text/plain", "origin": "http://attacker.example"},
+    )
+    assert response.status_code == 422
+    assert "access-control-allow-origin" not in response.headers
+    assert agent.questions == []
+
+
+def test_the_interactive_docs_are_not_served(unbuilt: Path) -> None:
+    # Swagger UI loads its script from a CDN onto the app's own origin.
+    api = client(StubAgent(), unbuilt)
+    assert api.get("/docs").status_code == 404
+    assert api.get("/redoc").status_code == 404
+
+
 def test_the_allowed_hosts_are_read_from_the_environment(
     monkeypatch: pytest.MonkeyPatch, unbuilt: Path
 ) -> None:

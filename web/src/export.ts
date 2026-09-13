@@ -7,7 +7,7 @@ const FORMULA_START = /^[=+\-@\t\r]/;
 const SLUG_MAX = 60;
 const SVG_NS = "http://www.w3.org/2000/svg";
 const XMLNS_NS = "http://www.w3.org/2000/xmlns/";
-export const PANEL_FILL = "#16161A";
+const PANEL_FILL = "#16161A";
 
 /** One CSV field: raw value, a formula-looking string defused with `'`, RFC 4180 quoting. */
 function csvField(value: Cell): string {

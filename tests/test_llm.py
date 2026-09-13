@@ -224,6 +224,17 @@ def test_a_refusal_carries_the_tokens_the_call_was_billed_for(
     assert raised.value.output_tokens == output_tokens
 
 
+def test_a_plan_with_long_or_extra_assumptions_is_still_a_plan(context: PromptContext) -> None:
+    long = "Last season is the Liberty's 2025 season, the latest with no home games left. " * 2
+    scripted = json.dumps(
+        {"answerable": True, "sql": "SELECT 1", "assumptions": [long, "b", "c", "d"]}
+    )
+
+    result = SqlWriter(FakeAnthropic([scripted])).write(QUESTION, context=context)
+
+    assert result.plan.assumptions == [long, "b", "c"]
+
+
 def test_an_sdk_error_carries_no_tokens_because_nothing_came_back(
     context: PromptContext,
 ) -> None:

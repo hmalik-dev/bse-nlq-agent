@@ -159,6 +159,20 @@ def test_the_connection_itself_refuses_a_write_with_the_guard_and_query_only_bot
     assert _ticket_count(db_path) == before
 
 
+def test_the_connection_opens_with_query_only_on(db_path: Path) -> None:
+    connection = open_read_only(db_path)
+    try:
+        assert connection.execute("PRAGMA query_only").fetchone()[0] == 1
+    finally:
+        connection.close()
+
+
+def test_the_widest_row_sqlite_allows_stays_within_twice_the_result_budget() -> None:
+    # The byte budget is counted after SQLite and Python hold a row, and one call
+    # over a huge value cannot be interrupted, so the value limit bounds both.
+    assert MAX_COLUMNS * MAX_VALUE_BYTES <= 2 * MAX_RESULT_BYTES
+
+
 @pytest.mark.parametrize("folder", ["a#b", "a?mode=rwc"])
 def test_a_database_path_with_uri_characters_still_opens_read_only(
     db_path: Path, tmp_path: Path, folder: str

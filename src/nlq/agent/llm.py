@@ -34,6 +34,7 @@ MAX_TOKENS = 2048
 # Fixed sentences: the SDK's own text goes to the log, never into an API response.
 MODEL_ERROR_MESSAGE = "The model call failed. Try again shortly."
 USAGE_EXHAUSTED_MESSAGE = "The API key has used up its credit or its spend cap."
+OFF_SCHEMA_MESSAGE = "The model's plan did not fit the schema."
 # What the API says in a 400 when the balance or a console spend limit runs out.
 USAGE_EXHAUSTED_PHRASES = ("credit balance is too low", "api usage limits")
 OUTPUT_CONFIG = {"format": {"type": "json_schema", "schema": anthropic.transform_schema(SqlPlan)}}
@@ -131,8 +132,8 @@ def _result(response: Any, started: float) -> LlmResult:
     try:
         plan = SqlPlan.model_validate_json(text)
     except pydantic.ValidationError as error:
-        message = f"The model's plan did not fit the schema: {error}"
-        raise ModelRefused(message, **usage) from error
+        logger.warning("The model's plan did not fit the schema: %s", error)
+        raise ModelRefused(OFF_SCHEMA_MESSAGE, **usage) from error
     return LlmResult(
         plan=plan,
         model=response.model,

@@ -361,6 +361,20 @@ def test_a_plan_that_fails_validation_is_still_priced(db_path: Path) -> None:
     assert answer_client.calls == []
 
 
+def test_a_plan_that_fails_validation_reaches_the_caller_as_a_fixed_sentence(
+    db_path: Path, caplog: pytest.LogCaptureFixture
+) -> None:
+    agent, _, _ = make_agent(db_path, ['{"answerable": true, "sql": "", "note": "model text"}'])
+
+    result = agent.ask(QUESTION)
+
+    assert result.error is not None
+    assert result.error.message == "The model's plan did not fit the schema."
+    assert "model text" not in result.model_dump_json()
+    assert "pydantic" not in result.model_dump_json()
+    assert "model text" in caplog.text
+
+
 def test_a_refusal_is_priced_for_the_prompt_it_read(db_path: Path) -> None:
     agent, _, _ = make_agent(db_path, [refusal()])
 

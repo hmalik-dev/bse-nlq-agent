@@ -4,12 +4,14 @@ from __future__ import annotations
 
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, Field, StringConstraints, model_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 MAX_ASSUMPTIONS = 3
 MAX_ASSUMPTION_CHARS = 120
 
-Assumption = Annotated[str, StringConstraints(max_length=MAX_ASSUMPTION_CHARS)]
+# The limits are asked for in the schema, but structured output cannot enforce
+# them, so a plan that runs over is trimmed to three rather than thrown away.
+Assumption = Annotated[str, Field(json_schema_extra={"maxLength": MAX_ASSUMPTION_CHARS})]
 DeclineCategory = Literal["out_of_scope", "destructive"]
 
 
@@ -18,9 +20,16 @@ class SqlPlan(BaseModel):
 
     answerable: bool
     sql: str | None = None
-    assumptions: list[Assumption] = Field(default_factory=list, max_length=MAX_ASSUMPTIONS)
+    assumptions: list[Assumption] = Field(
+        default_factory=list, json_schema_extra={"maxItems": MAX_ASSUMPTIONS}
+    )
     decline_reason: str | None = None
     decline_category: DeclineCategory | None = None
+
+    @field_validator("assumptions")
+    @classmethod
+    def _at_most_three(cls, assumptions: list[str]) -> list[str]:
+        return assumptions[:MAX_ASSUMPTIONS]
 
     @model_validator(mode="after")
     def _answerable_means_sql_and_declined_means_reason(self) -> SqlPlan:

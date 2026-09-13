@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type JSX } from "react";
-import { ask, examples as fetchExamples } from "./api";
+import { ask, examples as fetchExamples, hasApiKey } from "./api";
 import type { AskResult, ExampleQuestion } from "./types";
 import { Header } from "./components/Header";
 import { Footer } from "./components/Footer";
@@ -12,6 +12,7 @@ import { ResultTabs } from "./components/ResultTabs";
 import { HistoryRail, type HistoryEntry } from "./components/HistoryRail";
 import { SchemaDrawer, useSchema } from "./components/SchemaDrawer";
 import { SlideOver } from "./components/SlideOver";
+import { SetupScreen } from "./components/SetupScreen";
 
 type Screen = { kind: "ask" } | { kind: "thinking"; question: string } | { kind: "answer"; id: number };
 type Panel = { kind: "schema" | "history"; opener: HTMLElement } | null;
@@ -22,8 +23,19 @@ export function App(): JSX.Element {
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [screen, setScreen] = useState<Screen>({ kind: "ask" });
   const [panel, setPanel] = useState<Panel>(null);
+  const [apiKey, setApiKey] = useState<boolean | null>(null); // null until /api/health answers
   const schema = useSchema(panel?.kind === "schema");
   const nextId = useRef(1);
+
+  useEffect(() => {
+    let cancelled = false;
+    void hasApiKey().then((present) => {
+      if (!cancelled) setApiKey(present);
+    }); // hasApiKey never rejects
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -94,7 +106,8 @@ export function App(): JSX.Element {
       <div className="flex flex-1">
         {showRail && <div className="hidden w-60 shrink-0 border-r border-hairline lg:block">{rail}</div>}
         <main className="min-w-0 flex-1">
-          {screen.kind === "ask" && (
+          {screen.kind === "ask" && apiKey === false && <SetupScreen />}
+          {screen.kind === "ask" && apiKey === true && (
             <AskScreen draft={draft} examples={examples} onChange={setDraft} onSubmit={submit} onPick={pick} />
           )}
           {screen.kind === "thinking" && <ThinkingScreen question={screen.question} />}

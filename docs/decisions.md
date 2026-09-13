@@ -185,9 +185,9 @@ The choices a reviewer would ask about, and why. One entry each: the decision,
 - **`npm run dev` names a missing uv or Node, or an old Node, and stops; it never installs them.**
   *Why:* one printed line makes the fix obvious without running a remote installer on someone else's machine.
   *Rejected:* installing uv automatically.
-- **Fakes are development tooling:** the tests' scripted client, `NLQ_FAKE_AGENT=1`, and the evaluation's `--fake`.
-  *Why:* development and CI stayed free, and the interface could be built before the agent.
-  *Rejected:* deleting them (tests, browser checks and the smoke fallback need them); offering them to reviewers (canned answers don't show the agent).
+- **The app runs only against the real model; a missing key is a setup screen.** `npm run dev` and `scripts/smoke.sh` stop with one line; the interface shows "API key required" from `/api/health`. The tests' scripted client and the evaluation's `--fake` stay: neither reaches a user.
+  *Why:* a made-up answer shown to a new user reads as a wrong answer from the real agent.
+  *Rejected:* keeping the fake agent behind a flag (it was reachable by skipping one setup step); intercepting `/api/ask` in browser checks (it tests the mock, so they use the real key, capped at three questions).
 - **Quickstart seeds at `--scale 0.2`; full scale stays the default.**
   *Why:* a million tickets seed in seconds and answer every example question.
   *Rejected:* a smaller default (every documented figure would change).

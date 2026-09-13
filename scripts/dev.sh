@@ -2,7 +2,7 @@
 # One command from a clone to the app in a browser: install what is missing,
 # seed on first run only, start the API on :8000, then the Vite dev server on
 # :4000, which opens the browser and proxies /api to the API. Ctrl+C stops both.
-# Uses the fake agent when there is no API key. Run as `npm run dev`.
+# Stops before anything runs when there is no API key. Run as `npm run dev`.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -29,16 +29,7 @@ if [[ ! "$node_major" =~ ^[0-9]+$ ]] || ((node_major < NODE_MAJOR_REQUIRED)); th
   exit 1
 fi
 
-# The key and the fake flag may each be in the shell or in .env (the app reads
-# .env itself).
-in_env() { grep -qE "^$1=$2\$" .env 2>/dev/null; }
-if [[ "${NLQ_FAKE_AGENT:-}" != 1 ]] && ! in_env NLQ_FAKE_AGENT 1 \
-  && [[ -z "${ANTHROPIC_API_KEY:-}" ]] && ! in_env ANTHROPIC_API_KEY '.+'; then
-  export NLQ_FAKE_AGENT=1
-  hint=""
-  [[ -f .env ]] || hint=" Create .env with the ANTHROPIC_API_KEY= line you were sent."
-  echo "ANTHROPIC_API_KEY is not set: using the fake agent (canned answers).$hint"
-fi
+source scripts/require-key.sh
 
 echo "==> uv sync"
 uv sync

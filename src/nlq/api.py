@@ -3,7 +3,7 @@
 `POST /api/ask` always answers 200 with an `AskResult`; only a malformed body
 gets an HTTP error. `GET /api/schema` and `GET /api/examples` describe the
 data for the drawer and the chips, `GET /api/health` says whether the server,
-the database and fake mode are there, and everything else is the web app.
+the database and the API key are there, and everything else is the web app.
 """
 
 from __future__ import annotations
@@ -24,7 +24,6 @@ from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from nlq import config
 from nlq.agent.agent import INTERNAL_MESSAGE, Agent
-from nlq.agent.fake import FakeAgent
 from nlq.agent.models import AskResult, ErrorInfo, Trace
 from nlq.examples import EXAMPLE_QUESTIONS
 
@@ -112,11 +111,11 @@ def examples() -> list[dict[str, Any]]:
 
 @router.get("/health")
 def health() -> dict[str, bool]:
-    """Is the server up, is the database there, is fake mode on."""
+    """Is the server up, is the database there, is an API key set. Never the key itself."""
     return {
         "ok": True,
         "database": config.database_path().is_file(),
-        "fake": config.fake_agent(),
+        "api_key": bool(config.anthropic_api_key()),
     }
 
 
@@ -137,9 +136,9 @@ def create_app(agent: AgentLike | None = None, *, static_dir: Path = config.STAT
 
 
 def _agent(app: FastAPI) -> AgentLike:
-    """The injected agent, else the fake or the real one, built once on first use."""
+    """The injected agent, else the real one, built once on first use."""
     if app.state.agent is None:
-        app.state.agent = FakeAgent() if config.fake_agent() else Agent.from_env()
+        app.state.agent = Agent.from_env()
     return app.state.agent
 
 

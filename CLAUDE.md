@@ -32,7 +32,7 @@ src/nlq/
   config.py      paths and settings from the environment
   db/            schema.sql · dictionary.yaml · seed.py · connection.py (read-only)
   agent/         context.py · examples.yaml · llm.py · sql_guard.py · executor.py · answer.py
-                 agent.py · models.py · errors.py · fake.py
+                 agent.py · models.py · errors.py
   examples.py    example questions served to the UI
   pricing.py     dollars per million tokens
   ask.py         CLI: one question in, AskResult JSON out

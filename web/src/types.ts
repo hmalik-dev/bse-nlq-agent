@@ -46,6 +46,13 @@ export interface AskResult {
   suggestions: string[];
 }
 
+/** GET /api/health: the server, its database, and whether an API key is set (never the key). */
+export interface Health {
+  ok: boolean;
+  database: boolean;
+  api_key: boolean;
+}
+
 export type Badge = "nets" | "liberty";
 
 export interface ExampleQuestion {

@@ -21,7 +21,6 @@ from nlq.agent.agent import (
 from nlq.agent.answer import AnswerWriter
 from nlq.agent.context import build_context, load_examples
 from nlq.agent.executor import Executor, QueryResult
-from nlq.agent.fake import FakeAgent
 from nlq.agent.llm import SqlWriter
 from nlq.agent.models import AnswerText, AskResult, SqlPlan
 from nlq.db.seed import seed_database
@@ -191,12 +190,10 @@ def test_every_empty_suggestion_asked_through_the_fake_client_is_answerable(
     assert all(status in {"answered", "empty"} for status in statuses.values()), statuses
 
 
-def test_every_empty_suggestion_the_fake_agent_offers_is_answerable() -> None:
-    fake = FakeAgent()
-    suggestions = fake.ask("Show me nothing at all").suggestions
-    assert suggestions == EMPTY_SUGGESTIONS
-    assert len(suggestions) == 3
-    assert all(fake.ask(suggestion).status != "unanswerable" for suggestion in suggestions)
+def test_every_empty_suggestion_is_a_worked_example_the_model_answers() -> None:
+    plans = {example.question: example.plan for example in load_examples()}
+    assert len(EMPTY_SUGGESTIONS) == 3
+    assert all(plans[suggestion].answerable for suggestion in EMPTY_SUGGESTIONS)
 
 
 def test_unanswerable_returns_the_reason_and_three_example_questions(db_path: Path) -> None:

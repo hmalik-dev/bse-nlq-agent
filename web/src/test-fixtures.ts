@@ -1,5 +1,5 @@
-// One AskResult per status, shaped like the fake agent's answers. Test-only.
-import type { AskResult, Schema, Trace } from "./types";
+// One AskResult per status, shaped like the agent's real answers. Test-only.
+import type { AskResult, Health, Schema, Trace } from "./types";
 
 const TRACE: Trace = {
   steps: [
@@ -136,6 +136,8 @@ export const SCHEMA: Schema = {
 };
 
 /** A Response the way fetch would hand it back. */
+export const HEALTH: Health = { ok: true, database: true, api_key: true };
+
 export function jsonResponse(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
     status,

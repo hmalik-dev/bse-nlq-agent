@@ -38,7 +38,6 @@ CONTRIBUTOR_DETAIL = (
     "median latency",
     "never raises",
     "AskResult",
-    "NLQ_FAKE_AGENT",
     "--fake",
     "HTTP 200",
     "Seed small",
@@ -109,7 +108,7 @@ def test_run_it_locally_is_one_prerequisites_line_and_three_steps_ending_in_npm_
     assert [step[:2] for step in steps] == ["1.", "2.", "3."]
     assert "`npm run dev`" in steps[-1]
     text = "\n".join(lines).lower()
-    for absent in ("uv run uvicorn", "scripts/smoke.sh", "fake", "canned"):
+    for absent in ("uv run uvicorn", "scripts/smoke.sh", "fake"):
         assert absent not in text
 
 

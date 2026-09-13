@@ -3,11 +3,12 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { App } from "./App";
 import { HOME_LABEL } from "./components/Header";
-import { ANSWERED, BLOCKED, EMPTY, ERROR, EXAMPLES, NETS, UNANSWERABLE, jsonResponse } from "./test-fixtures";
+import { ANSWERED, BLOCKED, EMPTY, ERROR, EXAMPLES, HEALTH, NETS, UNANSWERABLE, jsonResponse } from "./test-fixtures";
 
-/** Routes /api/examples to the chips and /api/ask to a result picked by keyword, like the fake agent. */
-function stubApi(): Mock {
+/** Routes /api/health to `health`, /api/examples to the chips and /api/ask to a result picked by keyword. */
+function stubApi(health = HEALTH): Mock {
   const fetchMock = vi.fn((url: string, init?: RequestInit) => {
+    if (url === "/api/health") return Promise.resolve(jsonResponse(health));
     if (url === "/api/examples") return Promise.resolve(jsonResponse(EXAMPLES));
     const { question } = JSON.parse(String(init?.body)) as { question: string };
     const result = byKeyword(question);
@@ -31,6 +32,27 @@ const askCalls = (fetchMock: Mock): number =>
 afterEach(() => vi.unstubAllGlobals());
 
 describe("App", () => {
+  it("shows the API key setup screen, with no input and no chips, when the server has no key", async () => {
+    stubApi({ ...HEALTH, api_key: false });
+    render(<App />);
+    expect(await screen.findByRole("heading", { name: "API key required" })).toBeTruthy();
+    expect(screen.getByText(/then restart the server/).textContent).toBe(
+      "Add ANTHROPIC_API_KEY to the .env file in the project folder, then restart the server.",
+    );
+    await waitFor(() => expect(screen.queryAllByRole("listitem")).toHaveLength(0));
+    expect(screen.queryByLabelText("Your question")).toBeNull();
+    expect(screen.queryByRole("button", { name: "Ask" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Top 5 event categories by total revenue" })).toBeNull();
+  });
+
+  it("shows the ask screen when the server has a key", async () => {
+    stubApi();
+    render(<App />);
+    expect(await screen.findByLabelText("Your question")).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Ask anything about ticket sales" })).toBeTruthy();
+    expect(screen.queryByRole("heading", { name: "API key required" })).toBeNull();
+  });
+
   it("renders six chips from the API, two with badges, and disables Ask while empty", async () => {
     stubApi();
     render(<App />);
@@ -104,6 +126,7 @@ describe("App", () => {
     vi.stubGlobal(
       "fetch",
       vi.fn((url: string, init?: RequestInit) => {
+        if (url === "/api/health") return Promise.resolve(jsonResponse(HEALTH));
         if (url === "/api/examples") return Promise.resolve(jsonResponse(EXAMPLES));
         const { question } = JSON.parse(String(init?.body)) as { question: string };
         return Promise.resolve(jsonResponse({ ...hostile, question }));
@@ -126,8 +149,8 @@ describe("App", () => {
     vi.stubGlobal(
       "fetch",
       vi.fn((url: string) =>
-        url === "/api/examples"
-          ? Promise.resolve(jsonResponse(EXAMPLES))
+        url === "/api/health" || url === "/api/examples"
+          ? Promise.resolve(jsonResponse(url === "/api/health" ? HEALTH : EXAMPLES))
           : new Promise<Response>((done) => {
               resolve = done;
             }),

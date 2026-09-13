@@ -47,7 +47,7 @@ The pipeline is in `src/nlq/agent/agent.py`.
 
 ## Results
 
-Claude Sonnet 5 passed 20/20 test questions, including the brief's examples, attempts to change data and prompt injections, at $0.0215 per question on average. Haiku 4.5 scored 16/20. Details: [`docs/eval-results.md`](docs/eval-results.md).
+Claude Sonnet 5 passed 20/20 test questions, including the brief's examples, attempts to change data and prompt injections. Haiku 4.5 scored 16/20. A question costs $0.0215 on average. Details: [`docs/eval-results.md`](docs/eval-results.md).
 
 ## Tradeoffs
 
@@ -56,10 +56,10 @@ Claude Sonnet 5 passed 20/20 test questions, including the brief's examples, att
 - **Stated assumptions, not follow-up questions:** each question stands on its own.
 - **Sonnet 5 over Haiku 4.5:** more accurate answers at about three times the cost.
 
-## What I'd do differently
+## With more time
 
-- Write the test questions before the prompt, so they push it further instead of checking what it already handles.
-- With more time: databases too big to fit in the prompt, and follow-up questions.
+- **Follow-up questions**, so you can refine an answer ("now just the Nets").
+- **Bigger databases**, by giving the model only the tables a question needs instead of all of them.
 
 ## How it was built
 

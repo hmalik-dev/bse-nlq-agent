@@ -1,6 +1,6 @@
 """The generated database has to satisfy the rules the prompt tells the model about.
 
-Ranges come from `docs/data-spec.md`. They are asserted here rather than described
+Ranges come from `docs/data.md`. They are asserted here rather than described
 there, so the data cannot drift back to something a BSE reviewer would not accept.
 """
 
@@ -257,7 +257,7 @@ def test_each_calendar_year_has_a_full_liberty_home_slate(db: sqlite3.Connection
         assert counts == (20, 2), f"{year} Liberty slate is {counts}"
 
 
-# (club, season, is_playoff): first and last allowed date, from docs/data-spec.md.
+# (club, season, is_playoff): first and last allowed date, from docs/data.md.
 SEASON_WINDOWS = (
     ("NBA", "2025-26", 0, "2025-10-21", "2026-04-12"),
     ("NBA", "2025-26", 1, "2026-04-18", "2026-06-20"),

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import subprocess
 from pathlib import Path
 
@@ -12,13 +13,22 @@ from nlq.config import PROJECT_ROOT
 
 DOCKERIGNORE = PROJECT_ROOT / ".dockerignore"
 DOCKERFILE = PROJECT_ROOT / "Dockerfile"
-SCRIPTS = (PROJECT_ROOT / "docker" / "entrypoint.sh", PROJECT_ROOT / "scripts" / "smoke.sh")
+SCRIPTS = (
+    PROJECT_ROOT / "docker" / "entrypoint.sh",
+    PROJECT_ROOT / "scripts" / "smoke.sh",
+    PROJECT_ROOT / "scripts" / "dev.sh",
+)
 
 
 @pytest.mark.parametrize("script", SCRIPTS, ids=lambda path: path.name)
 def test_the_shell_scripts_parse_and_are_executable(script: Path) -> None:
     assert script.stat().st_mode & 0o111, f"{script.name} is not executable"
     subprocess.run(["bash", "-n", str(script)], check=True)
+
+
+def test_npm_run_dev_and_npm_start_both_run_the_dev_script() -> None:
+    package = json.loads((PROJECT_ROOT / "package.json").read_text(encoding="utf-8"))
+    assert package["scripts"] == {"dev": "scripts/dev.sh", "start": "scripts/dev.sh"}
 
 
 def test_env_files_and_secrets_are_kept_out_of_the_build_context() -> None:

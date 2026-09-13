@@ -1,5 +1,9 @@
 {
   "name": "bse-nlq-agent",
   "private": true,
-  "workspaces": ["./*"]
+  "workspaces": ["./*"],
+  "scripts": {
+    "dev": "scripts/dev.sh",
+    "start": "scripts/dev.sh"
+  }
 }

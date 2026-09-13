@@ -21,7 +21,7 @@ const KEYWORDS = new Set(
 // One piece at a time: a comment to end of line, a quoted string, a word, or a run of anything else.
 const PIECE = /--[^\n]*|'(?:[^']|'')*'?|[A-Za-z_][A-Za-z0-9_]*|[^A-Za-z_'-]+|-/gy;
 
-/** Tokenise one line of SQL. Comments run to the end of the line, so lines tokenise independently. */
+/** Tokenize one line of SQL. Comments run to the end of the line, so lines tokenize independently. */
 export function tokenize(line: string): Token[] {
   const tokens: Token[] = [];
   PIECE.lastIndex = 0;
@@ -31,7 +31,7 @@ export function tokenize(line: string): Token[] {
   return tokens;
 }
 
-/** Every line of a statement, tokenised, in order; line numbers are the array index plus one. */
+/** Every line of a statement, tokenized, in order; line numbers are the array index plus one. */
 export function highlight(sql: string): Token[][] {
   return sql.split("\n").map(tokenize);
 }

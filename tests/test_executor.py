@@ -88,7 +88,7 @@ def test_a_cartesian_join_returning_rows_stops_at_the_row_cap(db_path: Path) -> 
 
 def test_a_broken_query_stays_repairable_even_past_the_deadline(db_path: Path) -> None:
     # The deadline says whether it interrupted anything; the clock does not. A
-    # real SQL error must not be relabelled a timeout, or the repair loop gives
+    # real SQL error must not be relabeled a timeout, or the repair loop gives
     # up on a query it could have fixed.
     with pytest.raises(QueryFailed) as error:
         Executor(db_path, timeout_ms=0).run("SELECT nonexistent_column FROM tickets")

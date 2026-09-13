@@ -83,7 +83,7 @@ def compare(expected: QueryResult, actual: QueryResult, *, ordered: bool) -> boo
     """Same shape and the same rows, in order only when the reference orders them.
 
     Extra leading columns that hold one value in every row are labels (the year
-    or club a total row names), so they are dropped before comparing.
+    or team a total row names), so they are dropped before comparing.
     """
     if actual.truncated:
         return False

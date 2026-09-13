@@ -59,7 +59,7 @@
   tags: [join, relative-date, filter, ambiguous]
   expect: answered
   sql: |-
-    SELECT h.name AS club, e.season, ROUND(SUM(t.price), 2) AS refunded_revenue
+    SELECT h.name AS team, e.season, ROUND(SUM(t.price), 2) AS refunded_revenue
     FROM tickets t
     JOIN events e ON e.event_id = t.event_id
     JOIN teams h ON h.team_id = e.home_team_id

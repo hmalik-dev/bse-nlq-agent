@@ -14,7 +14,7 @@ CREATE TABLE teams (
     team_id      INTEGER PRIMARY KEY,
     name         TEXT    NOT NULL,
     league       TEXT    NOT NULL CHECK (league IN ('NBA', 'WNBA')),
-    is_home_club INTEGER NOT NULL DEFAULT 0  -- 1 for the clubs this operator owns
+    is_home_team INTEGER NOT NULL DEFAULT 0  -- 1 for the teams this operator owns
 );
 
 CREATE TABLE events (

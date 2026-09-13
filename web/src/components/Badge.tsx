@@ -8,7 +8,7 @@ const MARKS: Record<BadgeName, { src: string; alt: string; width: number; height
   liberty: { src: "/brand/liberty.svg", alt: "New York Liberty", width: 200, height: 170 },
 };
 
-/** A 24px club mark. Decorative: it always sits beside text that names the club. */
+/** A 24px team mark. Decorative: it always sits beside text that names the team. */
 export function Badge({ name }: { name: BadgeName }): JSX.Element {
   const mark = MARKS[name];
   return (
@@ -24,7 +24,7 @@ export function Badge({ name }: { name: BadgeName }): JSX.Element {
   );
 }
 
-/** Which club mark a row or question carries, if any, read from its text. */
+/** Which team mark a row or question carries, if any, read from its text. */
 export function badgeFor(text: string): BadgeName | null {
   if (/brooklyn nets/i.test(text)) return "nets";
   if (/new york liberty/i.test(text)) return "liberty";

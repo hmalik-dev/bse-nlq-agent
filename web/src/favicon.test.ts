@@ -31,7 +31,7 @@ describe("browser tab icon", () => {
     expect(Number(background?.getAttribute("rx"))).toBeGreaterThan(0);
   });
 
-  it("carries the BSE logo unstretched, centred inside padding", () => {
+  it("carries the BSE logo unstretched, centered inside padding", () => {
     const logo = parseSvg(faviconSvg).querySelector(":scope > svg");
     expect(logo?.getAttribute("viewBox")).toBe(parseSvg(bseLogoSvg).getAttribute("viewBox"));
     expect(logo?.getAttribute("preserveAspectRatio")).toBe("xMidYMid meet");

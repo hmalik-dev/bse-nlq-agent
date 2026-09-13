@@ -28,7 +28,7 @@ CATEGORIES = ("NBA", "WNBA", "Concert", "Comedy", "Boxing", "Family Show")
 CHANNELS = ("web", "mobile_app", "box_office", "resale", "group_sales")
 STATUSES = ("sold", "refunded", "comp")
 SEAT_TIERS = ("Courtside", "Suite", "Club", "Lower Bowl", "Upper Bowl", "General Admission")
-HOME_CLUBS = ("Brooklyn Nets", "New York Liberty")
+HOME_TEAMS = ("Brooklyn Nets", "New York Liberty")
 
 ROLE_AND_RULES = """\
 # Role
@@ -45,16 +45,16 @@ query, or decline it. Rules:
 - A question about one most, least, highest or lowest thing returns that one
   row (LIMIT 1). Return a ranked list only when the question asks for several,
   and cap it at 10 rows unless the question gives a number.
-- A "how many" or "how much" question about one named club's home games or one
+- A "how many" or "how much" question about one named team's home games or one
   named venue's events, sold or played within a month or less, returns one row
   per event (name, event_date and the measure) largest first, with no LIMIT, so
-  the rows show where the total comes from. A question with no club or venue
+  the rows show where the total comes from. A question with no team or venue
   named (yesterday's sales, last month's sales), or one over a season, a year or
   a whole category, stays one total row. The exception is "last season" or "this
-  season" with no club named, which returns one row per club.
+  season" with no team named, which returns one row per team.
 - A total row names what it totals: its leading columns carry each specific
-  value the question filters on (the year, season label, club name or category)
-  with a readable alias (year, season, club, category), followed by the measure.
+  value the question filters on (the year, season label, team name or category)
+  with a readable alias (year, season, team, category), followed by the measure.
   This holds for any measure and for a date range too: a total for one year
   (tickets sold, events hosted, revenue) selects strftime('%Y', the date) AS
   year and groups by it, so the row reads year | measure, never a lone number.
@@ -73,7 +73,7 @@ JOIN_PATHS = """\
   it was bought, and through which channel.
 - orders -> customers: orders.customer_id = customers.customer_id.
 - tickets -> events: tickets.event_id = events.event_id. What a seat was for.
-- events -> teams: events.home_team_id = teams.team_id for the home club, and
+- events -> teams: events.home_team_id = teams.team_id for the home team, and
   events.away_team_id = teams.team_id for the opponent. Join teams twice, with
   two aliases, when a question needs both.
 - events -> venues: events.venue_id = venues.venue_id.
@@ -191,9 +191,9 @@ def _known_values_section(today: date) -> str:
             f"- orders.channel: {_quoted(CHANNELS)}.",
             f"- tickets.status: {_quoted(STATUSES)}.",
             f"- tickets.seat_tier: {_quoted(SEAT_TIERS)}.",
-            f"- Home clubs, by exact teams.name: {_quoted(HOME_CLUBS)}. The Nets play"
+            f"- Home teams, by exact teams.name: {_quoted(HOME_TEAMS)}. The Nets play"
             " in the NBA and the Liberty in the WNBA.",
-            "- Opponents are teams rows with is_home_club = 0. Match a partial name with"
+            "- Opponents are teams rows with is_home_team = 0. Match a partial name with"
             " LIKE, e.g. name LIKE '%Celtics%'.",
             "- events.season reads 'YYYY-YY' for an NBA season, which spans two years,"
             " and 'YYYY' for a WNBA season; it is NULL for non-sport events.",

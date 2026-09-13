@@ -1,4 +1,4 @@
-// Mirrors src/nlq/agent/models.py field for field. The API serialises AskResult unchanged.
+// Mirrors src/nlq/agent/models.py field for field. The API serializes AskResult unchanged.
 
 export type Status = "answered" | "empty" | "unanswerable" | "blocked" | "error";
 

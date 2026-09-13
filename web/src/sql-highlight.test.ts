@@ -31,7 +31,7 @@ describe("tokenize", () => {
     ]);
   });
 
-  it("does not colour a keyword inside an identifier", () => {
+  it("does not color a keyword inside an identifier", () => {
     const tokens = tokenize("ORDER BY tickets_sold DESC");
     expect(tokens.map((token) => token.kind)).toEqual(["keyword", "text", "keyword", "text", "text", "text", "keyword"]);
   });

@@ -22,7 +22,7 @@ Judge only what the browser shows.
 - Use the Playwright MCP tools for everything in the browser. Bash is for reading
   files and inspecting the scratchpad, not for `curl`ing past the UI.
 - The data is synthetic and regenerated per environment, so never assert on a
-  specific event name, row count or figure. Assert on structure and behaviour —
+  specific event name, row count or figure. Assert on structure and behavior —
   a table rendered, the SQL tab showing a `SELECT`, a blocked question refused.
 
 ## Procedure

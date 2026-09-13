@@ -137,7 +137,7 @@ def _value_bytes(value: object) -> int:
 
 
 def _json_safe(value: object) -> object:
-    """Coerce a SQLite value into something the API can serialise."""
+    """Coerce a SQLite value into something the API can serialize."""
     if isinstance(value, bytes):
         try:
             return value.decode("utf-8")

@@ -12,16 +12,16 @@ query, or decline it. Rules:
 - A question about one most, least, highest or lowest thing returns that one
   row (LIMIT 1). Return a ranked list only when the question asks for several,
   and cap it at 10 rows unless the question gives a number.
-- A "how many" or "how much" question about one named club's home games or one
+- A "how many" or "how much" question about one named team's home games or one
   named venue's events, sold or played within a month or less, returns one row
   per event (name, event_date and the measure) largest first, with no LIMIT, so
-  the rows show where the total comes from. A question with no club or venue
+  the rows show where the total comes from. A question with no team or venue
   named (yesterday's sales, last month's sales), or one over a season, a year or
   a whole category, stays one total row. The exception is "last season" or "this
-  season" with no club named, which returns one row per club.
+  season" with no team named, which returns one row per team.
 - A total row names what it totals: its leading columns carry each specific
-  value the question filters on (the year, season label, club name or category)
-  with a readable alias (year, season, club, category), followed by the measure.
+  value the question filters on (the year, season label, team name or category)
+  with a readable alias (year, season, team, category), followed by the measure.
   This holds for any measure and for a date range too: a total for one year
   (tickets sold, events hosted, revenue) selects strftime('%Y', the date) AS
   year and groups by it, so the row reads year | measure, never a lone number.
@@ -52,7 +52,7 @@ CREATE TABLE teams (
     team_id      INTEGER PRIMARY KEY,
     name         TEXT    NOT NULL,
     league       TEXT    NOT NULL CHECK (league IN ('NBA', 'WNBA')),
-    is_home_club INTEGER NOT NULL DEFAULT 0  -- 1 for the clubs this operator owns
+    is_home_team INTEGER NOT NULL DEFAULT 0  -- 1 for the teams this operator owns
 );
 
 CREATE TABLE events (
@@ -119,7 +119,7 @@ CREATE INDEX idx_tickets_status   ON tickets(event_id, status);
   it was bought, and through which channel.
 - orders -> customers: orders.customer_id = customers.customer_id.
 - tickets -> events: tickets.event_id = events.event_id. What a seat was for.
-- events -> teams: events.home_team_id = teams.team_id for the home club, and
+- events -> teams: events.home_team_id = teams.team_id for the home team, and
   events.away_team_id = teams.team_id for the opponent. Join teams twice, with
   two aliases, when a question needs both.
 - events -> venues: events.venue_id = venues.venue_id.
@@ -129,20 +129,20 @@ tickets -> events.
 
 # Business rules
 
-Synthetic ticketing data for a sports and entertainment operator that runs one venue, Barclays Center in Brooklyn, and owns two clubs (Brooklyn Nets, New York Liberty). Every customer, order and ticket in it is generated; no real sales data is used.
+Synthetic ticketing data for a sports and entertainment operator that runs one venue, Barclays Center in Brooklyn, and owns two teams (Brooklyn Nets, New York Liberty). Every customer, order and ticket in it is generated; no real sales data is used.
 
 - A ticket is one seat. "Tickets sold" is COUNT(*) over tickets with status = 'sold'.
 - Revenue is SUM(price) over tickets with status = 'sold'. It excludes the fee column, excludes refunded tickets, and excludes comps (which have price 0).
 - Use fee only when the question asks about fees or "total paid" / "all-in" cost.
 - Average ticket price means AVG(price) over tickets with status = 'sold'.
 - Sell-through, or "how full was the house", is tickets sold divided by events.seating_capacity for that event. Use seating_capacity, not venues.capacity, because the arena is reconfigured per event.
-- "Home games" are events where home_team_id points at a club with is_home_club = 1.
+- "Home games" are events where home_team_id points at a team with is_home_team = 1.
 - The data holds Barclays Center home games only. A Nets season has 41 regular-season home games (of 82 played) and a Liberty season has 20 (of 44 played), plus any home playoff games. Away games are not in the data.
 - Date wording about when a game or show happened filters events.event_date. Date wording about when a purchase happened filters orders.ordered_at. If the question is ambiguous, prefer orders.ordered_at for "sold"/"bought" wording and say so in the assumptions.
-- An order with is_season_package = 1 is a season-ticket package: one pre-season purchase covering the same seats at every regular-season home game of one club season (playoff games are not included). Its tickets therefore span many events, and it is dated months before the first of them. Every other order is a single-game purchase and covers tickets to one event only.
-- A club season (events.season) covers that season's regular-season and playoff home games. Include playoff games unless the question says "regular season".
-- Seasons are worked out per club, from the data and today's date; never write a season label from memory. "Last season" for a club is that club's most recent events.season with no home games (regular season or playoffs) on or after today. "This season" for a club is its season in progress (home games both before and on or after today), or if none, its earliest season with games on or after today. Filter on events.season, not on dates.
-- "Last season" or "this season" with no club named means both clubs, each with its own season: one row per club, labelled with the club name and events.season, and the answer names both seasons. One assumption says both clubs are counted and whether playoff games are included.
+- An order with is_season_package = 1 is a season-ticket package: one pre-season purchase covering the same seats at every regular-season home game of one team season (playoff games are not included). Its tickets therefore span many events, and it is dated months before the first of them. Every other order is a single-game purchase and covers tickets to one event only.
+- A team season (events.season) covers that season's regular-season and playoff home games. Include playoff games unless the question says "regular season".
+- Seasons are worked out per team, from the data and today's date; never write a season label from memory. "Last season" for a team is that team's most recent events.season with no home games (regular season or playoffs) on or after today. "This season" for a team is its season in progress (home games both before and on or after today), or if none, its earliest season with games on or after today. Filter on events.season, not on dates.
+- "Last season" or "this season" with no team named means both teams, each with its own season: one row per team, labeled with the team name and events.season, and the answer names both seasons. One assumption says both teams are counted and whether playoff games are included.
 - Events dated in the future are on sale but not yet played, so they have partial sales. Exclude them when a question is about past performance.
 - Attendance is not recorded. Tickets sold is the closest available measure.
 
@@ -155,19 +155,19 @@ Synthetic ticketing data for a sports and entertainment operator that runs one v
 - state: Two-letter state code.
 - capacity: Largest full-house configuration the building holds.
 
-## teams: Clubs, both the operator's own and visiting opponents.
+## teams: Teams, both the operator's own and visiting opponents.
 - team_id: Primary key.
-- name: Club name, e.g. 'Brooklyn Nets'.
+- name: Team name, e.g. 'Brooklyn Nets'.
 - league: NBA or WNBA.
-- is_home_club: 1 for the two clubs the operator owns, 0 for opponents.
+- is_home_team: 1 for the two teams the operator owns, 0 for opponents.
 
 ## events: One row per game, concert or show, past or on sale.
 - event_id: Primary key.
 - venue_id: Venue hosting the event.
 - name: Display name, e.g. 'Brooklyn Nets vs. Boston Celtics'.
 - category: NBA, WNBA, Concert, Comedy, Boxing or Family Show.
-- home_team_id: Home club for sport events, NULL otherwise.
-- away_team_id: Visiting club for sport events, NULL otherwise.
+- home_team_id: Home team for sport events, NULL otherwise.
+- away_team_id: Visiting team for sport events, NULL otherwise.
 - event_date: Date the event takes or took place (ISO date).
 - season: NBA seasons span two years and read 'YYYY-YY' (the opening year, then the last two digits of the closing year); WNBA seasons read 'YYYY'; NULL for non-sport events.
 - is_playoff: 1 for postseason games.
@@ -207,8 +207,8 @@ Synthetic ticketing data for a sports and entertainment operator that runs one v
 - orders.channel: 'web', 'mobile_app', 'box_office', 'resale', 'group_sales'.
 - tickets.status: 'sold', 'refunded', 'comp'.
 - tickets.seat_tier: 'Courtside', 'Suite', 'Club', 'Lower Bowl', 'Upper Bowl', 'General Admission'.
-- Home clubs, by exact teams.name: 'Brooklyn Nets', 'New York Liberty'. The Nets play in the NBA and the Liberty in the WNBA.
-- Opponents are teams rows with is_home_club = 0. Match a partial name with LIKE, e.g. name LIKE '%Celtics%'.
+- Home teams, by exact teams.name: 'Brooklyn Nets', 'New York Liberty'. The Nets play in the NBA and the Liberty in the WNBA.
+- Opponents are teams rows with is_home_team = 0. Match a partial name with LIKE, e.g. name LIKE '%Celtics%'.
 - events.season reads 'YYYY-YY' for an NBA season, which spans two years, and 'YYYY' for a WNBA season; it is NULL for non-sport events.
 - The data covers events from 2024-01-01 to 2027-01-10. Events after today are on sale, not played.
 

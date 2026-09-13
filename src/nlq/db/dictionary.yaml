@@ -3,7 +3,7 @@
 
 dataset: >-
   Synthetic ticketing data for a sports and entertainment operator that runs one
-  venue, Barclays Center in Brooklyn, and owns two clubs (Brooklyn Nets, New York
+  venue, Barclays Center in Brooklyn, and owns two teams (Brooklyn Nets, New York
   Liberty). Every customer, order and ticket in it is generated; no real sales
   data is used.
 
@@ -17,7 +17,7 @@ business_rules:
     Sell-through, or "how full was the house", is tickets sold divided by
     events.seating_capacity for that event. Use seating_capacity, not
     venues.capacity, because the arena is reconfigured per event.
-  - '"Home games" are events where home_team_id points at a club with is_home_club = 1.'
+  - '"Home games" are events where home_team_id points at a team with is_home_team = 1.'
   - >-
     The data holds Barclays Center home games only. A Nets season has 41
     regular-season home games (of 82 played) and a Liberty season has 20 (of 44
@@ -28,26 +28,26 @@ business_rules:
     wording and say so in the assumptions.
   - >-
     An order with is_season_package = 1 is a season-ticket package: one pre-season
-    purchase covering the same seats at every regular-season home game of one club
+    purchase covering the same seats at every regular-season home game of one team
     season (playoff games are not included). Its tickets therefore span many
     events, and it is dated months before the first of them. Every other order is
     a single-game purchase and covers tickets to one event only.
   - >-
-    A club season (events.season) covers that season's regular-season and
+    A team season (events.season) covers that season's regular-season and
     playoff home games. Include playoff games unless the question says
     "regular season".
   - >-
-    Seasons are worked out per club, from the data and today's date; never write
-    a season label from memory. "Last season" for a club is that club's most
+    Seasons are worked out per team, from the data and today's date; never write
+    a season label from memory. "Last season" for a team is that team's most
     recent events.season with no home games (regular season or playoffs) on or
-    after today. "This season" for a club is its season in progress (home games
+    after today. "This season" for a team is its season in progress (home games
     both before and on or after today), or if none, its earliest season with
     games on or after today. Filter on events.season, not on dates.
   - >-
-    "Last season" or "this season" with no club named means both clubs, each
-    with its own season: one row per club, labelled with the club name and
+    "Last season" or "this season" with no team named means both teams, each
+    with its own season: one row per team, labeled with the team name and
     events.season, and the answer names both seasons. One assumption says
-    both clubs are counted and whether playoff games are included.
+    both teams are counted and whether playoff games are included.
   - Events dated in the future are on sale but not yet played, so they have
     partial sales. Exclude them when a question is about past performance.
   - Attendance is not recorded. Tickets sold is the closest available measure.
@@ -64,11 +64,11 @@ definitions:
   - term: Sell-through
     text: is tickets sold divided by the event's `seating_capacity`.
   - term: Home games
-    text: are all the data holds, 41 of 82 a Nets season and 20 of 44 a Liberty one.
+    text: 'are all the data holds: 41 of 82 per Nets season, 20 of 44 per Liberty season.'
   - term: A season
     text: includes its playoff games unless you say "regular season".
   - term: Last season
-    text: is each club's latest season with no home games left, one row per club.
+    text: is each team's latest season with no home games left, one row per team.
   - term: Attendance
     text: is not recorded, so tickets sold stands in for it.
 
@@ -82,12 +82,12 @@ tables:
       state: Two-letter state code.
       capacity: Largest full-house configuration the building holds.
   teams:
-    description: Clubs, both the operator's own and visiting opponents.
+    description: Teams, both the operator's own and visiting opponents.
     columns:
       team_id: Primary key.
-      name: Club name, e.g. 'Brooklyn Nets'.
+      name: Team name, e.g. 'Brooklyn Nets'.
       league: NBA or WNBA.
-      is_home_club: 1 for the two clubs the operator owns, 0 for opponents.
+      is_home_team: 1 for the two teams the operator owns, 0 for opponents.
   events:
     description: One row per game, concert or show, past or on sale.
     columns:
@@ -95,8 +95,8 @@ tables:
       venue_id: Venue hosting the event.
       name: Display name, e.g. 'Brooklyn Nets vs. Boston Celtics'.
       category: NBA, WNBA, Concert, Comedy, Boxing or Family Show.
-      home_team_id: Home club for sport events, NULL otherwise.
-      away_team_id: Visiting club for sport events, NULL otherwise.
+      home_team_id: Home team for sport events, NULL otherwise.
+      away_team_id: Visiting team for sport events, NULL otherwise.
       event_date: Date the event takes or took place (ISO date).
       season: >-
         NBA seasons span two years and read 'YYYY-YY' (the opening year, then the

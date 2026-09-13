@@ -118,9 +118,9 @@ function Card({ tone = "plain", children }: { tone?: "plain" | "error"; children
 }
 
 function Mark({ tone }: { tone: "warning" | "error" }): JSX.Element {
-  const colour = tone === "warning" ? "bg-warning/15 text-warning" : "bg-error/15 text-error";
+  const color = tone === "warning" ? "bg-warning/15 text-warning" : "bg-error/15 text-error";
   return (
-    <span aria-hidden="true" className={`mt-1.5 inline-flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-full font-mono text-xs font-semibold ${colour}`}>
+    <span aria-hidden="true" className={`mt-1.5 inline-flex h-[22px] w-[22px] shrink-0 items-center justify-center rounded-full font-mono text-xs font-semibold ${color}`}>
       !
     </span>
   );

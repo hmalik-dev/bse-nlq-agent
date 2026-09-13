@@ -53,7 +53,7 @@
           WHERE x.home_team_id = c.team_id AND x.event_date >= '{today}'
         )
     )
-    SELECT h.name AS club, e.season, COUNT(*) AS tickets_sold
+    SELECT h.name AS team, e.season, COUNT(*) AS tickets_sold
     FROM tickets t
     JOIN events e ON e.event_id = t.event_id
     JOIN teams h ON h.team_id = e.home_team_id
@@ -74,14 +74,14 @@
       SELECT s.home_team_id, MAX(s.season) AS season
       FROM events s
       JOIN teams c ON c.team_id = s.home_team_id
-      WHERE c.is_home_club = 1
+      WHERE c.is_home_team = 1
         AND s.season NOT IN (
           SELECT x.season FROM events x
           WHERE x.home_team_id = c.team_id AND x.event_date >= '{today}'
         )
       GROUP BY s.home_team_id
     )
-    SELECT h.name AS club, e.season, COUNT(*) AS tickets_sold
+    SELECT h.name AS team, e.season, COUNT(*) AS tickets_sold
     FROM tickets t
     JOIN events e ON e.event_id = t.event_id
     JOIN last_season ls ON ls.home_team_id = e.home_team_id AND ls.season = e.season
@@ -90,8 +90,8 @@
     GROUP BY h.team_id, e.season
     ORDER BY h.name
   assumptions:
-    - No club was named, so both clubs are counted, each for its own last season, playoff games included.
-    - A club's last season is its most recent season with no home games still to play.
+    - No team was named, so both teams are counted, each for its own last season, playoff games included.
+    - A team's last season is its most recent season with no home games still to play.
   decline_reason: null
   decline_category: null
 

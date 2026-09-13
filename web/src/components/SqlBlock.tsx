@@ -9,7 +9,7 @@ const TOKEN_CLASS: Record<Token["kind"], string> = {
   text: "",
 };
 
-/** The statement on the SQL surface with line numbers, light colouring and a copy button. */
+/** The statement on the SQL surface with line numbers, light coloring and a copy button. */
 export function SqlBlock({ sql }: { sql: string }): JSX.Element {
   const [copied, setCopied] = useState(false);
 

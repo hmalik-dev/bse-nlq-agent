@@ -8,7 +8,7 @@ What the generated database holds, and the ranges `tests/test_seed.py` asserts.
 | Table | One row per | Notes |
 |---|---|---|
 | `venues` | venue | Barclays Center only. Kept so "at Barclays Center" resolves through a join. |
-| `teams` | club | The Nets and the Liberty (`is_home_club = 1`) and every visiting opponent |
+| `teams` | team | The Nets and the Liberty (`is_home_team = 1`) and every visiting opponent |
 | `events` | game, concert or show | Category, date, season, playoff flag, `seating_capacity` |
 | `customers` | buyer | `is_season_member` marks season-package holders |
 | `orders` | purchase | Time, channel, promo code, `is_season_package` |
@@ -35,7 +35,7 @@ tickets only to home games.
 Season dates are the same every year, close to the real calendars: Nets 21 Oct –
 12 Apr, playoffs 18 Apr – 20 Jun; Liberty 12 May – 20 Sep, playoffs 24 Sep – 25 Oct.
 Season labels are `YYYY-YY` for the Nets and `YYYY` for the Liberty. "Last season"
-is per club: its latest season with no home games left.
+is per team: its latest season with no home games left.
 
 ## Realism targets
 
@@ -58,7 +58,7 @@ These make the questions genuinely ambiguous, which the agent has to resolve.
   column. Revenue excludes all three.
 - **Purchase date is not event date.** "Sold last month" filters on purchase time.
 - **Season packages:** a third of the Nets house and a quarter of the Liberty
-  house, bought 30–120 days before opening night, 28–38% of each club's sold
+  house, bought 30–120 days before opening night, 28–38% of each team's sold
   regular-season tickets. Packages are never refunded or comped.
 - **Single-game sales** rush in the first three weeks and spike in the last two.
 - **Channels:** web ~44%, app ~31%, resale ~11%, box office ~9%, group ~5%.
@@ -73,7 +73,7 @@ Full scale, measured on 2026-09-12: 5,082,400 tickets, 1,717,269 orders, 419
 events, 644 MB, 34 s, 52 MB peak memory. At `--scale 0.2`: about a million
 tickets, 128 MB, 5 s. The seed is deterministic for a given date.
 
-## Not modelled
+## Not modeled
 
 Attendance scans (sell-through answers "how full"), dynamic repricing, suites,
 secondary-market pricing, private hires and college games. Barclays' "200+ events

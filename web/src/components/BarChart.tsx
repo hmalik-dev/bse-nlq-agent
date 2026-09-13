@@ -2,7 +2,7 @@ import { useLayoutEffect, useRef, useState, type JSX, type Ref, type RefObject }
 import type { AskResult } from "../types";
 import { formatCell, humanize, isMoneyColumn } from "../format";
 
-// Drawn as SVG so Download SVG can save exactly what is on screen. Every colour and font is
+// Drawn as SVG so Download SVG can save exactly what is on screen. Every color and font is
 // an attribute, never a Tailwind class, because a class would not travel with the file.
 const INK = "#FFFFFF";
 const INK_2 = "#A1A1AA";
@@ -156,7 +156,7 @@ interface AxisProps {
   money: boolean;
 }
 
-/** The first tick starts at its mark, the last ends at it, and every one between is centred. */
+/** The first tick starts at its mark, the last ends at it, and every one between is centered. */
 function tickAnchor(fraction: number): "start" | "middle" | "end" {
   if (fraction === 0) return "start";
   if (fraction === 1) return "end";

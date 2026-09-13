@@ -14,7 +14,7 @@ In the one-column layout it shortens to "Barclays Center, 2024 to today" and `De
 
 ## Brand assets
 
-Committed at `web/public/brand/`. Never stretch, recolour or outline them.
+Committed at `web/public/brand/`. Never stretch, recolor or outline them.
 
 | File | Artwork | Use |
 |---|---|---|

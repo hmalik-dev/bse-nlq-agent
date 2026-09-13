@@ -37,7 +37,7 @@ export function exportFileName(question: string, extension: "csv" | "svg"): stri
 /** The on-screen chart as a file of its own: a copy with the namespace and the panel behind it. */
 export function serializeChart(svg: SVGSVGElement): string {
   const copy = svg.cloneNode(true) as SVGSVGElement;
-  // As a namespace declaration: a plain `xmlns` attribute serialises twice and the file will not parse.
+  // As a namespace declaration: a plain `xmlns` attribute serializes twice and the file will not parse.
   copy.setAttributeNS(XMLNS_NS, "xmlns", SVG_NS);
   const background = document.createElementNS(SVG_NS, "rect");
   background.setAttribute("width", "100%");

@@ -270,6 +270,18 @@ def test_schema_lists_six_tables_in_order_with_typed_columns_and_definitions(
     assert len(by_name) == 8
 
 
+def test_schema_defines_home_games_and_last_season_in_whole_sentences(unbuilt: Path) -> None:
+    definitions = client(StubAgent(), unbuilt).get("/api/schema").json()["definitions"]
+    by_term = {definition["term"]: definition["text"] for definition in definitions}
+
+    assert by_term["Home games"] == (
+        "are all the data holds: 41 of 82 per Nets season, 20 of 44 per Liberty season."
+    )
+    assert by_term["Last season"] == (
+        "is each team's latest season with no home games left, one row per team."
+    )
+
+
 def test_schema_names_the_table_a_foreign_key_points_at(unbuilt: Path) -> None:
     tables = client(StubAgent(), unbuilt).get("/api/schema").json()["tables"]
     columns = {

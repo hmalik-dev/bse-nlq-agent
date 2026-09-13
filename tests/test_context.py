@@ -84,7 +84,7 @@ def test_known_values_and_the_data_window_are_stated(context: PromptContext) -> 
     for value in ("'Family Show'", "'group_sales'", "'comp'", "'General Admission'"):
         assert value in context.system
     assert "'Brooklyn Nets', 'New York Liberty'" in context.system
-    assert "is_home_club = 0" in context.system and "LIKE" in context.system
+    assert "is_home_team = 0" in context.system and "LIKE" in context.system
     assert "'2025-26'" in context.system and "'2026'" in context.system
     assert "from 2024-01-01 to 2027-01-10" in context.system
 
@@ -106,8 +106,8 @@ def test_the_output_contract_names_both_decline_categories(context: PromptContex
 
 def test_a_total_row_leads_with_the_values_it_filters_on(context: PromptContext) -> None:
     assert "A total row names what it totals" in context.system
-    assert "(the year, season label, club name or category)" in context.system
-    assert "alias (year, season, club, category), followed by the measure" in context.system
+    assert "(the year, season label, team name or category)" in context.system
+    assert "alias (year, season, team, category), followed by the measure" in context.system
     assert "selects strftime('%Y', the date) AS\n  year and groups by it" in context.system
 
 
@@ -119,7 +119,7 @@ def test_the_context_is_cached_per_day() -> None:
 def test_the_rules_break_a_short_run_of_events_down_and_keep_one_row_for_one_thing(
     context: PromptContext,
 ) -> None:
-    assert "one named club's home games or one\n  named venue's events" in context.system
+    assert "one named team's home games or one\n  named venue's events" in context.system
     assert "per event (name, event_date and the measure)" in context.system
     assert "with no LIMIT" in context.system
     assert "(yesterday's sales, last month's sales)" in context.system
@@ -188,7 +188,7 @@ def _sql_lines(raw: str) -> str:
     return "\n".join(line for line in raw.splitlines() if "-01-01'" not in line)
 
 
-def test_last_season_is_worked_out_per_club_from_the_data_and_today(
+def test_last_season_is_worked_out_per_team_from_the_data_and_today(
     context: PromptContext, db_path: Path
 ) -> None:
     by_question = {example.question: example.plan.sql or "" for example in context.examples}
@@ -197,8 +197,8 @@ def test_last_season_is_worked_out_per_club_from_the_data_and_today(
     nets = _rows(executor, by_question["How many tickets did the Nets sell last season?"])
     both = _rows(executor, by_question["How many tickets did we sell last season?"])
 
-    assert [(club, season) for club, season, _ in nets] == [("Brooklyn Nets", "2025-26")]
-    assert [(club, season) for club, season, _ in both] == [
+    assert [(team, season) for team, season, _ in nets] == [("Brooklyn Nets", "2025-26")]
+    assert [(team, season) for team, season, _ in both] == [
         ("Brooklyn Nets", "2025-26"),
         ("New York Liberty", "2025"),
     ]
@@ -219,7 +219,7 @@ def _rows(executor: Executor, sql: str) -> list[list]:
     return executor.run(guard(sql, max_rows=MAX_ROWS).sql).rows
 
 
-def test_the_both_clubs_example_assumes_both_clubs_and_playoffs_in_one_sentence(
+def test_the_both_teams_example_assumes_both_teams_and_playoffs_in_one_sentence(
     context: PromptContext,
 ) -> None:
     (plan,) = [
@@ -227,4 +227,14 @@ def test_the_both_clubs_example_assumes_both_clubs_and_playoffs_in_one_sentence(
         for e in context.examples
         if e.question == "How many tickets did we sell last season?"
     ]
-    assert any("both clubs" in line and "playoff" in line for line in plan.assumptions)
+    assert any("both teams" in line and "playoff" in line for line in plan.assumptions)
+
+
+def test_the_prompt_says_team_and_names_club_only_as_a_seat_tier(context: PromptContext) -> None:
+    assert "one named team's home games" in context.system
+    assert "is_home_team = 1" in context.system
+    club_lines = [
+        line for line in context.system.splitlines() if re.search(r"\bclubs?\b", line, re.I)
+    ]
+    assert len(club_lines) == 3
+    assert all("Suite" in line and "Lower Bowl" in line for line in club_lines), club_lines

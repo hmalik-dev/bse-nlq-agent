@@ -20,7 +20,7 @@ The choices a reviewer would ask about, and why. One entry each: the decision,
 - **Suggestions and totals come from code, never the model.**
   *Why:* a suggestion chip is asked literally, so it must have a known plan; models misadd.
   *Rejected:* model-written rewrites of an empty question; asking the writer to sum a column.
-- **A count over one club's or venue's events within a month returns one row per event.**
+- **A count over one team's or venue's events within a month returns one row per event.**
   *Why:* a 1×1 table repeats the sentence; the rows show where the number came from (BSE-17).
   *Rejected:* re-querying a scalar with `GROUP BY` (the SQL tab would disagree with the rows).
 - **Multi-row answers use compact money and name at most 5 rows; a single row stays exact.**
@@ -29,7 +29,7 @@ The choices a reviewer would ask about, and why. One entry each: the decision,
 - **`ask()` never raises, and every outcome is HTTP 200 with a status.**
   *Why:* the UI, CLI and evaluation render one shape; a malformed question is a 422.
   *Rejected:* mapping statuses to HTTP codes (a blocked question is an answer, not a 403).
-- **"Last season" and "this season" are worked out per club, from the data and today.**
+- **"Last season" and "this season" are worked out per team, from the data and today.**
   *Why:* Nets and Liberty seasons have different labels and calendars (BSE-28).
   *Rejected:* one NBA-only rule; a combined total with no single season to name.
 - **Today is always the real date; tests pass `today=` by argument.**
@@ -123,7 +123,7 @@ The choices a reviewer would ask about, and why. One entry each: the decision,
   *Why:* a BSE reviewer spots a wrong Nets attendance before reading code.
   *Rejected:* jittered capacity (noise in every asserted range).
 - **Where the bands disagreed, tickets sold won and sell-through was recomputed.**
-  *Why:* tickets sold is the figure a reviewer recognises on sight.
+  *Why:* tickets sold is the figure a reviewer recognizes on sight.
   *Rejected:* widening capacity per event to keep both.
 - **Season packages are a flag on the order, and `is_season_member` marks exactly their holders.**
   *Why:* package questions become answerable in SQL; the membership share follows (~1.1%).
@@ -135,11 +135,21 @@ The choices a reviewer would ask about, and why. One entry each: the decision,
   *Why:* "last month" always has data, and two machines get the same database.
   *Rejected:* committing a 644 MB file.
 - **`--scale` shrinks seats and customers, never the calendar.**
-  *Why:* per-customer behaviour and per-year counts stay true in small test fixtures.
+  *Why:* per-customer behavior and per-year counts stay true in small test fixtures.
   *Rejected:* shrinking the calendar.
-- **Real club and venue names; fictional performers.**
-  *Why:* the questions need the clubs, and no real artist should appear to play a date they did not.
+- **Real team and venue names; fictional performers.**
+  *Why:* the questions need the teams, and no real artist should appear to play a date they did not.
   *Rejected:* real artist names.
+- **US English; the operator's sides are teams, everywhere, including `teams.is_home_team`.**
+  The one other word for a side survives only as a seat tier name, an arena seating level. The
+  drawer's definitions are whole sentences. A database seeded before the rename must be reseeded
+  (delete `data/tickets.db`, then `npm run dev`); there is no migration.
+  *Why:* the brief and its reader are American, and the model echoes the prompt's words back in
+  its answers and assumptions.
+  *Rejected:* keeping the old column name (the model reads column names too); renaming the seat
+  tier (it is a real Barclays seating level, not a team); a migration or startup check for a
+  synthetic, regenerated file. The accuracy report predates the wording change until its next
+  full run; a capped eight-question run in the browser checked it instead.
 
 ## Interface
 
@@ -201,7 +211,7 @@ The choices a reviewer would ask about, and why. One entry each: the decision,
   *Why:* each ticket carries its acceptance criteria and was built and reviewed on its own.
   *Rejected:* a backlog file in the repo (it drifted from the tracker).
 - **A total row names what it totals.** The prompt asks a total row to lead with each value
-  the question filters on (year, season, club, category); the scorer drops extra leading
+  the question filters on (year, season, team, category); the scorer drops extra leading
   columns that hold one value in every row; a lone column is left-aligned.
   *Why:* a lone number with a blank left column reads as a broken table.
   *Rejected:* a UI-only fix (the table can't know the filter value); adding label columns to

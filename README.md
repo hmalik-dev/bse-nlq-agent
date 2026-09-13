@@ -14,21 +14,6 @@ You need [uv](https://docs.astral.sh/uv/getting-started/installation/) (it insta
 2. Create a file named `.env` in that folder and paste in the `ANTHROPIC_API_KEY=` line from the link you were sent. The key is real and has a small spending limit, so please try what the app can do rather than sending many repeated questions.
 3. Run `npm run dev`. The first run installs and seeds the database, the browser opens on <http://localhost:4000>, and `Ctrl+C` stops it.
 
-## Other ways to run
-
-**Docker**, if you don't have uv or Node. The app is on <http://localhost:8000>.
-
-```sh
-docker build -t bse-insights .
-docker run --env-file .env -p 127.0.0.1:8000:8000 bse-insights
-```
-
-**From the terminal:** `uv run python -m nlq.ask "How many tickets did we sell last month?"`
-
-## Tests
-
-`uv run pytest -q` for the Python side and `npm run -w web test` for the interface. Neither calls the Anthropic API.
-
 ## How it works
 
 ```mermaid

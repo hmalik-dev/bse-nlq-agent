@@ -186,9 +186,12 @@ The choices a reviewer would ask about, and why. One entry each: the decision,
 - **The local run is the primary path, and `npm run dev` is the one command.**
   *Why:* it installs, seeds on first run and opens the dev UI on :4000 with the API on :8000.
   *Rejected:* a production build on :8000 as the default (the build takes a minute on every change).
-- **One command is the setup; Docker is the only alternative.**
-  *Why:* a reviewer should reach a working app without choosing between paths.
-  *Rejected:* keeping the manual block, which duplicates `CLAUDE.md` and makes setup look harder than it is.
+- **The README names one way to run the app: `npm run dev`.** Docker, the CLI and the test
+  commands stay in `CLAUDE.md`; the container and the CLI still work.
+  *Why:* the app is meant to be met through its web interface, and every alternative on the
+  page is a choice the reviewer has to make before seeing it.
+  *Rejected:* an "Other ways to run" section and a "Tests" section (they read as options, and
+  a reviewer who wants them finds them in `CLAUDE.md`); the manual run block (duplicated `CLAUDE.md`).
 - **The README is for the interviewer; detail lives in docs.**
   *Why:* a reviewer should grasp and run the app in a few minutes, in plain English.
   *Rejected:* one README serving both reviewers and contributors (latency, fake modes and internal contracts buried the point).

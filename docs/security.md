@@ -30,7 +30,7 @@ control has a test that fails if the control breaks.
 | Browser | Exported SVG carries script | Serialized by `XMLSerializer`, so text is escaped | `web/src/export.test.ts > escapes markup in a label, so the file carries no script and no live element` |
 | Container | The server runs as root | `USER nlq` (uid 10001); only `/data` is writable, and a root-owned volume from an older image stops start-up with a fix to run | `tests/test_ship.py::test_the_container_runs_as_a_user_that_is_not_root`, `::test_the_entrypoint_explains_an_unwritable_data_directory_instead_of_seeding` |
 | API | A third-party script runs on the app's origin | No Swagger UI or ReDoc, which load theirs from a CDN | `tests/test_api.py::test_the_interactive_docs_are_not_served` |
-| Container | The port is open to the network | The README runs `-p 127.0.0.1:8000:8000` | `tests/test_ship.py::test_every_documented_docker_run_publishes_the_port_on_loopback_only` |
+| Container | The port is open to the network | `CLAUDE.md` runs `-p 127.0.0.1:8000:8000` | `tests/test_ship.py::test_every_documented_docker_run_publishes_the_port_on_loopback_only` |
 
 ## Findings fixed in BSE-23
 

@@ -56,13 +56,8 @@ def test_the_container_runs_as_a_user_that_is_not_root() -> None:
 
 
 def test_every_documented_docker_run_publishes_the_port_on_loopback_only() -> None:
-    documents = [PROJECT_ROOT / "README.md", PROJECT_ROOT / "CLAUDE.md"]
-    runs = [
-        line
-        for document in documents
-        for line in document.read_text(encoding="utf-8").splitlines()
-        if "docker run" in line and " -p " in line
-    ]
+    claude_md = (PROJECT_ROOT / "CLAUDE.md").read_text(encoding="utf-8")
+    runs = [line for line in claude_md.splitlines() if "docker run" in line and " -p " in line]
     assert runs, "no documented docker run command to check"
     assert all(" -p 127.0.0.1:" in line for line in runs), runs
     assert "-p 127.0.0.1:8000:8000" in UI_NOT_BUILT_PAGE

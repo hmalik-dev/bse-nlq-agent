@@ -104,8 +104,8 @@ components and chrome copy, never data.
 ```
 
 Steps are `Reading schema`, `Writing SQL`, `Checking safety`, `Running query` and
-`Writing answer`, in that order; a step that never ran is left out. The only HTTP
-error is a 422 for a missing, blank or over-long question.
+`Writing answer`, in that order; a step that never ran is left out. A missing, blank
+or over-long question gets a 422.
 
 | Route | Returns |
 |---|---|

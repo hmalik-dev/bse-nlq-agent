@@ -47,8 +47,8 @@ control has a test that fails if the control breaks.
   their own key; a spend cap on the key in the Anthropic console is the outer layer.
 - **No request body size cap, and a 422 echoes the input.** Only the local user can
   send one; a hosted deployment needs a body limit at its proxy.
-- **`/docs` and `/openapi.json` are served.** They describe four routes that are
-  already public in the README.
+- **`/docs` and `/openapi.json` are served.** They describe the routes already
+  documented in `docs/design.md`.
 - **SQLite's own error text reaches `repairs_exhausted`.** It is SQL wording about
   the model's query, never a path, and the repair loop needs it.
 - **A dev-only advisory in `@vitest/mocker`** (GHSA-82fw-gwwq-j7x9). It is in the test

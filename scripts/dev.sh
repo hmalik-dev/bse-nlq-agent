@@ -43,6 +43,11 @@ stop_api() {
 }
 trap stop_api EXIT
 
+# A server already on the port would answer the health check in place of ours.
+if (exec 3<>"/dev/tcp/127.0.0.1/$API_PORT") 2>/dev/null; then
+  echo "FAIL: port $API_PORT is already in use (lsof -i :$API_PORT)." >&2
+  exit 1
+fi
 echo "==> starting the API on port $API_PORT"
 uv run uvicorn nlq.api:app --reload --host 127.0.0.1 --port "$API_PORT" &
 API_PID=$!

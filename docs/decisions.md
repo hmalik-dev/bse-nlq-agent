@@ -27,7 +27,7 @@ The choices a reviewer would ask about, and why. One entry each: the decision,
   *Why:* the table below carries exact values; long sentences wrap past two lines (BSE-19).
   *Rejected:* naming every row; a takeaway-only sentence.
 - **`ask()` never raises, and every outcome is HTTP 200 with a status.**
-  *Why:* the UI, CLI and evaluation render one shape; only a malformed body is a 422.
+  *Why:* the UI, CLI and evaluation render one shape; a malformed question is a 422.
   *Rejected:* mapping statuses to HTTP codes (a blocked question is an answer, not a 403).
 - **"Last season" and "this season" are worked out per club, from the data and today.**
   *Why:* Nets and Liberty seasons have different labels and calendars (BSE-28).
@@ -95,6 +95,9 @@ The choices a reviewer would ask about, and why. One entry each: the decision,
 - **The golden set is 20 questions covering every status: empty, unanswerable, writes, injections.**
   *Why:* every status is scored; more rows of the same shape raise cost without moving the decision.
   *Rejected:* dozens of variants; a separate repair-rate column.
+- **Evaluation misses fix the prompt, not the model.** Two questions failing on both models is a prompt defect.
+  *Why:* the first sweep exposed a copied `LIMIT 5` and an undefined "last season"; the first injection run
+  answered a smuggled `DROP` question silently. Each became one prompt rule. *Rejected:* chasing Haiku's misses.
 - **The harness runs free with `--fake` before any paid run.**
   *Why:* the live sweep costs under a dollar, so it is the last step, not the debug loop.
   *Rejected:* a response cache (replayed calls have no latency to measure).

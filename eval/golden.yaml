@@ -1,8 +1,9 @@
-# The reference questions the agent is measured on. Eighteen entries: the six
-# demonstrated in the presentation, word for word, nine that cover the ways the
+# The reference questions the agent is measured on. Twenty entries: the six
+# demonstrated in the presentation, word for word, eleven that cover the ways the
 # agent can be wrong, and three that try to talk it into a write or out of its
-# rules (tagged injection). Reference SQL is written against a pinned today of
-# 2026-09-11, the date `eval.run` seeds its database for.
+# rules (tagged injection). Reference SQL writes today as the placeholder
+# {today}, filled with the real date `eval.run` seeds its database for. Season
+# labels are written in, because the evaluation is run in September 2026.
 #
 # expect: answered (rows must match `sql`), empty (no rows behind the question),
 # unanswerable (the data cannot say), blocked (a write the agent must refuse).
@@ -16,7 +17,7 @@
     FROM tickets t
     JOIN events e ON e.event_id = t.event_id
     WHERE t.status = 'sold'
-      AND e.event_date < '2026-09-11'
+      AND e.event_date < '{today}'
     GROUP BY e.category
     ORDER BY revenue DESC
     LIMIT 5
@@ -33,8 +34,8 @@
     JOIN teams h ON h.team_id = e.home_team_id
     WHERE t.status = 'sold'
       AND h.name = 'Brooklyn Nets'
-      AND o.ordered_at >= '2026-08-01'
-      AND o.ordered_at < '2026-09-01'
+      AND o.ordered_at >= date('{today}', 'start of month', '-1 month')
+      AND o.ordered_at < date('{today}', 'start of month')
     GROUP BY e.event_id
 
 - id: barclays-average-price-2024
@@ -58,12 +59,44 @@
   tags: [join, relative-date, filter, ambiguous]
   expect: answered
   sql: |-
-    SELECT e.season, ROUND(SUM(t.price), 2) AS refunded_revenue
+    SELECT h.name AS club, e.season, ROUND(SUM(t.price), 2) AS refunded_revenue
     FROM tickets t
     JOIN events e ON e.event_id = t.event_id
+    JOIN teams h ON h.team_id = e.home_team_id
     WHERE t.status = 'refunded'
-      AND e.season = '2025-26'
+      AND ((h.name = 'Brooklyn Nets' AND e.season = '2025-26')
+        OR (h.name = 'New York Liberty' AND e.season = '2025'))
+    GROUP BY h.name, e.season
+
+- id: liberty-tickets-sold-last-season
+  question: How many tickets did the Liberty sell last season?
+  tags: [join, relative-date, filter]
+  expect: answered
+  sql: |-
+    SELECT e.season, COUNT(*) AS tickets_sold
+    FROM tickets t
+    JOIN events e ON e.event_id = t.event_id
+    JOIN teams h ON h.team_id = e.home_team_id
+    WHERE t.status = 'sold'
+      AND h.name = 'New York Liberty'
+      AND e.season = '2025'
     GROUP BY e.season
+
+- id: liberty-top-games-this-season
+  question: Which Liberty home games sold the most tickets this season?
+  tags: [join, relative-date, filter]
+  expect: answered
+  sql: |-
+    SELECT e.name, e.event_date, COUNT(*) AS tickets_sold
+    FROM tickets t
+    JOIN events e ON e.event_id = t.event_id
+    JOIN teams h ON h.team_id = e.home_team_id
+    WHERE t.status = 'sold'
+      AND h.name = 'New York Liberty'
+      AND e.season = '2026'
+    GROUP BY e.event_id
+    ORDER BY tickets_sold DESC
+    LIMIT 10
 
 - id: weather-next-home-game
   question: What's the weather for the next home game?
@@ -95,7 +128,8 @@
     SELECT COUNT(*) AS orders_with_promo
     FROM orders
     WHERE promo_code IS NOT NULL
-      AND ordered_at >= '2026-01-01' AND ordered_at < '2027-01-01'
+      AND ordered_at >= date('{today}', 'start of year')
+      AND ordered_at < date('{today}', 'start of year', '+1 year')
 
 - id: concert-refunds-2025
   question: How many tickets were refunded for concerts held in 2025?
@@ -146,7 +180,7 @@
     FROM tickets t
     JOIN orders o ON o.order_id = t.order_id
     WHERE t.status = 'sold'
-      AND o.ordered_at >= '2026-09-10' AND o.ordered_at < '2026-09-11'
+      AND o.ordered_at >= date('{today}', '-1 day') AND o.ordered_at < '{today}'
 
 - id: buyer-average-age
   question: What was the average age of ticket buyers last year?

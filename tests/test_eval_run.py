@@ -14,10 +14,10 @@ from eval.fake_client import ERROR_ENTRY_ID
 from eval.run import Decision, ModelRun, Record, decide, main
 from nlq.db.seed import seed_database
 
-TODAY = "2026-09-11"
+TODAY = "2026-09-12"
 SCALE = 0.005
 MODELS = ("claude-sonnet-5", "claude-haiku-4-5")
-ENTRY_COUNT = 18
+ENTRY_COUNT = 20
 EVERY_STATUS = {"answered", "empty", "unanswerable", "blocked", "error"}
 
 
@@ -38,15 +38,14 @@ def harness(monkeypatch: pytest.MonkeyPatch, tmp_path: Path, seeded_dir: Path) -
     monkeypatch.setattr(anthropic, "Anthropic", refuse)
     monkeypatch.setattr(eval_run, "DATA_DIR", seeded_dir)
     monkeypatch.setattr(eval_run, "RESULTS_DIR", tmp_path / "results")
-    monkeypatch.setenv("NLQ_TODAY", "")
     monkeypatch.setenv("NLQ_DATABASE_PATH", "")
     return tmp_path
 
 
 def run_fake(harness: Path, *extra: str) -> tuple[int, Path]:
     report = harness / "eval-results.md"
-    args = ["--fake", "--models", ",".join(MODELS), "--today", TODAY, "--out", str(report)]
-    return main([*args, *extra]), report
+    args = ["--fake", "--models", ",".join(MODELS), "--out", str(report)]
+    return main([*args, *extra], today=date.fromisoformat(TODAY)), report
 
 
 def test_a_fake_sweep_writes_a_json_file_per_model_covering_every_status(
@@ -76,7 +75,7 @@ def test_a_fake_sweep_writes_the_report_with_summary_matrix_and_decision(harness
     text = report.read_text(encoding="utf-8")
     assert "## Summary" in text and "## Decision" in text and "## Per question" in text
     for model in MODELS:
-        assert f"| `{model}` | {ENTRY_COUNT - 1}/{ENTRY_COUNT} | 94% |" in text
+        assert f"| `{model}` | {ENTRY_COUNT - 1}/{ENTRY_COUNT} | 95% |" in text
     assert "**Winner: `claude-haiku-4-5`**" in text
     assert "**Not a measured run.**" in text and "`uv run python -m eval.run --fake`" in text
     assert (
@@ -126,12 +125,38 @@ def test_a_live_run_without_a_key_stops_before_touching_the_database(
     monkeypatch.setenv("ANTHROPIC_API_KEY", "")
     monkeypatch.setattr(eval_run, "DATA_DIR", harness / "never-created")
 
-    code = main(["--today", TODAY, "--out", str(harness / "unused.md")])
+    code = main(["--out", str(harness / "unused.md")], today=date.fromisoformat(TODAY))
 
     assert code == 2
     assert "ANTHROPIC_API_KEY" in capsys.readouterr().err
     assert not (harness / "never-created").exists()
     assert not (harness / "unused.md").exists()
+
+
+def test_today_cannot_be_overridden_from_the_command_line(harness: Path) -> None:
+    with pytest.raises(SystemExit):
+        main(["--fake", "--today", TODAY])
+
+
+def test_a_run_with_no_date_passed_in_uses_the_real_date(
+    harness: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(eval_run.config, "today", lambda: date.fromisoformat(TODAY))
+
+    code = main(
+        [
+            "--fake",
+            "--models",
+            MODELS[0],
+            "--only",
+            "delete-all-tickets",
+            "--out",
+            str(harness / "report.md"),
+        ]
+    )
+
+    payload = json.loads((harness / "results" / f"{MODELS[0]}.json").read_text(encoding="utf-8"))
+    assert code == 0 and payload["today"] == TODAY
 
 
 def make_run(

@@ -24,7 +24,7 @@ built as what is.
 - Row counts per table in the drawer: they change with `--scale` and with
   today's date, so they would need a query per page load to stay honest, for a
   number nobody asks the agent for.
-- More golden questions: eighteen cover every status and every failure shape,
+- More golden questions: twenty cover every status and every failure shape,
   prompt injection included (BSE-21 added three because injection was a shape
   the set lacked); more of the same rows, or variants of one injection, raise
   the run's cost without moving the decision.
@@ -66,8 +66,8 @@ window also contributes its January-to-April home games.
 **Which NBA seasons exist is decided by the horizon, not by the season in
 progress.** The obvious rule — generate up to the season that has tipped off, so
 `today.month >= 9` — disagrees with the 120-day on-sale horizon for the ten weeks
-from 24 June, when the horizon already reaches the 22 October opener. A seed pinned
-to `NLQ_TODAY=2026-07-01` had no Nets games on sale at all, which is both wrong and
+from 24 June, when the horizon already reaches the late-October opener. A seed for
+2026-07-01 had no Nets games on sale at all, which is both wrong and
 the single worst question for this dataset to fail. The bound is now "whichever
 season has opened by the horizon", matching what the WNBA and non-sport generators
 already did.
@@ -160,12 +160,16 @@ is the part being graded hardest. The graph is in `docs/backlog.md`.
 current date, so "last month" always has data in it. The seed is deterministic
 (fixed RNG seed), so two machines produce identical data for the same date.
 
-**The seed and the agent share one "today".** `seed_database()` defaults to
-`config.today()`, which honours `NLQ_TODAY`, so a pinned date drives the seed, the
-agent's relative-date resolution and the evaluation together. Without that, a
-container seeded on the real date and an agent pinned to another would disagree on
-what "last month" holds. Rejected: pinning only the agent (the "nothing bought
-after today" guarantee would silently break).
+**Today is always the real date; tests inject a date by argument** (BSE-28).
+`config.today()` returns `date.today()` and nothing overrides it: the API, the CLI,
+the seed and the evaluation all use it, so a question asked in the app is answered
+against the same day a BSE analyst would use. Tests pass `today=` to
+`seed_database()`, `build_context()`, `Agent` and `eval.run.main()` for
+determinism. Rejected: the `NLQ_TODAY` environment variable and the `--today` flags
+it replaced (a demo pinned to one date slowly goes stale, and a container seeded
+for one day with an agent pinned to another disagrees on what "last month" holds),
+and pinning only the agent (the "nothing bought after today" guarantee would
+silently break).
 
 **Deliberate ambiguity in the data.** Refunded tickets, comps priced at zero, a
 separate `fee` column, and a purchase date that is not the event date. These make
@@ -189,8 +193,7 @@ runner matrix across Python versions (the app ships in one container on 3.12).
 **No lane tooling.** There is no database server, no ports to allocate and no
 long-running service, so a ticket runs in a plain git worktree. The only thing a
 worktree needs that git will not give it is `.env`, which is ignored, so
-`.worktreeinclude` copies it in — otherwise a lane has no API key and no pinned
-`NLQ_TODAY`. Rejected: per-lane databases (nothing to isolate; the SQLite file is
+`.worktreeinclude` copies it in — otherwise a lane has no API key. Rejected: per-lane databases (nothing to isolate; the SQLite file is
 generated per worktree anyway).
 
 **Parity runs offline, against the canvas committed in the repo.** Because
@@ -266,14 +269,17 @@ extended thinking (the schema and the dictionary are in the prompt, so this is
 a reading task, not a reasoning one; see "No frontier model in the sweep").
 
 **Worked examples ride along as conversation turns, not as prompt text.** The
-nine examples in `src/nlq/agent/examples.yaml` become alternating user and
+worked examples in `src/nlq/agent/examples.yaml` become alternating user and
 assistant messages ahead of the real question, with each assistant turn being
 the `SqlPlan` JSON the model is asked to produce. The model sees the exact
-output shape nine times before it writes one, the system prompt stays a stable
+output shape once per example before it writes one, the system prompt stays a stable
 snapshot (`tests/golden/sql_prompt.txt`), and every example is proven against
 the schema by a test that runs its SQL through the guard and the executor.
-Dates inside the example SQL are written against a literal today so the model
-sees how to plug in the date the prompt supplies. Rejected: pasting examples
+Today's date inside the example SQL is a `{today}` placeholder that
+`build_context(today)` fills with the date the prompt supplies, so the examples
+and the prompt always agree (BSE-28). Rejected: a literal date (stale the day
+after it was written), and `date('now')` in the SQL (the prompt tells the model
+never to call it, so there is one date source for prompt, seed and data). Rejected: pasting examples
 into the system prompt as text (the SDK cannot validate them there, and every
 wording tweak would churn the golden file).
 
@@ -1019,3 +1025,44 @@ and fixed text on 422s. `docs/security.md` gives the one-line reason for each.
 package to a lockfile.
 
 **Nothing became a follow-up ticket.** Every finding fitted a small fix here.
+
+## Club seasons (BSE-28)
+
+**One set of approximate season dates, tuned to the real calendars.** Nets regular
+season 21 Oct - 12 Apr, playoffs 18 Apr - 20 Jun; Liberty 12 May - 20 Sep, playoffs
+24 Sep - 25 Oct, the same month and day every year. The old Liberty season ended on
+8 September, which made 2026 look finished on 12 September when the real one runs
+to the 24th. Rejected: a table of real dates for each season (more code for
+synthetic data that only needs to be close).
+
+**The data holds Barclays Center home games only, and says so.** 41 of a Nets
+season's 82 games and 20 of a Liberty season's 44, plus home playoff games. BSE
+only sells tickets to home games, so the league's game counts do not apply. The
+dictionary's business rules, the drawer's definitions and `docs/data-spec.md` each
+state it. Rejected: generating 22 Liberty home games, or adding away games.
+
+**"Last season" and "this season" are worked out per club, from the data and
+today.** A club's last season is its most recent `events.season` with no home
+games on or after today; this season is the one in progress, or else the next with
+games on sale. On 12 September 2026 that is Nets 2025-26 and Liberty 2025 for last
+season, and Liberty 2026 for this season. A question that names no club answers
+one row per club. Two worked examples teach the lookup in a CTE, and no season
+label is written into the rules or the examples; the label format is described as
+'YYYY-YY' and 'YYYY' instead. The schema DDL's column comment still shows
+'2025-26', because the ticket rules out schema changes. Rejected: one combined
+total for both clubs (their season labels differ, so the total has no one season
+to name), and the old rule that meant the NBA only.
+
+**Golden reference SQL uses the same `{today}` placeholder**, filled by
+`load_golden(today)`, so "yesterday", "last month", "this year" and "before today"
+follow the real date the evaluation seeds for. Season labels stay literal in the
+references, because the evaluation is only run in September 2026 and a reference
+that re-derived the season would share the agent's logic instead of checking it.
+
+**Claude Sonnet 5 stays the default after the real-date evaluation.** The
+20-question run on 2026-09-12 scored Sonnet 5 at 20/20 ($0.0212 per question) and
+Haiku 4.5 at 16/20 ($0.0079), so the rule keeps Sonnet. A 19-question run earlier
+the same day, before the "this season" question was added, tied both at 19/19,
+which would have picked Haiku. The model was not switched on that pass, and the
+20-question rerun shows why: one pass is noisy for Haiku. Rejected: switching
+`.env.example` on the tied pass (a model change hidden inside a data ticket).

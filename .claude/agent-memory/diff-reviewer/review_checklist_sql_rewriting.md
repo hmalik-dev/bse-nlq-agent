@@ -30,6 +30,12 @@ When a diff rewrites SQL text or guards it with sqlglot, check these:
   the returned rows: the authorizer reported a `sqlite_master` read for a
   `count(*)` that actually resolved to a shadowing CTE (BSE-23, false alarm).
 
+- **Template placeholders filled at one entry point.** When SQL gains a
+  `{today}`-style placeholder filled in `build_context`, grep every caller of
+  the raw loader (`load_examples()` in tests/test_agent.py): unfilled `'{today}'`
+  still runs in SQLite (string compare, `date()` gives NULL), so tests pass on
+  wrong SQL (BSE-28).
+
 **Why:** the first four were live defects in the BSE-3 guard/executor diff and none of
 them are visible from reading the code alone.
 

@@ -18,7 +18,7 @@ from nlq.config import DICTIONARY_PATH
 from nlq.db import seed
 from nlq.db.seed import seed_database, window_bounds
 
-TODAY = date(2026, 9, 11)
+TODAY = date(2026, 9, 12)
 SCALE = 0.02
 WINDOW_START, HORIZON = window_bounds(TODAY)
 
@@ -207,9 +207,9 @@ def test_every_nba_season_in_the_window_is_a_full_41_game_schedule(db: sqlite3.C
 
 
 def _nba_season_bounds(season: str) -> tuple[date, date]:
-    """22 October to 12 April of the season labelled '2025-26'."""
+    """21 October to 12 April of the season labelled '2025-26'."""
     start_year = int(season[:4])
-    return date(start_year, 10, 22), date(start_year + 1, 4, 12)
+    return date(start_year, 10, 21), date(start_year + 1, 4, 12)
 
 
 def _season_fits_the_window(season: str) -> bool:
@@ -217,13 +217,13 @@ def _season_fits_the_window(season: str) -> bool:
     return WINDOW_START <= opens and closes <= HORIZON
 
 
-def test_nba_playoff_games_sit_between_18_april_and_30_may(db: sqlite3.Connection) -> None:
+def test_nba_playoff_games_sit_between_18_april_and_20_june(db: sqlite3.Connection) -> None:
     out_of_range = _scalar(
         db,
         """
         SELECT COUNT(*) FROM events
         WHERE category = 'NBA' AND is_playoff = 1
-          AND (substr(event_date, 6) < '04-18' OR substr(event_date, 6) > '05-30')
+          AND (substr(event_date, 6) < '04-18' OR substr(event_date, 6) > '06-20')
     """,
     )
     assert out_of_range == 0
@@ -233,7 +233,7 @@ def test_each_calendar_year_has_a_full_nets_home_slate(db: sqlite3.Connection) -
     """A calendar year straddles two seasons plus a playoff run, so it holds about 41.
 
     The current year only reaches 36 because the 120-day horizon runs past
-    22 October; the fixture pins today to 2026-09-11, which it does.
+    21 October; the fixture passes today as 2026-09-12, which it does.
     """
     per_year = _counts_by(
         db,
@@ -246,7 +246,7 @@ def test_each_calendar_year_has_a_full_nets_home_slate(db: sqlite3.Connection) -
 def test_each_calendar_year_has_a_full_liberty_home_slate(db: sqlite3.Connection) -> None:
     """Liberty seasons sit inside one calendar year, so every year in range is complete."""
     for year in FULL_YEARS:
-        assert date(year, *(10, 8)) <= HORIZON, f"{year} postseason is outside the window"
+        assert date(year, *(10, 25)) <= HORIZON, f"{year} postseason is outside the window"
         counts = db.execute(
             """
             SELECT SUM(1 - is_playoff), SUM(is_playoff) FROM events
@@ -255,6 +255,40 @@ def test_each_calendar_year_has_a_full_liberty_home_slate(db: sqlite3.Connection
             (str(year),),
         ).fetchone()
         assert counts == (20, 2), f"{year} Liberty slate is {counts}"
+
+
+# (club, season, is_playoff): first and last allowed date, from docs/data-spec.md.
+SEASON_WINDOWS = (
+    ("NBA", "2025-26", 0, "2025-10-21", "2026-04-12"),
+    ("NBA", "2025-26", 1, "2026-04-18", "2026-06-20"),
+    ("WNBA", "2026", 0, "2026-05-12", "2026-09-20"),
+    ("WNBA", "2026", 1, "2026-09-24", "2026-10-25"),
+)
+
+
+@pytest.mark.parametrize(("category", "season", "is_playoff", "opens", "closes"), SEASON_WINDOWS)
+def test_club_games_fall_inside_the_real_league_calendar(
+    db: sqlite3.Connection, category: str, season: str, is_playoff: int, opens: str, closes: str
+) -> None:
+    first, last = db.execute(
+        """
+        SELECT MIN(event_date), MAX(event_date) FROM events
+        WHERE category = ? AND season = ? AND is_playoff = ?
+    """,
+        (category, season, is_playoff),
+    ).fetchone()
+    assert first is not None, f"{category} {season} has no games"
+    assert opens <= first <= last <= closes, (first, last)
+
+
+def test_the_liberty_season_is_still_being_played_on_12_september(db: sqlite3.Connection) -> None:
+    still_to_play = _scalar(
+        db,
+        "SELECT COUNT(*) FROM events WHERE category = 'WNBA' AND season = '2026'"
+        " AND is_playoff = 0 AND event_date > ?",
+        (TODAY.isoformat(),),
+    )
+    assert still_to_play >= 1
 
 
 @pytest.mark.parametrize(
@@ -522,21 +556,6 @@ def test_a_tiny_scale_still_seeds_a_usable_customer_base(tmp_path: Path) -> None
     assert orphans == 0
 
 
-def test_seed_honours_nlq_today(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    """The seed and the agent must agree on "today", so NLQ_TODAY pins both."""
-    monkeypatch.setenv("NLQ_TODAY", "2025-03-01")
-    path = tmp_path / "pinned.db"
-    seed_database(path, scale=SCALE)
-    conn = sqlite3.connect(path)
-    try:
-        latest_order = _scalar(conn, "SELECT MAX(DATE(ordered_at)) FROM orders")
-        latest_event = _scalar(conn, "SELECT MAX(event_date) FROM events")
-    finally:
-        conn.close()
-    assert latest_order <= "2025-03-01"
-    assert latest_event <= "2025-06-29"  # today plus the 120-day on-sale horizon
-
-
 def test_seed_is_deterministic(tmp_path: Path) -> None:
     """Two machines seeding the same date must produce the same database."""
     fingerprints = []
@@ -571,29 +590,29 @@ def _record_seed(monkeypatch: pytest.MonkeyPatch) -> list[dict[str, object]]:
     return calls
 
 
-def test_the_command_line_passes_scale_and_today_through_and_prints_the_scale(
+def test_the_command_line_passes_scale_through_and_prints_the_scale(
     monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
     calls = _record_seed(monkeypatch)
 
-    seed.main(["--scale", "0.2", "--today", "2026-09-11"])
+    seed.main(["--scale", "0.2"])
 
-    assert calls == [{"today": date(2026, 9, 11), "scale": 0.2}]
+    assert calls == [{"scale": 0.2}]
     out = capsys.readouterr().out
     assert "at scale 0.2" in out
     assert "tickets" in out and "1,234" in out
 
 
-def test_the_command_line_defaults_to_full_scale_and_the_configured_today(
+def test_the_command_line_defaults_to_full_scale_for_the_real_today(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     calls = _record_seed(monkeypatch)
     seed.main([])
-    assert calls == [{"today": None, "scale": 1.0}]
+    assert calls == [{"scale": 1.0}]
 
 
-@pytest.mark.parametrize("argv", [["--scale", "0"], ["--scale", "-1"], ["--today", "yesterday"]])
-def test_the_command_line_rejects_a_bad_scale_or_date(
+@pytest.mark.parametrize("argv", [["--scale", "0"], ["--scale", "-1"], ["--today", "2026-09-12"]])
+def test_the_command_line_rejects_a_bad_scale_or_a_today_override(
     monkeypatch: pytest.MonkeyPatch, argv: list[str]
 ) -> None:
     calls = _record_seed(monkeypatch)

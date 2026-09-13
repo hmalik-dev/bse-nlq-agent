@@ -25,10 +25,10 @@ from nlq.db.seed import seed_database
 FAKE_MODEL = "claude-fake"
 NETS_LAST_MONTH = "How many tickets were sold for Brooklyn Nets home games last month?"
 PROMO_THIS_YEAR = "How many orders used a promo code this year?"
-TODAY = date(2026, 9, 11)
+TODAY = date(2026, 9, 12)
 SCALE = 0.005
 MAX_ROWS = 500
-ENTRY_COUNT = 18
+ENTRY_COUNT = 20
 # Planted as ANTHROPIC_API_KEY, so a leak anywhere in a request or a result is visible.
 CANARY = "canary-value-for-the-leak-test"
 
@@ -68,7 +68,7 @@ UNCOVERED_NODES = (exp.With, exp.Window, exp.Having)
 
 @pytest.fixture(scope="module")
 def entries() -> list[GoldenEntry]:
-    return load_golden(GOLDEN_PATH)
+    return load_golden(TODAY, GOLDEN_PATH)
 
 
 @pytest.fixture(scope="module")
@@ -218,6 +218,49 @@ def test_the_promo_question_with_nothing_to_group_by_stays_one_scalar_row(
     assert result.status == "answered"
     assert result.columns == ["orders_with_promo"]
     assert result.row_count == 1 and isinstance(result.rows[0][0], int)
+
+
+def test_reference_sql_has_today_written_in_and_no_placeholder_left(
+    entries: list[GoldenEntry],
+) -> None:
+    raw = GOLDEN_PATH.read_text(encoding="utf-8")
+    assert "{today}" in raw and TODAY.isoformat() not in raw
+    dated = [entry.sql for entry in entries if entry.sql and TODAY.isoformat() in entry.sql]
+    assert len(dated) >= 4
+    assert all("{today}" not in (entry.sql or "") for entry in entries)
+    later = load_golden(date(2026, 9, 30), GOLDEN_PATH)
+    assert any("2026-09-30" in (entry.sql or "") for entry in later)
+
+
+def test_refund_losses_last_season_expect_one_row_per_club_for_its_own_season(
+    entries: list[GoldenEntry], db_path: Path
+) -> None:
+    rows = _reference_rows(entries, db_path, "refund-losses-last-season")
+    assert [(club, season) for club, season, _ in rows] == [
+        ("Brooklyn Nets", "2025-26"),
+        ("New York Liberty", "2025"),
+    ]
+    assert all(refunded > 0 for _, _, refunded in rows)
+
+
+def test_liberty_last_season_is_2025_while_2026_is_still_being_played(
+    entries: list[GoldenEntry], db_path: Path
+) -> None:
+    rows = _reference_rows(entries, db_path, "liberty-tickets-sold-last-season")
+    assert len(rows) == 1 and rows[0][0] == "2025" and rows[0][1] > 0
+
+
+def test_liberty_this_season_is_the_2026_season_in_progress(
+    entries: list[GoldenEntry], db_path: Path
+) -> None:
+    rows = _reference_rows(entries, db_path, "liberty-top-games-this-season")
+    assert rows and all(event_date.startswith("2026-") for _, event_date, _ in rows)
+
+
+def _reference_rows(entries: list[GoldenEntry], db_path: Path, entry_id: str) -> list[list]:
+    (entry,) = [entry for entry in entries if entry.id == entry_id]
+    sql = guard(entry.sql or "", max_rows=MAX_ROWS).sql
+    return sorted(Executor(db_path).run(sql).rows)
 
 
 def _ask_through_the_fake_client(

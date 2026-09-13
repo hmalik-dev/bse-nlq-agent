@@ -112,12 +112,8 @@ DATABASE_PATH = database_path()
 
 
 def today() -> date:
-    """The date the agent treats as "now" when resolving relative wording.
+    """The date the agent, the seed and the evaluation treat as "now": always the real date.
 
-    NLQ_TODAY pins it so evaluation runs are reproducible; unset means the real
-    current date.
+    Nothing overrides it at runtime; tests pass a date in by argument instead.
     """
-    pinned = os.environ.get("NLQ_TODAY", "").strip()
-    if not pinned:
-        return date.today()
-    return date.fromisoformat(pinned)
+    return date.today()

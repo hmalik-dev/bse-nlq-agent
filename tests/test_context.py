@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from datetime import date
 from pathlib import Path
 
@@ -85,7 +86,7 @@ def test_known_values_and_the_data_window_are_stated(context: PromptContext) -> 
     assert "'Brooklyn Nets', 'New York Liberty'" in context.system
     assert "is_home_club = 0" in context.system and "LIKE" in context.system
     assert "'2025-26'" in context.system and "'2026'" in context.system
-    assert "from 2024-01-01 to 2027-01-09" in context.system
+    assert "from 2024-01-01 to 2027-01-10" in context.system
 
 
 def test_dialect_notes_forbid_date_now(context: PromptContext) -> None:
@@ -94,7 +95,7 @@ def test_dialect_notes_forbid_date_now(context: PromptContext) -> None:
 
 
 def test_today_is_stated_as_iso(context: PromptContext) -> None:
-    assert "Today is 2026-09-11." in context.system
+    assert "Today is 2026-09-12." in context.system
     assert "Today is 2025-03-02." in build_context(date(2025, 3, 2)).system
 
 
@@ -132,7 +133,7 @@ def test_the_worked_examples_teach_both_the_breakdown_and_the_scalar_count(
 
 def test_exactly_ten_examples_load_with_every_field(context: PromptContext) -> None:
     entries = yaml.safe_load(EXAMPLES_PATH.read_text(encoding="utf-8"))
-    assert len(entries) == len(context.examples) == 10
+    assert len(entries) == len(context.examples) == 11
     for entry in entries:
         assert set(entry) == {
             "question",
@@ -161,3 +162,62 @@ def test_every_answerable_example_runs_against_the_schema(
         guarded = guard(example.plan.sql or "", max_rows=MAX_ROWS)
         result = executor.run(guarded.sql)
         assert len(result.columns) >= 1, example.question
+
+
+def test_the_today_placeholder_is_filled_with_the_date_passed_in() -> None:
+    raw = EXAMPLES_PATH.read_text(encoding="utf-8")
+    assert "{today}" in raw
+    assert not re.search(r"'20\d\d-\d\d-\d\d'", _sql_lines(raw)), (
+        "a literal date stands in for today"
+    )
+    for day in (GOLDEN_TODAY, date(2025, 3, 2)):
+        sql = "\n".join(example.plan.sql or "" for example in build_context(day).examples)
+        assert "{today}" not in sql
+        assert sql.count(f"'{day.isoformat()}'") >= 5
+
+
+def _sql_lines(raw: str) -> str:
+    """The example SQL minus the calendar-year bounds a question names itself (in 2024, in 2025)."""
+    return "\n".join(line for line in raw.splitlines() if "-01-01'" not in line)
+
+
+def test_last_season_is_worked_out_per_club_from_the_data_and_today(
+    context: PromptContext, db_path: Path
+) -> None:
+    by_question = {example.question: example.plan.sql or "" for example in context.examples}
+    executor = Executor(db_path)
+
+    nets = _rows(executor, by_question["How many tickets did the Nets sell last season?"])
+    both = _rows(executor, by_question["How many tickets did we sell last season?"])
+
+    assert [row[0] for row in nets] == ["2025-26"]
+    assert [(club, season) for club, season, _ in both] == [
+        ("Brooklyn Nets", "2025-26"),
+        ("New York Liberty", "2025"),
+    ]
+
+
+def test_no_season_label_is_written_into_the_rules_or_the_examples(
+    context: PromptContext,
+) -> None:
+    """The schema DDL's column comment shows the label format and is left as it is."""
+    rules = context.system.replace(SCHEMA_PATH.read_text(encoding="utf-8").rstrip(), "")
+    sql = "\n".join(example.plan.sql or "" for example in context.examples)
+    for label in ("'2024-25'", "'2025-26'", "'2026-27'", "'2025'", "'2026'"):
+        assert label not in rules, label
+        assert label not in sql, label
+
+
+def _rows(executor: Executor, sql: str) -> list[list]:
+    return executor.run(guard(sql, max_rows=MAX_ROWS).sql).rows
+
+
+def test_the_both_clubs_example_assumes_both_clubs_and_playoffs_in_one_sentence(
+    context: PromptContext,
+) -> None:
+    (plan,) = [
+        e.plan
+        for e in context.examples
+        if e.question == "How many tickets did we sell last season?"
+    ]
+    assert any("both clubs" in line and "playoff" in line for line in plan.assumptions)

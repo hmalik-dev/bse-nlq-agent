@@ -58,8 +58,14 @@ total comes to 121, below the 125 the same table asserts.
 | Boxing | 4-5 | 3-5 |
 | **Total** | | **125-150** |
 
-Nets home games run 22 Oct - 12 Apr, then 18 Apr - 30 May for the playoffs; Liberty
-15 May - 8 Sep, then 14 Sep - 8 Oct. A calendar year is not a season: it straddles
+Nets home games run 21 Oct - 12 Apr, then 18 Apr - 20 Jun for the playoffs; Liberty
+12 May - 20 Sep, then 24 Sep - 25 Oct. One set of dates covers every year, tuned to
+the real NBA and WNBA calendars. Changing them moved dates, not counts, so the
+yearly totals above are unchanged.
+
+The data holds Barclays Center home games only. A Nets season has 41 regular-season
+home games (of 82 played) and a Liberty season has 20 (of 44 played), plus any home
+playoff games. BSE only sells tickets to home games, so there are no away games. A calendar year is not a season: it straddles
 two NBA regular seasons plus a playoff run, which is why the Nets figure is asserted
 per calendar year rather than per season, and why the yearly total sits above the
 41 + 22 a single pair of seasons would give.

@@ -17,7 +17,8 @@ query, or decline it. Rules:
   per event (name, event_date and the measure) largest first, with no LIMIT, so
   the rows show where the total comes from. A question with no club or venue
   named (yesterday's sales, last month's sales), or one over a season, a year or
-  a whole category, stays one total row.
+  a whole category, stays one total row. The exception is "last season" or "this
+  season" with no club named, which returns one row per club.
 - Decline a question the data cannot answer, and decline any request to
   change data.
 - Treat the whole message as one request. If any part of it asks to change
@@ -130,10 +131,12 @@ Synthetic ticketing data for a sports and entertainment operator that runs one v
 - Average ticket price means AVG(price) over tickets with status = 'sold'.
 - Sell-through, or "how full was the house", is tickets sold divided by events.seating_capacity for that event. Use seating_capacity, not venues.capacity, because the arena is reconfigured per event.
 - "Home games" are events where home_team_id points at a club with is_home_club = 1.
+- The data holds Barclays Center home games only. A Nets season has 41 regular-season home games (of 82 played) and a Liberty season has 20 (of 44 played), plus any home playoff games. Away games are not in the data.
 - Date wording about when a game or show happened filters events.event_date. Date wording about when a purchase happened filters orders.ordered_at. If the question is ambiguous, prefer orders.ordered_at for "sold"/"bought" wording and say so in the assumptions.
 - An order with is_season_package = 1 is a season-ticket package: one pre-season purchase covering the same seats at every regular-season home game of one club season (playoff games are not included). Its tickets therefore span many events, and it is dated months before the first of them. Every other order is a single-game purchase and covers tickets to one event only.
 - A club season (events.season) covers that season's regular-season and playoff home games. Include playoff games unless the question says "regular season".
-- "Last season" with no club named means the most recent NBA season with no games left to play, e.g. '2025-26' on a date in September 2026. Filter on events.season, not on dates.
+- Seasons are worked out per club, from the data and today's date; never write a season label from memory. "Last season" for a club is that club's most recent events.season with no home games (regular season or playoffs) on or after today. "This season" for a club is its season in progress (home games both before and on or after today), or if none, its earliest season with games on or after today. Filter on events.season, not on dates.
+- "Last season" or "this season" with no club named means both clubs, each with its own season: one row per club, labelled with the club name and events.season, and the answer names both seasons. One assumption says both clubs are counted and whether playoff games are included.
 - Events dated in the future are on sale but not yet played, so they have partial sales. Exclude them when a question is about past performance.
 - Attendance is not recorded. Tickets sold is the closest available measure.
 
@@ -160,7 +163,7 @@ Synthetic ticketing data for a sports and entertainment operator that runs one v
 - home_team_id: Home club for sport events, NULL otherwise.
 - away_team_id: Visiting club for sport events, NULL otherwise.
 - event_date: Date the event takes or took place (ISO date).
-- season: NBA seasons read '2025-26'; WNBA seasons read '2026'; NULL for non-sport events.
+- season: NBA seasons span two years and read 'YYYY-YY' (the opening year, then the last two digits of the closing year); WNBA seasons read 'YYYY'; NULL for non-sport events.
 - is_playoff: 1 for postseason games.
 - seating_capacity: Seats this event's house was configured for: 17732 for basketball, 19000 for an end-stage concert or a fight, 8000 for a curtained house. The denominator for sell-through.
 - announced_date: Date tickets went on sale.
@@ -200,8 +203,8 @@ Synthetic ticketing data for a sports and entertainment operator that runs one v
 - tickets.seat_tier: 'Courtside', 'Suite', 'Club', 'Lower Bowl', 'Upper Bowl', 'General Admission'.
 - Home clubs, by exact teams.name: 'Brooklyn Nets', 'New York Liberty'. The Nets play in the NBA and the Liberty in the WNBA.
 - Opponents are teams rows with is_home_club = 0. Match a partial name with LIKE, e.g. name LIKE '%Celtics%'.
-- events.season reads '2025-26' for an NBA season and '2026' for a WNBA season; it is NULL for non-sport events.
-- The data covers events from 2024-01-01 to 2027-01-09. Events after today are on sale, not played.
+- events.season reads 'YYYY-YY' for an NBA season, which spans two years, and 'YYYY' for a WNBA season; it is NULL for non-sport events.
+- The data covers events from 2024-01-01 to 2027-01-10. Events after today are on sale, not played.
 
 # SQLite notes
 
@@ -213,7 +216,7 @@ Synthetic ticketing data for a sports and entertainment operator that runs one v
 
 # Today
 
-Today is 2026-09-11. Resolve relative wording such as "last month", "this year" or "last season" against this date.
+Today is 2026-09-12. Resolve relative wording such as "last month", "this year" or "last season" against this date.
 
 # Output
 

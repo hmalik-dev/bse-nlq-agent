@@ -14,7 +14,8 @@ What the generated database holds, and the ranges `tests/test_seed.py` asserts.
 | `orders` | purchase | Time, channel, promo code, `is_season_package` |
 | `tickets` | seat | Price, fee, status (`sold`, `refunded`, `comp`) |
 
-Categories: NBA, WNBA, Concert, Comedy, Boxing, Family Show.
+Categories: NBA, WNBA, Concert, Comedy, Boxing, Family Show. Team and venue names
+are real; performers are fictional, so no real act appears to play a date it did not.
 
 ## Calendar
 

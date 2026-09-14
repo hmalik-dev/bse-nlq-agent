@@ -4,8 +4,9 @@ Rules and commands for agents working on BSE Insights, a natural language query
 agent over a synthetic ticketing database. The bar is agent design, SQL accuracy,
 code quality, error handling and docs a new engineer can follow.
 
-**Read `docs/decisions.md` before changing anything**, and add an entry for every new
-call. Then read what the work touches: `docs/data.md` (dataset and tested ranges),
+**Read `docs/decisions.md` before changing anything**, and add an entry only when a call
+changes what the agent does, what the data means, or what a user sees at runtime;
+wording, styling and workflow choices go in the PR body. Then read what the work touches: `docs/data.md` (dataset and tested ranges),
 `docs/design.md` (brand, tokens, screens, API shape), `docs/security.md` (boundaries).
 
 ## Commands

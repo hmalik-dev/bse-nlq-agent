@@ -1,5 +1,5 @@
 # Worked examples sent to the model as prior conversation turns. Each one
-# teaches a join shape the brief's questions need; nothing here is decoration,
+# teaches a join shape the example questions need; nothing here is decoration,
 # because every entry is paid for as prompt tokens on every question.
 #
 # Today's date is written as the placeholder {today}, which build_context fills

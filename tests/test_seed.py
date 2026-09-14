@@ -1,7 +1,7 @@
 """The generated database has to satisfy the rules the prompt tells the model about.
 
 Ranges come from `docs/data.md`. They are asserted here rather than described
-there, so the data cannot drift back to something a BSE reviewer would not accept.
+there, so the data cannot drift back to something people at BSE would not accept.
 """
 
 from __future__ import annotations

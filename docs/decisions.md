@@ -1,6 +1,6 @@
 # Decisions
 
-The choices a reviewer would ask about, and why. One entry each: the decision,
+The choices a new engineer would ask about, and why. One entry each: the decision,
 *why*, and what was *rejected*. Add an entry whenever you make a new call.
 
 ## Agent
@@ -105,13 +105,13 @@ The choices a reviewer would ask about, and why. One entry each: the decision,
   *Why:* the first sweep exposed a copied `LIMIT 5` and an undefined "last season"; the first injection run
   answered a smuggled `DROP` question silently. Each became one prompt rule. *Rejected:* chasing Haiku's misses.
 - **The direct Anthropic API, not Bedrock.**
-  *Why:* one less account for a reviewer; Bedrock is a client swap.
+  *Why:* one less account for a new user; Bedrock is a client swap.
   *Rejected:* Bedrock.
 
 ## Data
 
 - **A purpose-built synthetic ticketing dataset.**
-  *Why:* the brief's questions are about Nets home games and Barclays Center.
+  *Why:* the example questions are about Nets home games and Barclays Center.
   *Rejected:* Chinook (unrelated business); a real ticketing dataset (none public at this grain).
 - **SQLite.**
   *Why:* ships with Python, one portable file, and a real read-only mode.
@@ -120,10 +120,10 @@ The choices a reviewer would ask about, and why. One entry each: the decision,
   *Why:* "how many tickets" is a plain `COUNT(*)`, the shape models get right most often.
   *Rejected:* order lines with a quantity (`SUM(quantity)` invites errors).
 - **Realism is measured: each category's tickets, sell-through, price and gate sit in a tested band.**
-  *Why:* a BSE reviewer spots a wrong Nets attendance before reading code.
+  *Why:* anyone at BSE spots a wrong Nets attendance before reading code.
   *Rejected:* jittered capacity (noise in every asserted range).
 - **Where the bands disagreed, tickets sold won and sell-through was recomputed.**
-  *Why:* tickets sold is the figure a reviewer recognizes on sight.
+  *Why:* tickets sold is the figure people at BSE recognize on sight.
   *Rejected:* widening capacity per event to keep both.
 - **Season packages are a flag on the order, and `is_season_member` marks exactly their holders.**
   *Why:* package questions become answerable in SQL; the membership share follows (~1.1%).
@@ -143,7 +143,7 @@ The choices a reviewer would ask about, and why. One entry each: the decision,
 - **US English: the operator's sides are teams everywhere, including `teams.is_home_team`.**
   "Club" survives only as a seat tier, a real Barclays seating level. A database seeded before
   the rename must be reseeded (delete `data/tickets.db`, then `npm run dev`).
-  *Why:* the brief and its reader are American, and the model echoes the prompt's words in its answers.
+  *Why:* BSE is American, and the model echoes the prompt's words in its answers.
   *Rejected:* keeping the old column name (the model reads column names too); a migration for a
   synthetic, regenerated file. The accuracy report predates the rename; eight questions were
   re-asked in the browser instead.
@@ -189,19 +189,20 @@ The choices a reviewer would ask about, and why. One entry each: the decision,
 - **The README names one way to run the app: `npm run dev`.** Docker, the CLI and the test
   commands stay in `CLAUDE.md`; the container and the CLI still work.
   *Why:* the app is meant to be met through its web interface, and every alternative on the
-  page is a choice the reviewer has to make before seeing it.
+  page is a choice a new user has to make before seeing it.
   *Rejected:* an "Other ways to run" section and a "Tests" section (they read as options, and
-  a reviewer who wants them finds them in `CLAUDE.md`); the manual run block (duplicated `CLAUDE.md`).
-- **The README is for the interviewer; detail lives in docs.**
-  *Why:* a reviewer should grasp and run the app in a few minutes, in plain English.
-  *Rejected:* one README serving both reviewers and contributors (latency, fake modes and internal contracts buried the point).
-- **The README has one section per deliverable the brief names**: setup, how the agent
+  an engineer who wants them finds them in `CLAUDE.md`); the manual run block (duplicated `CLAUDE.md`).
+- **The README is for a first-time reader; detail lives in docs.**
+  *Why:* a new reader should grasp and run the app in a few minutes, in plain English.
+  *Rejected:* one README serving both readers and contributors (latency, fake modes and internal contracts buried the point).
+- **The README has one section per question a new reader asks**: setup, how the agent
   works and fails, the dataset and schema, the model choice, tradeoffs, more time, and
   the AI tools used, under headings that say so.
-  *Why:* the brief lists what to submit, and a reviewer ticks that list; the schema and
-  the AI citation were only reachable through a link or a heading that named neither.
-  *Rejected:* linking to `docs/data.md` for the schema (the brief says "in your README");
-  dropping the AI citation (the brief requires it, and every commit names the co-author).
+  *Why:* a reader looks for each of those by name; the schema and the AI citation were
+  only reachable through a link or a heading that named neither.
+  *Rejected:* linking to `docs/data.md` for the schema (the schema belongs where the data
+  is introduced); dropping the AI citation (every commit names the co-author, so the README
+  should say so too).
 - **`npm run dev` names a missing uv or Node, or an old Node, and stops; it never installs them.**
   *Why:* one printed line makes the fix obvious without running a remote installer on someone else's machine.
   *Rejected:* installing uv automatically.

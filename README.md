@@ -48,7 +48,7 @@ The schema is `src/nlq/db/schema.sql`. Every term the model reads is defined in 
 
 ## Model selection
 
-Claude Sonnet 5 writes both the SQL and the answer. It was chosen by measurement: each candidate was asked the same 20 test questions, which include the brief's examples, attempts to change data and prompt injections.
+Claude Sonnet 5 writes both the SQL and the answer. It was chosen by measurement: each candidate was asked the same 20 test questions, which include the app's example questions, attempts to change data and prompt injections.
 
 - Claude Sonnet 5 passed 20/20 test questions. A question costs $0.0215 on average.
 - Haiku 4.5 scored 16/20 at about a third of the cost.
@@ -75,7 +75,7 @@ The rule, fixed before the run, was the cheapest model within one question of th
 
 ## Docs
 
-- [`docs/decisions.md`](docs/decisions.md): the choices a reviewer would ask about, and why.
+- [`docs/decisions.md`](docs/decisions.md): the choices a new engineer would ask about, and why.
 - [`docs/data.md`](docs/data.md): the dataset, its scale and its quirks.
 - [`docs/security.md`](docs/security.md): what could go wrong and what stops it.
 - [`docs/design.md`](docs/design.md): brand, screens and the API response.

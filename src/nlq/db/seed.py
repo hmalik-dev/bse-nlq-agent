@@ -1,7 +1,7 @@
 """Generate the synthetic ticketing dataset.
 
 Everything here is fabricated. Team, venue and opponent names are real so the
-exercise's example questions are answerable; artists, customers, orders and
+example questions are answerable; artists, customers, orders and
 tickets are invented. The generator is seeded, so the same inputs always give
 the same database.
 

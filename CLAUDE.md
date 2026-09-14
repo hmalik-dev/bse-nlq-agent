@@ -1,8 +1,8 @@
 # CLAUDE.md — build conventions for this repo
 
 Rules and commands for agents working on BSE Insights, a natural language query
-agent over a synthetic ticketing database, built for a hiring exercise. It is judged
-on agent design, SQL accuracy, code quality, error handling, docs and the walkthrough.
+agent over a synthetic ticketing database. The bar is agent design, SQL accuracy,
+code quality, error handling and docs a new engineer can follow.
 
 **Read `docs/decisions.md` before changing anything**, and add an entry for every new
 call. Then read what the work touches: `docs/data.md` (dataset and tested ranges),

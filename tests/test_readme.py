@@ -23,13 +23,17 @@ def summary_rows() -> dict[str, list[str]]:
     }
 
 
+# One section per deliverable the brief names: setup, agent design and error
+# handling, the dataset and schema, the model choice, tradeoffs, what more time
+# would buy, and the AI tools used.
 README_SECTIONS = [
     "Run it locally",
     "How it works",
-    "Results",
+    "The data",
+    "Model selection",
     "Tradeoffs",
     "With more time",
-    "How it was built",
+    "AI tools used",
     "Docs",
 ]
 CONTRIBUTOR_DETAIL = (
@@ -44,7 +48,7 @@ CONTRIBUTOR_DETAIL = (
 
 
 def test_the_readme_is_short_and_follows_the_interviewer_outline() -> None:
-    assert len(README.splitlines()) <= 75
+    assert len(README.splitlines()) <= 90
     headings = [line[3:] for line in README.splitlines() if line.startswith("## ")]
     assert headings == README_SECTIONS
 

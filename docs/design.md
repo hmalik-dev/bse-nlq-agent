@@ -37,6 +37,7 @@ Declared once in the `@theme` block of `web/src/index.css`.
 | Warning · error and blocked | `#FBBF24` · `#F87171` |
 | Type | Archivo for headings, Inter for body, JetBrains Mono for SQL, labels and numbers (tabular, right-aligned) |
 | Shape | 12px radius on cards, 8px on controls; no gradients in the UI |
+| Theme | Dark only: the BSE and Nets marks are solid white |
 | Motion and grid | 150–200ms fades, nothing bounces; 1200px max content width, 24px gutters |
 
 ## Example questions
@@ -65,7 +66,7 @@ The six chips on the ask screen, in order, served by `GET /api/examples` from
 | 08 | Blocked | A fixed refusal, the read-only note, the rejected statement dimmed |
 | 09 | Error | One sentence per `error.code`, Retry, the question kept in the input |
 | 10 | API key required | In place of the ask screen when `/api/health` says `api_key: false`: one card with the title, one sentence on adding the key to `.env`, the `.env` line and the health check's `api_key` and `database` values; no input, no chips |
-| 11 | Schema drawer | Slide-over: plain definitions and six tables; `events` and `tickets` open |
+| 11 | Schema drawer | Slide-over: the dictionary's short definitions for people (not the prompt's business rules) and six tables; `events` and `tickets` open |
 | 12 | Session history | Left rail of this session's questions and "New question"; the footer sits beside it |
 | 13–18 | 1024, 768, 390 | Reference only. The app has two layouts: 1440 at 1024 and up, one column below. |
 
@@ -75,6 +76,12 @@ full-width rows of at least 44px with the whole question on each.
 
 **Results table.** A total row leads with what it totals (`YEAR | TICKETS SOLD`), and a
 lone column is left-aligned so its header and value sit together.
+
+**Chart and exports.** The chart is inline SVG, and Download SVG saves that element
+as drawn. Export CSV writes raw values in the browser and defuses formula cells.
+
+**Thinking.** No simulated progress: the API is one call, so steps show a spinner
+and real step times appear only when it returns.
 
 **Accessibility.** A real label on the input, `aria-label` on icon buttons,
 4.5:1 text contrast, visible cyan focus rings, and a real `<table>` with header cells.

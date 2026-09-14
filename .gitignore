@@ -9,7 +9,7 @@ node_modules/
 dist/
 .DS_Store
 
-# Interview prep notes — not part of the submission.
+# Private notes, never committed.
 PRESENTATION_NOTES.md
 
 # Editor-local state.

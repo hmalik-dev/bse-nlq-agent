@@ -8,11 +8,17 @@ Barclays Center, the Brooklyn Nets and the New York Liberty.
 
 ## Run it locally
 
-You need [uv](https://docs.astral.sh/uv/getting-started/installation/) (it installs Python itself) and [Node 24](https://nodejs.org/en/download).
+You need [uv](https://docs.astral.sh/uv/getting-started/installation/) to run the Python side and [Node 24](https://nodejs.org/en/download) or newer to run the web interface. You don't need to install Python, because uv downloads it for you.
+
+- **Install uv** on macOS or Linux with `curl -LsSf https://astral.sh/uv/install.sh | sh`, then open a new terminal so your shell can find it.
+- **Install Node** from [nodejs.org](https://nodejs.org/en/download), or with `brew install node` on a Mac.
+- **On Windows**, run everything below inside WSL.
+
+If a tool is missing or too old, step 3 says which one and stops before anything runs.
 
 1. Clone it: `git clone https://github.com/hmalik-dev/bse-nlq-agent.git && cd bse-nlq-agent`
 2. Create a file named `.env` in that folder and paste in the `ANTHROPIC_API_KEY=` line from the link you were sent. The key is real and has a small spending limit, so please try what the app can do rather than sending many repeated questions.
-3. Run `npm run dev`. The first run installs and seeds the database, the browser opens on <http://localhost:4000>, and `Ctrl+C` stops it.
+3. Run `npm run dev`. The first run installs everything and seeds the database, the browser opens on <http://localhost:4000>, and `Ctrl+C` stops it.
 
 ## How it works
 

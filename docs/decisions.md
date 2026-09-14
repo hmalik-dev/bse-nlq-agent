@@ -195,6 +195,13 @@ The choices a reviewer would ask about, and why. One entry each: the decision,
 - **The README is for the interviewer; detail lives in docs.**
   *Why:* a reviewer should grasp and run the app in a few minutes, in plain English.
   *Rejected:* one README serving both reviewers and contributors (latency, fake modes and internal contracts buried the point).
+- **The README has one section per deliverable the brief names**: setup, how the agent
+  works and fails, the dataset and schema, the model choice, tradeoffs, more time, and
+  the AI tools used, under headings that say so.
+  *Why:* the brief lists what to submit, and a reviewer ticks that list; the schema and
+  the AI citation were only reachable through a link or a heading that named neither.
+  *Rejected:* linking to `docs/data.md` for the schema (the brief says "in your README");
+  dropping the AI citation (the brief requires it, and every commit names the co-author).
 - **`npm run dev` names a missing uv or Node, or an old Node, and stops; it never installs them.**
   *Why:* one printed line makes the fix obvious without running a remote installer on someone else's machine.
   *Rejected:* installing uv automatically.

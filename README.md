@@ -27,19 +27,39 @@ flowchart LR
 
 - **Read-only.** A check allows only a single `SELECT`, and the database itself is opened read-only.
 - **No guessing.** If the data can't answer a question, or it asks to change data, the app says so. Ambiguous terms like "revenue" are answered with the assumption stated.
+- **Errors are answers.** A question the data can't answer, one that returns nothing, a request to change data, and SQL that fails to run each come back as a plain sentence with its own status, never a crash.
 
 The pipeline is in `src/nlq/agent/agent.py`.
 
-## Results
+## The data
 
-Claude Sonnet 5 passed 20/20 test questions, including the brief's examples, attempts to change data and prompt injections. Haiku 4.5 scored 16/20. A question costs $0.0215 on average. Details: [`docs/eval-results.md`](docs/eval-results.md).
+A synthetic ticketing database for Barclays Center, chosen over Chinook or a public dataset because the brief's questions are about Nets home games and event revenue. It is generated on first run, so "last month" always has data, and covers the last two calendar years, the year in progress and events on sale up to 120 days out. Six tables in SQLite:
+
+| Table | One row per | Holds |
+|---|---|---|
+| `events` | game, concert or show | category, date, season, home and away team, seating capacity |
+| `tickets` | seat | face price, fee, status: sold, refunded or comp |
+| `orders` | purchase | when it was bought, channel, promo code, season-package flag |
+| `customers` | buyer | name, city, season-member flag |
+| `teams` | team | the Nets, the Liberty and every visiting opponent |
+| `venues` | venue | Barclays Center |
+
+The schema is `src/nlq/db/schema.sql`. Every term the model reads is defined in `src/nlq/db/dictionary.yaml`. Scale, calendars and realism checks: [`docs/data.md`](docs/data.md).
+
+## Model selection
+
+Claude Sonnet 5 writes both the SQL and the answer. It was chosen by measurement: each candidate was asked the same 20 test questions, which include the brief's examples, attempts to change data and prompt injections.
+
+- Claude Sonnet 5 passed 20/20 test questions. A question costs $0.0215 on average.
+- Haiku 4.5 scored 16/20 at about a third of the cost.
+
+The rule, fixed before the run, was the cheapest model within one question of the best that gets every refusal right. Haiku was four behind, and a wrong number costs more than a cent. Larger models were not tried, because writing SQL over six tables is a reading task rather than a reasoning one. Switching models is one setting. Details: [`docs/eval-results.md`](docs/eval-results.md).
 
 ## Tradeoffs
 
 - **SQLite with generated data, not a real warehouse:** nothing to install and a true read-only mode, but a smaller SQL dialect.
 - **Local and single user:** no login or rate limits, since whoever runs it supplies the key.
 - **Stated assumptions, not follow-up questions:** each question stands on its own.
-- **Sonnet 5 over Haiku 4.5:** more accurate answers at about three times the cost.
 
 ## With more time
 
@@ -47,9 +67,11 @@ Claude Sonnet 5 passed 20/20 test questions, including the brief's examples, att
 - **Bigger databases**, by giving the model only the tables a question needs instead of all of them.
 - **Prompt caching** in everyday use, so repeated questions cost less. The evaluation ran without it to keep per-question costs comparable.
 
-## How it was built
+## AI tools used
 
-[Claude Code](https://claude.com/claude-code) wrote the code, tests and docs from tickets tracked in Linear; Claude Design drew the mockups in `design-plan/`.
+- **Model provider:** Anthropic, through the direct API. Claude Sonnet 5 writes the SQL and the answer inside the app; Haiku 4.5 was evaluated alongside it.
+- **Coding assistant:** [Claude Code](https://claude.com/claude-code) wrote the code, tests and docs from tickets tracked in Linear.
+- **Design:** Claude Design drew the mockups in `design-plan/`.
 
 ## Docs
 

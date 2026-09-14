@@ -48,7 +48,7 @@ Add an entry only when a call changes what the agent does, what the data means, 
 - **The API refuses an unknown `Host` header.**
   *Why:* with no auth, a DNS-rebinding page could otherwise spend the user's key.
   *Rejected:* CORS rules (rebinding makes the request same-origin).
-- **Error messages are fixed sentences; detail goes to the log.**
+- **Error messages are fixed sentences; detail goes to the log, and the UI never shows `message`.**
   *Why:* no path or SDK text can reach a screen.
   *Rejected:* a response-scrubbing middleware (it has to guess what a path looks like).
 - **No auth, rate limit or spend guard in the app.**
@@ -76,7 +76,7 @@ Add an entry only when a call changes what the agent does, what the data means, 
   *Rejected:* dozens of variants; a separate repair-rate column.
 - **Evaluation misses fix the prompt, not the model.**
   *Why:* a question both models miss is a prompt defect, and each one became one prompt rule.
-  *Rejected:* chasing Haiku's misses with a bigger model or model-specific prompts.
+  *Rejected:* model-specific prompts to lift Haiku's score.
 
 ## Data
 - **A purpose-built synthetic dataset of Barclays Center events, with home games only.**
@@ -110,6 +110,6 @@ Add an entry only when a call changes what the agent does, what the data means, 
 - **The launcher is plain Node, so the same steps run on macOS, Linux and Windows.**
   *Why:* Node is already required, and Windows has no bash, so a shell launcher failed at once.
   *Rejected:* WSL or Git Bash instructions (a second setup path); a launcher dependency.
-- **Only the real model answers; a missing key is a setup screen, and fakes stay in tests.**
+- **Only the real model answers; a missing key is a setup screen; fakes stay in tests and `--fake`.**
   *Why:* a made-up answer shown to a new user reads as a wrong answer from the real agent.
   *Rejected:* a fake agent behind a flag (reachable by skipping one setup step).

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 import sqlite3
+import sys
 import time
 from datetime import date
 from pathlib import Path
@@ -173,7 +174,18 @@ def test_the_widest_row_sqlite_allows_stays_within_twice_the_result_budget() -> 
     assert MAX_COLUMNS * MAX_VALUE_BYTES <= 2 * MAX_RESULT_BYTES
 
 
-@pytest.mark.parametrize("folder", ["a#b", "a?mode=rwc"])
+@pytest.mark.parametrize(
+    "folder",
+    [
+        "a#b",
+        pytest.param(
+            "a?mode=rwc",
+            marks=pytest.mark.skipif(
+                sys.platform == "win32", reason="'?' cannot appear in a Windows file name"
+            ),
+        ),
+    ],
+)
 def test_a_database_path_with_uri_characters_still_opens_read_only(
     db_path: Path, tmp_path: Path, folder: str
 ) -> None:

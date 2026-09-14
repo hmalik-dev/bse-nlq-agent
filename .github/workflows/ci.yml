@@ -7,9 +7,18 @@ on:
 
 jobs:
   python:
-    name: python
-    runs-on: ubuntu-latest
+    name: python (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        # `npm run dev` must work on Windows without WSL; this is the only Windows evidence.
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
+      # Keep LF endings on Windows so format checks see the committed bytes.
+      - name: Check out with LF line endings
+        run: git config --global core.autocrlf false
+
       - uses: actions/checkout@v4
 
       - name: Set up uv
@@ -18,6 +27,12 @@ jobs:
           python-version: "3.12"
           enable-cache: true
           cache-dependency-glob: uv.lock
+
+      # The launcher tests run scripts/dev.mjs, which requires this Node major.
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
 
       - name: Install dependencies
         run: uv sync --frozen
@@ -32,9 +47,16 @@ jobs:
         run: uv run pytest -q
 
   web:
-    name: web
-    runs-on: ubuntu-latest
+    name: web (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
+      - name: Check out with LF line endings
+        run: git config --global core.autocrlf false
+
       - uses: actions/checkout@v4
 
       - name: Set up Node

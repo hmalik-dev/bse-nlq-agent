@@ -203,6 +203,11 @@ The choices a new engineer would ask about, and why. One entry each: the decisio
   *Rejected:* linking to `docs/data.md` for the schema (the schema belongs where the data
   is introduced); dropping the AI citation (every commit names the co-author, so the README
   should say so too).
+- **The `npm run dev` launcher is plain Node (`scripts/dev.mjs`), not bash.** It runs the same
+  steps on macOS, Linux and Windows and stops the API with a process group or `taskkill /T`.
+  *Why:* Node is already required, and Windows has no bash, so a `.sh` launcher failed before installing anything.
+  *Rejected:* WSL or Git Bash instructions (a second setup path); a launcher dependency such as
+  `concurrently` (Node's standard library covers it). CI runs the Python and web suites on Ubuntu and Windows.
 - **`npm run dev` names a missing uv or Node, or an old Node, and stops; it never installs them.**
   *Why:* one printed line makes the fix obvious without running a remote installer on someone else's machine.
   *Rejected:* installing uv automatically.

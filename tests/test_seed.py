@@ -628,3 +628,9 @@ def test_the_command_line_rejects_a_bad_scale_or_a_today_override(
     with pytest.raises(SystemExit):
         seed.main(argv)
     assert calls == []
+
+
+def test_a_show_name_carries_its_date_without_a_platform_specific_format() -> None:
+    # "%-d" is glibc-only; Windows raises "Invalid format string" and seeding fails.
+    event = seed._show_event("Comedy Night", "Comedy", 1.0, date(2026, 3, 5))
+    assert event.name == "Comedy Night — Mar 5, 2026"

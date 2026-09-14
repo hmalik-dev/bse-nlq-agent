@@ -219,7 +219,7 @@ class _Run:
     def __init__(self, question: str, model: str) -> None:
         self.question = question
         self.model = model
-        self.started = time.monotonic()
+        self.started = time.perf_counter()
         self.steps: dict[str, int] = {}
         self.repairs = 0
         self.input_tokens = 0
@@ -230,7 +230,7 @@ class _Run:
     @contextmanager
     def step(self, name: str) -> Iterator[None]:
         """Time one stage, adding to the same step when a repair runs it again."""
-        started = time.monotonic()
+        started = time.perf_counter()
         try:
             yield
         finally:
@@ -259,4 +259,4 @@ class _Run:
 
 def _elapsed_ms(started: float) -> int:
     """Whole milliseconds since `started`, rounded up so a stage that ran never reads 0."""
-    return math.ceil((time.monotonic() - started) * 1000)
+    return math.ceil((time.perf_counter() - started) * 1000)

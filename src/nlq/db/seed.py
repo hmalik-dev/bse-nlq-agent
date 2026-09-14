@@ -472,7 +472,8 @@ def _wnba_season(rng: random.Random, year: int) -> list[Event]:
 def _show_event(name: str, category: str, draw: float, event_date: date) -> Event:
     return Event(
         event_id=0,
-        name=f"{name} — {event_date:%b %-d, %Y}",  # dated, so two nights read distinctly
+        # Dated, so two nights read distinctly; `.day` because "%-d" fails on Windows.
+        name=f"{name} — {event_date:%b} {event_date.day}, {event_date:%Y}",
         category=category,
         home_team_id=None,
         away_team_id=None,

@@ -60,5 +60,3 @@ control has a test that fails if the control breaks.
   `docs/design.md`, and loads nothing.
 - **SQLite's and the SQL parser's error text reach `repairs_exhausted`.** It is wording
   about the model's query, never a path, and the repair loop needs it.
-- **A dev-only advisory in `@vitest/mocker`** (GHSA-82fw-gwwq-j7x9). It is in the test
-  runner, which never ships; `npm audit --omit=dev` and `pip-audit` are clean.

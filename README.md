@@ -8,18 +8,13 @@ Barclays Center, the Brooklyn Nets and the New York Liberty.
 
 ## Run it locally
 
-This runs on macOS or Linux. On Windows, use it inside WSL.
+You need [uv](https://docs.astral.sh/uv/getting-started/installation/) to run the Python side and [Node 24](https://nodejs.org/en/download) or newer to run the web interface. You don't need to install Python, because uv downloads it for you.
 
-### Before you start
+- **Install uv** on macOS or Linux with `curl -LsSf https://astral.sh/uv/install.sh | sh`, then open a new terminal so your shell can find it.
+- **Install Node** from [nodejs.org](https://nodejs.org/en/download), or with `brew install node` on a Mac.
+- **On Windows**, run everything below inside WSL.
 
-Install two tools. You don't need to install Python yourself, because uv downloads the right version on the first run.
-
-- **uv**, which runs the Python side. Install it with `curl -LsSf https://astral.sh/uv/install.sh | sh`, then open a new terminal so your shell can find it. Other ways to install are in the [uv guide](https://docs.astral.sh/uv/getting-started/installation/).
-- **Node 24 or newer**, which runs the web interface. Download it from [nodejs.org](https://nodejs.org/en/download), or run `brew install node` on a Mac.
-
-To check both are ready, run `uv --version` and `node --version`. Each should print a version number.
-
-### Steps
+If a tool is missing or too old, step 3 says which one and stops before anything runs.
 
 1. Clone it: `git clone https://github.com/hmalik-dev/bse-nlq-agent.git && cd bse-nlq-agent`
 2. Create a file named `.env` in that folder and paste in the `ANTHROPIC_API_KEY=` line from the link you were sent. The key is real and has a small spending limit, so please try what the app can do rather than sending many repeated questions.

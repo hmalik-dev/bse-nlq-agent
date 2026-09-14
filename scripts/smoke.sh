@@ -22,7 +22,7 @@ cleanup() {
 }
 trap cleanup EXIT
 
-source scripts/require-key.sh
+node scripts/dev.mjs --check-key
 
 echo "==> uv sync"
 uv sync

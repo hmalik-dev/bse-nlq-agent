@@ -39,7 +39,7 @@ src/nlq/
   api.py         FastAPI: /api/ask, /api/schema, /api/examples, /api/health, the built UI
 web/             React + Vite + TypeScript + Tailwind, built into src/nlq/static
 eval/            golden.yaml · run.py · score.py · report.py · fake_client.py
-scripts/         dev.sh · smoke.sh
+scripts/         dev.mjs · smoke.sh
 ```
 
 The agent core never imports the API or the UI. Everything goes through

@@ -10,9 +10,8 @@ Barclays Center, the Brooklyn Nets and the New York Liberty.
 
 You need [uv](https://docs.astral.sh/uv/getting-started/installation/) to run the Python side and [Node 24](https://nodejs.org/en/download) or newer to run the web interface. You don't need to install Python, because uv downloads it for you.
 
-- **Install uv** on macOS or Linux with `curl -LsSf https://astral.sh/uv/install.sh | sh`, then open a new terminal so your shell can find it.
+- **Install uv** on macOS or Linux with `curl -LsSf https://astral.sh/uv/install.sh | sh`, or on Windows with `powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"`, then open a new terminal so your shell can find it.
 - **Install Node** from [nodejs.org](https://nodejs.org/en/download), or with `brew install node` on a Mac.
-- **On Windows**, run everything below inside WSL.
 
 If a tool is missing or too old, step 3 says which one and stops before anything runs.
 

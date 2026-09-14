@@ -3,8 +3,8 @@
   "private": true,
   "workspaces": ["./*"],
   "scripts": {
-    "dev": "scripts/dev.sh",
-    "start": "scripts/dev.sh"
+    "dev": "node scripts/dev.mjs",
+    "start": "node scripts/dev.mjs"
   },
   "allowScripts": {
     "esbuild@0.28.2": true,

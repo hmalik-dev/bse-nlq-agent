@@ -33,7 +33,7 @@ The pipeline is in `src/nlq/agent/agent.py`.
 
 ## The data
 
-A synthetic ticketing database for Barclays Center, chosen over Chinook or a public dataset because the brief's questions are about Nets home games and event revenue. It is generated on first run, so "last month" always has data, and covers the last two calendar years, the year in progress and events on sale up to 120 days out. Six tables in SQLite:
+A synthetic ticketing database for Barclays Center, generated on first run so "last month" always has data. It covers the last two calendar years, the year in progress and events on sale up to 120 days out. Six tables in SQLite:
 
 | Table | One row per | Holds |
 |---|---|---|

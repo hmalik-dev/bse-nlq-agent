@@ -13,7 +13,7 @@ wording, styling and workflow choices go in the PR body. Then read what the work
 
 | Task | Command |
 |---|---|
-| Run the app: install, seed once, API :8000, dev UI :4000 | `npm run dev` |
+| Run the app: install, seed once a day, API :8000, dev UI :4000 | `npm run dev` |
 | Install | `uv sync` · `npm ci` (root; an npm workspace) |
 | Seed the database | `uv run python -m nlq.db.seed` (`--scale 0.2` for a fifth) |
 | Python tests, lint | `uv run pytest -q` · `uv run ruff check src tests` |

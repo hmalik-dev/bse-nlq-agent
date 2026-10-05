@@ -124,7 +124,6 @@ def stubs(tmp_path: Path) -> dict[str, str]:
 
 
 UV_STUB = """case "$*" in
-  "run python -c"*) echo "$STUB_DB";;
   "run uvicorn"*) echo $$ > "$STUB_PID"; exec "$STUB_API";;
 esac"""
 
@@ -147,19 +146,11 @@ def _run_dev_with_the_api_port_taken(
 
 
 @POSIX_ONLY
-def test_npm_run_dev_seeds_a_fifth_of_the_data_when_there_is_no_database(
+def test_npm_run_dev_seeds_the_full_dataset_unless_it_is_already_todays(
     stubs: dict[str, str],
 ) -> None:
     _run_dev_with_the_api_port_taken(stubs)
-    assert "uv run python -m nlq.db.seed --scale 0.2" in _calls(stubs)
-
-
-@POSIX_ONLY
-def test_npm_run_dev_reuses_an_existing_database(stubs: dict[str, str]) -> None:
-    Path(stubs["STUB_DB"]).write_bytes(b"")
-    run = _run_dev_with_the_api_port_taken(stubs)
-    assert "nlq.db.seed" not in _calls(stubs)
-    assert f"using the existing database at {stubs['STUB_DB']}" in run.stdout
+    assert "uv run python -m nlq.db.seed --if-stale\n" in _calls(stubs)
 
 
 def _bin_dir(stubs: dict[str, str]) -> Path:
@@ -366,7 +357,6 @@ def test_stopping_npm_run_dev_stops_the_api_too(
         assert probe.connect_ex(("127.0.0.1", DEV_API_PORT)) != 0, (
             f"port {DEV_API_PORT} is in use; stop `npm run dev` or the container first"
         )
-    Path(stubs["STUB_DB"]).write_bytes(b"")
     os.mkfifo(stubs["STUB_READY"])
     dev = subprocess.Popen(
         [NODE, str(DEV)],

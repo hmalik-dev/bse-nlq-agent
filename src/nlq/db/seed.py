@@ -8,7 +8,7 @@ the same database.
 Rows are written per event rather than accumulated, so a full-scale seed holds
 one event's orders and tickets in memory at a time instead of five million.
 
-Run with: python -m nlq.db.seed [--scale 0.2]
+Run with: python -m nlq.db.seed [--scale 0.2] [--if-stale]
 """
 
 from __future__ import annotations
@@ -887,6 +887,7 @@ def seed_database(
         conn.execute("PRAGMA journal_mode = OFF")
         conn.execute("PRAGMA synchronous = OFF")
         conn.executescript(SCHEMA_PATH.read_text(encoding="utf-8"))
+        conn.execute(f"PRAGMA user_version = {_date_stamp(as_of)}")
         conn.execute("INSERT INTO venues VALUES (?, ?, ?, ?, ?)", BARCLAYS_CENTER)
         team_rows = _team_rows()
         conn.executemany("INSERT INTO teams VALUES (?, ?, ?, ?)", team_rows)
@@ -913,6 +914,30 @@ def seed_database(
     }
 
 
+def _date_stamp(day: date) -> int:
+    """`day` as the integer YYYYMMDD, the only shape SQLite's `user_version` can hold."""
+    return day.year * 10_000 + day.month * 100 + day.day
+
+
+def seeded_on(db_path: Path) -> date | None:
+    """The date `db_path` was seeded for, or None when it is missing, unstamped or unreadable.
+
+    `seed_database` stamps the date into `PRAGMA user_version`, outside every
+    table, so the model never sees it. A database from before the stamp reads 0.
+    """
+    if not db_path.is_file():
+        return None
+    try:
+        conn = sqlite3.connect(f"{db_path.resolve().as_uri()}?mode=ro", uri=True)
+        try:
+            stamp = conn.execute("PRAGMA user_version").fetchone()[0]
+        finally:
+            conn.close()
+        return date(stamp // 10_000, stamp // 100 % 100, stamp % 100)
+    except (sqlite3.Error, ValueError):
+        return None
+
+
 def main(argv: list[str] | None = None) -> None:
     """The command line: `--scale` in, the scale and the row counts out, for the real today."""
     parser = argparse.ArgumentParser(description="Generate the synthetic ticketing database.")
@@ -922,9 +947,17 @@ def main(argv: list[str] | None = None) -> None:
         default=1.0,
         help="fraction of the full dataset to generate (default 1.0, about 5 million tickets)",
     )
+    parser.add_argument(
+        "--if-stale",
+        action="store_true",
+        help="keep the database when it was already seeded for today",
+    )
     args = parser.parse_args(argv)
     if args.scale <= 0:
         parser.error("--scale must be greater than 0")
+    if args.if_stale and seeded_on(DATABASE_PATH) == config.today():
+        print(f"Kept {DATABASE_PATH}: already seeded for today")
+        return
     counts = seed_database(scale=args.scale)
     print(f"Seeded {DATABASE_PATH} at scale {args.scale:g}")
     for table, number in counts.items():

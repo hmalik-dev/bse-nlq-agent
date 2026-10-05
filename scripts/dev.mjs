@@ -1,7 +1,7 @@
 // One command from a clone to the app in a browser, on macOS, Linux and Windows:
-// install what is missing, seed on first run only, start the API on :8000, then
-// the Vite dev server on :4000, which opens the browser and proxies /api to the
-// API. Ctrl+C stops both. Stops before anything runs when there is no API key.
+// install what is missing, seed the database unless it is already today's, start
+// the API on :8000, then the Vite dev server on :4000, which opens the browser and
+// proxies /api to the API. Ctrl+C stops both. Stops before anything runs when there is no API key.
 // Run as `npm run dev`; `node scripts/dev.mjs --check-key` runs only the key check.
 import { spawn, spawnSync } from "node:child_process";
 import { once } from "node:events";
@@ -92,14 +92,6 @@ function runStep(command, args) {
   if (result.status !== 0) throw new LauncherError(`FAIL: ${command} ${args[0]} did not succeed`);
 }
 
-function databasePath() {
-  const code = "from nlq.config import DATABASE_PATH; print(DATABASE_PATH)";
-  const options = { stdio: ["ignore", "pipe", "inherit"], encoding: "utf8" };
-  const result = runCommand(spawnSync, "uv", ["run", "python", "-c", code], options);
-  if (result.status !== 0) throw new LauncherError("FAIL: could not resolve the database path");
-  return result.stdout.trim();
-}
-
 function installAndSeed() {
   say("uv sync");
   runStep("uv", ["sync"]);
@@ -107,13 +99,9 @@ function installAndSeed() {
     say("npm ci");
     runStep("npm", ["ci"]);
   }
-  const database = databasePath();
-  if (existsSync(database)) {
-    say(`using the existing database at ${database}`);
-    return;
-  }
-  say(`seeding ${database} at scale 0.2 (first run only)`);
-  runStep("uv", ["run", "python", "-m", "nlq.db.seed", "--scale", "0.2"]);
+  // Full scale, so attendance matches docs/data.md; reseeded once a day so "yesterday" has sales.
+  say("checking the database is seeded for today (a reseed takes about half a minute)");
+  runStep("uv", ["run", "python", "-m", "nlq.db.seed", "--if-stale"]);
 }
 
 function isListening(port) {

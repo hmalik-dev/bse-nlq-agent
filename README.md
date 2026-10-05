@@ -17,7 +17,7 @@ If a tool is missing or too old, step 3 says which one and stops before anything
 
 1. Clone it: `git clone https://github.com/hmalik-dev/bse-nlq-agent.git && cd bse-nlq-agent`
 2. Create a file named `.env` in that folder and paste in the `ANTHROPIC_API_KEY=` line from the link you were sent. The key is real and has a small spending limit, so please try what the app can do rather than sending many repeated questions.
-3. Run `npm run dev`. The first run installs everything and seeds the database, the browser opens on <http://localhost:4000>, and `Ctrl+C` stops it.
+3. Run `npm run dev`. The first run installs everything. The first run each day also builds that day's data, which takes about half a minute. The browser opens on <http://localhost:4000>, and `Ctrl+C` stops it.
 
 ## How it works
 
@@ -38,7 +38,7 @@ The pipeline is in `src/nlq/agent/agent.py`.
 
 ## The data
 
-A synthetic ticketing database for Barclays Center, generated on first run so "last month" always has data. It covers the last two calendar years, the year in progress and events on sale up to 120 days out. Six tables in SQLite:
+A synthetic ticketing database for Barclays Center, generated for today's date so "last month" and "yesterday" always have data. It covers the last two calendar years, the year in progress and events on sale up to 120 days out. Six tables in SQLite:
 
 | Table | One row per | Holds |
 |---|---|---|

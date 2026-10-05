@@ -630,6 +630,43 @@ def test_the_command_line_rejects_a_bad_scale_or_a_today_override(
     assert calls == []
 
 
+def test_a_seeded_database_records_the_date_it_was_seeded_for(db: sqlite3.Connection) -> None:
+    assert _scalar(db, "PRAGMA user_version") == 20260912
+    path = Path(db.execute("PRAGMA database_list").fetchone()[2])
+    assert seed.seeded_on(path) == TODAY
+
+
+def test_a_missing_or_unstamped_database_has_no_seed_date(tmp_path: Path) -> None:
+    assert seed.seeded_on(tmp_path / "missing.db") is None
+    unstamped = tmp_path / "unstamped.db"
+    sqlite3.connect(unstamped).close()
+    assert seed.seeded_on(unstamped) is None
+    not_a_database = tmp_path / "notes.db"
+    not_a_database.write_text("not sqlite", encoding="utf-8")
+    assert seed.seeded_on(not_a_database) is None
+
+
+@pytest.mark.parametrize(
+    ("seeded", "expected_calls"),
+    [(TODAY, []), (TODAY - timedelta(days=1), [{"scale": 1.0}]), (None, [{"scale": 1.0}])],
+    ids=["seeded-today", "seeded-yesterday", "never-seeded"],
+)
+def test_if_stale_reseeds_only_a_database_not_seeded_for_today(
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    seeded: date | None,
+    expected_calls: list[dict[str, object]],
+) -> None:
+    calls = _record_seed(monkeypatch)
+    monkeypatch.setattr(seed, "seeded_on", lambda _path: seeded)
+    monkeypatch.setattr(seed.config, "today", lambda: TODAY)
+
+    seed.main(["--if-stale"])
+
+    assert calls == expected_calls
+    assert ("already seeded for today" in capsys.readouterr().out) == (seeded == TODAY)
+
+
 def test_a_show_name_carries_its_date_without_a_platform_specific_format() -> None:
     # "%-d" is glibc-only; Windows raises "Invalid format string" and seeding fails.
     event = seed._show_event("Comedy Night", "Comedy", 1.0, date(2026, 3, 5))

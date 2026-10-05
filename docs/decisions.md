@@ -104,9 +104,9 @@ Add an entry only when a call changes what the agent does, what the data means, 
   *Rejected:* a chart-type picker; asking the model to choose.
 
 ## Running and shipping
-- **`npm run dev` is the one command: it installs, seeds at `--scale 0.2`, and starts the app.**
-  *Why:* a million tickets seed in seconds; a missing or old uv or Node is named, and it stops.
-  *Rejected:* several documented ways to run it; installing uv on someone else's machine.
+- **`npm run dev` is the one command: it installs, seeds at full scale unless the data is already today's, and starts the app.**
+  *Why:* an older seed has no sales since its day, so "yesterday" reads zero; the date sits in `PRAGMA user_version`, out of the model's sight. A missing or old uv or Node is named, and it stops.
+  *Rejected:* several documented ways to run it; installing uv on someone else's machine; `--scale 0.2` (fast, but a Nets game reads a fifth full).
 - **The launcher is plain Node, so the same steps run on macOS, Linux and Windows.**
   *Why:* Node is already required, and Windows has no bash, so a shell launcher failed at once.
   *Rejected:* WSL or Git Bash instructions (a second setup path); a launcher dependency.

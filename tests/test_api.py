@@ -275,7 +275,7 @@ def test_schema_defines_home_games_and_last_season_in_whole_sentences(unbuilt: P
     by_term = {definition["term"]: definition["text"] for definition in definitions}
 
     assert by_term["Home games"] == (
-        "are all the data holds: 41 of 82 per Nets season, 20 of 44 per Liberty season."
+        "are all the data holds: 41 of 82 per Nets season, 20 of 40 per Liberty season."
     )
     assert by_term["Last season"] == (
         "is each team's latest season with no home games left, one row per team."
